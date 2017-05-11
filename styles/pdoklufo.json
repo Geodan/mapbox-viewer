@@ -1,0 +1,35 @@
+{
+    "version": 8,
+    "name": "PDOKLufo",
+    "metadata": {
+        "mapbox:autocomposite": true,
+        "mapbox:type": "default"
+    },
+    "sources": {
+        "pdoklufo": {
+            "type": "raster",
+            "tileSize": 256,
+            "tiles": [
+                "https://geodata1.nationaalgeoregister.nl/luchtfoto/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&styles=default&layers=luchtfoto_jpeg"
+            ]            
+        }
+    },    
+    "layers": [{
+        "id": "background",
+        "type": "background",
+        "paint": {
+            "background-color": "rgb(4,7,14)"
+        }
+    }, {
+        "id": "pdoklufo",
+        "type": "raster",
+        "source": "pdoklufo",
+        "source-layer": "mapbox_satellite_full"
+    }],
+    "created": 0,
+    "modified": 0,
+    "owner": "mapbox",
+    "id": "pdoklufo",
+    "draft": false,
+    "visibility": "public"
+}
