@@ -48,7 +48,7 @@
    "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "http://rhea.geodan.nl/data/v3.json"
+      "url": "https://saturnus.geodan.nl/data/v3.json"
     }
   },
   "sprite": "https://openmaptiles.github.io/osm-bright-gl-style/sprite",

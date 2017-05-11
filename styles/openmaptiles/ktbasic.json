@@ -19,7 +19,7 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "http://rhea.geodan.nl/data/v3.json"
+      "url": "https://saturnus.geodan.nl/data/v3.json"
     }
   },
   "glyphs": "https://free.tilehosting.com/fonts/{fontstack}/{range}.pbf?key={key}",

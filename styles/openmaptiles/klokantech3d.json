@@ -8,7 +8,7 @@
   },
   "sources": {
     "openmaptiles": {
-      "url": "http://rhea.geodan.nl/data/v3.json",
+      "url": "https://saturnus.geodan.nl/data/v3.json",
       "type": "vector"
     }
   },

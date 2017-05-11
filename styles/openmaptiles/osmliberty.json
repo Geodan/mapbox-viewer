@@ -15,7 +15,7 @@
     },
     "openmaptiles": {
       "type": "vector",
-      "url": "http://rhea.geodan.nl/data/v3.json"
+      "url": "https://saturnus.geodan.nl/data/v3.json"
     }
   },
   "sprite": "https://rawgit.com/lukasmartinelli/osm-liberty/gh-pages/sprites/osm-liberty",
