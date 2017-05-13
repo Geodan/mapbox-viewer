@@ -23,6 +23,11 @@ var map = new mapboxgl.Map({
     style: 'styles/pdoklufo.json',
     hash: false
 });
+
+
+map.on('load', () => {
+	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
+});
 </script>
 
 </body>
