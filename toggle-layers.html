@@ -148,6 +148,10 @@ for (var i = 0; i < toggleableLayerIds.length; i++) {
     layers.appendChild(link);
 }
 
+map.on('load', () => {
+	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
+});
+
 </script>
 
 </body>
