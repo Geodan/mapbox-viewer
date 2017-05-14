@@ -4,6 +4,14 @@
 
     </head>
     <body>
+        This page is largely based on <a href="https://www.mapbox.com/mapbox-gl-js/examples/">https://www.mapbox.com/mapbox-gl-js/examples/</a><br>
+        mapbox-gl is an open source project backed by a large community. The examples on this page show that mapbox-gl can also be used independent of 
+        the MapBox services (no built-in MapBox vendor lock-in).
+
+        <h2>Mapbox vs OpenLayers</h2>
+        MapBox supports only one projection, spherical Mercator or pseudo Mercator (EPSG:3857) which is the de-facto standard for maps on the web. OpenLayers supports many. 
+        OpenLayers has better support for OGC standards such as WMS and WFS. MapBox has better support for vector tiles and fast rendering using webgl. OpenLayers has a broader and more complete feature set. MapBox takes advantage of newer technologies
+
         <h2>Styles</h2>
         <ul>
             <li><a href="displaymap.html">Display a map</a></li>
@@ -13,7 +21,7 @@
         </ul>
         <h2>Layers</h2>
         <ul>
-        <li>Show and hide layers</li>
+        <li><a href="toggle-layers.html">Show and hide layers</a></li>
         <li>Create and style clusters</li>
         <li>Create a heatmap from points</li>
         <li>Change a layer's color with buttons</li>
