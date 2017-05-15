@@ -77,7 +77,8 @@ map.on('load', function () {
         "tiles": [
         //"http://saturnus.geodan.nl:9090/data/suriname_dorpen/z/x/y.pbf" 
         "https://saturnus.geodan.nl/v2/tiles/{z}/{x}/{y}.pbf"
-      ]
+      ],
+	"bounds": [-57.4,2.0,-54.0,5.9]
     });
     map.addLayer({
         'id': 'suriname villages',
@@ -98,7 +99,8 @@ map.on('load', function () {
         //url: 'mapbox://mapbox.mapbox-terrain-v2'
         "tiles": [       
         "https://saturnus.geodan.nl/v2/tiles/{z}/{x}/{y}.pbf"
-      ]
+           ],
+        "bounds": [-58.4,1.46,-54.0,6.0]
     });
     map.addLayer({
         'id': 'suriname districten',
