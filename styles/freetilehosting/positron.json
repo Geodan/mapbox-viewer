@@ -34,7 +34,7 @@
       "url": "https://free.tilehosting.com/data/v3.json?key=tiTjXEeks3Nnrivgsk3b"
     }
   },
-  "sprite": "https://openmaptiles.github.io/positron-gl-style/sprite",
+  "sprite": "https://saturnus.geodan.nl/mapbox-viewer/sprites/mapicons",
   "glyphs": "https://free.tilehosting.com/fonts/{fontstack}/{range}.pbf?key=tiTjXEeks3Nnrivgsk3b",
   "layers": [
     {

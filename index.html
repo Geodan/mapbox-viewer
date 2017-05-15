@@ -1,26 +1,34 @@
 <!DOCTYPE html>
 <html>
-    <head>
 
-    </head>
-    <body>
-        This page is largely based on <a target="mapboxexamples" href="https://www.mapbox.com/mapbox-gl-js/examples/">https://www.mapbox.com/mapbox-gl-js/examples/</a><br>
-        mapbox-gl is an open source project backed by a large community. The examples on this page show that mapbox-gl can also be used independent of 
-        the MapBox services (no built-in MapBox vendor lock-in).
+<head>
+    <title>MapBox viewer examples</title>
+    <style>
+        body {
+            font: 15px/20px 'Open Sans', sans-serif;
+        }
+    </style>
+</head>
 
-        <h2>Mapbox vs OpenLayers</h2>
-        MapBox supports only one projection, spherical Mercator or pseudo Mercator (EPSG:3857) which is the de-facto standard for maps on the web. OpenLayers supports many. 
-        OpenLayers has better support for OGC standards such as WMS and WFS. MapBox has better support for vector tiles and fast rendering using webgl. OpenLayers has a broader and more complete feature set. MapBox takes advantage of newer technologies
+<body>
+    This page is largely based on <a target="mapboxexamples" href="https://www.mapbox.com/mapbox-gl-js/examples/">https://www.mapbox.com/mapbox-gl-js/examples/</a><br>    mapbox-gl is an open source project backed by a large community. The examples on this page show that mapbox-gl can also
+    be used independent of the MapBox services (no built-in MapBox vendor lock-in).
 
-        <h2>Styles</h2>
-        <ul>
-            <li><a href="displaymap.html">Display a map</a></li>
-            <li><a href="displaymapcustomstyle.html">Display a map with a custom style</a></li>
-            <li><a href="setstyle.html">Change a map's style</a></li>
-            <li><a href="aerial.html">Display aerial map</a> with scale bar. Todo: find global layer</li>
-        </ul>
-        <h2>Layers</h2>
-        <ul>
+    <h2>Mapbox vs OpenLayers</h2>
+    MapBox supports only one projection, spherical Mercator or pseudo Mercator (EPSG:3857) which is the de-facto standard for
+    maps on the web. OpenLayers supports many. OpenLayers has better support for OGC standards such as WMS and WFS. MapBox
+    has better support for vector tiles and fast rendering using webgl. OpenLayers has a broader and more complete feature
+    set. MapBox takes advantage of newer technologies
+
+    <h2>Styles</h2>
+    <ul>
+        <li><a href="displaymap.html">Display a map</a></li>
+        <li><a href="displaymapcustomstyle.html">Display a map with a custom style</a></li>
+        <li><a href="setstyle.html">Change a map's style</a></li>
+        <li><a href="aerial.html">Display aerial map</a> with scale bar. Todo: find global layer</li>
+    </ul>
+    <h2>Layers</h2>
+    <ul>
         <li><a href="toggle-layers.html">Show and hide layers</a></li>
         <li><a href="cluster.html">Create and style clusters</a></li>
         <li><a href="heatmap.html">Create a heatmap from points</a></li>
@@ -29,7 +37,7 @@
         <li>Add a GeoJSON line</li>
         <li>Add a GeoJSON polygon</li>
         <li>Add multiple geometries from one GeoJSON source</li>
-        <li>Draw GeoJSON points</li>
+        <li><a href="geojson-markers.html">Draw GeoJSON points</a></li>
         <li>Add an image</li>
         <li>Add a video</li>
         <li>Style circles using data-driven styling</li>
@@ -43,22 +51,23 @@
         <li>Add a generated icon to the map</li>
         <li>Add an icon to the map</li>
         <li>Style lines using an identity property function.</li>
-        </ul>
-	<h2>Sources</h2>
-	<ul>	
-	<li><a href="vector-source.html">Add a vector tile source</a></li>
-	<li><a href="openstreetmap.html">Add a raster tile source</a></li>
-	<li>Add a WMS source</li>
-	<li>Add an image</li>
-	<li>Add a video</li>
-	<li>Add a third party vector tile source</li>
-	<li>Add live realtime data</li>
-	<li>Update a feature in realtime</li>
-	<li>Move symbol with the keyboard</li>
-	<li>Animate a point</li>
-	<li>Animate a series of images</li>
-	<li>Create a time slider</li>
-	<li>Join local JSON data with vector tile geometries</li>
-	</ul>
-    </body>
+    </ul>
+    <h2>Sources</h2>
+    <ul>
+        <li><a href="vector-source.html">Add a vector tile source</a></li>
+        <li><a href="openstreetmap.html">Add a raster tile source</a></li>
+        <li>Add a WMS source</li>
+        <li>Add an image</li>
+        <li>Add a video</li>
+        <li>Add a third party vector tile source</li>
+        <li>Add live realtime data</li>
+        <li>Update a feature in realtime</li>
+        <li>Move symbol with the keyboard</li>
+        <li>Animate a point</li>
+        <li>Animate a series of images</li>
+        <li>Create a time slider</li>
+        <li>Join local JSON data with vector tile geometries</li>
+    </ul>
+</body>
+
 </html>
