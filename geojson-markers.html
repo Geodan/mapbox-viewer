@@ -27,7 +27,7 @@ map.on('load', function () {
 
     map.addLayer({        
         "id": "points",
-        "type": "symbol",        
+        "type": "symbol",
         "source": {            
             "type": "geojson",
             "data": {
@@ -40,7 +40,7 @@ map.on('load', function () {
                     },
                     "properties": {
                         "title": "Geodan Amsterdam",
-                        "icon": "town-hall"
+                        "icon": "circle"
                     }
                 }, {
                     "type": "Feature",
@@ -50,13 +50,13 @@ map.on('load', function () {
                     },
                     "properties": {
                         "title": "Geodan Den Bosch",
-                        "icon": "geodan"
+                        "icon": "star"
                     }
                 }]
             }
         },
-        "layout": {            
-            "icon-image": "{icon}-15",
+        "layout": {                        
+            "icon-image": "{icon}-11",
             "text-field": "{title}",
             "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
             "text-offset": [0, 0.6],

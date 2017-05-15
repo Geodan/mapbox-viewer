@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+//mapboxgl.accessToken = '<your access token here>';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    center: [5.1, 52.0],
+    zoom: 8    
+});
+
+map.on('load', function () {
+    map.loadImage('icons/geodan-15.png', (error, image) => {
+        if (error) throw error;
+        map.addImage('geodan-15', image);
+        map.addLayer({        
+            "id": "points",
+            "type": "symbol",
+            "source": {            
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": [{
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [4.91320, 52.34227]
+                        },
+                        "properties": {
+                            "title": "Geodan Amsterdam",
+                            "icon": "geodan-15"
+                        }
+                    }, {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [5.29969, 51.69176]
+                        },
+                        "properties": {
+                            "title": "Geodan Den Bosch",
+                            "icon": "star-11"
+                        }
+                    }]
+                }
+            },
+            "layout": {                        
+                "icon-image": "{icon}",
+                "text-field": "{title}",
+                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                "text-offset": [0, 0.6],
+                "text-anchor": "top"
+            }
+        });
+    });
+    
+});
+</script>
+
+</body>
+</html>
