@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    zoom: 16,
+    center: [4.913, 52.342]
+});
+
+map.on('load', function () {
+
+    map.addLayer({
+        "id": "gebouwen",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            tiles:["http:/metis:3001/mvt/gebouwen/{z}/{x}/{y}.mvt"]
+        },
+        "source-layer": "gebouwen",
+        "paint": {
+            "fill-color": "#0a49f4",
+			"fill-outline-color": "#ffffff",
+            "fill-opacity": 0.5
+        }
+    }, 'waterway-label');
+    map.addLayer({
+        "id": "wegen",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            tiles:["http:/metis:3001/mvt/wegen/{z}/{x}/{y}.mvt"]
+        },
+        "source-layer": "wegen",        
+        "paint": {
+            "fill-color": "#f4490a",
+			"fill-outline-color": "#ff994a",
+            "fill-opacity": 0.5
+        }
+    }, 'waterway-label');
+    map.addLayer({
+        "id": "terrorism",
+        "type": "symbol",
+        "source": {
+            type: 'vector',
+            tiles:["http:/metis:3001/mvt/terrorism/{z}/{x}/{y}.mvt"]
+        },
+        "source-layer": "terrorism",
+        "layout": {
+            "icon-image": "star"
+        }
+    });
+});
+</script>
+
+</body>
+</html>
