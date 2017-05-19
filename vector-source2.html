@@ -27,10 +27,11 @@ map.on('load', function () {
 
     map.addLayer({
         "id": "gebouwen",
+	"minzoom": 11,
         "type": "fill",
         "source": {
             type: 'vector',
-            tiles:["http:/metis:3001/mvt/gebouwen/{z}/{x}/{y}.mvt"]
+            tiles:["http://saturnus.geodan.nl/mvt/gebouwen/{z}/{x}/{y}.mvt"]
         },
         "source-layer": "gebouwen",
         "paint": {
@@ -41,10 +42,11 @@ map.on('load', function () {
     }, 'waterway-label');
     map.addLayer({
         "id": "wegen",
+	"minzoom": 11,
         "type": "fill",
         "source": {
             type: 'vector',
-            tiles:["http:/metis:3001/mvt/wegen/{z}/{x}/{y}.mvt"]
+            tiles:["http://saturnus.geodan.nl/mvt/wegen/{z}/{x}/{y}.mvt"]
         },
         "source-layer": "wegen",        
         "paint": {
@@ -58,7 +60,7 @@ map.on('load', function () {
         "type": "symbol",
         "source": {
             type: 'vector',
-            tiles:["http:/metis:3001/mvt/terrorism/{z}/{x}/{y}.mvt"]
+            tiles:["http://saturnus.geodan.nl/mvt/terrorism/{z}/{x}/{y}.mvt"]
         },
         "source-layer": "terrorism",
         "layout": {
