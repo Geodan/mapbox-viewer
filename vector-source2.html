@@ -27,7 +27,7 @@ map.on('load', function () {
 
     map.addLayer({
         "id": "gebouwen",
-	"minzoom": 11,
+	"minzoom": 12,
         "type": "fill",
         "source": {
             type: 'vector',
@@ -42,7 +42,7 @@ map.on('load', function () {
     }, 'waterway-label');
     map.addLayer({
         "id": "wegen",
-	"minzoom": 11,
+	"minzoom": 12,
         "type": "fill",
         "source": {
             type: 'vector',
@@ -64,7 +64,8 @@ map.on('load', function () {
         },
         "source-layer": "terrorism",
         "layout": {
-            "icon-image": "star"
+            // see https://openmaptiles.github.io/positron-gl-style/sprite.json
+            "icon-image": "circle-11"
         }
     });
 });
