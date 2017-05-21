@@ -1,0 +1,22 @@
+{
+  "name": "mapbox-viewer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Geodan/mapbox-viewer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Geodan/mapbox-viewer/issues"
+  },
+  "homepage": "https://github.com/Geodan/mapbox-viewer#readme",
+  "dependencies": {
+    "papaparse": "^4.3.2"
+  }
+}
