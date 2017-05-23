@@ -80,7 +80,7 @@ map.on('load', function () {
             },
             "fill-opacity": 0.5
         }
-    }, 'waterway-label');
+    }, 'place_other');
     map.addLayer({
         'id': "gemeentewater",
         "minzoom": 5,
@@ -92,7 +92,7 @@ map.on('load', function () {
             "fill-color": "hsl(205,56%, 73%)", 
             "fill-opacity": 0.5
         }
-    })
+    }, 'place_other');
     map.addLayer({
         "id": "gemeentenline",
 	    "minzoom": 5,
@@ -104,7 +104,7 @@ map.on('load', function () {
             "line-width": 2,
             "line-opacity": 0.5
         }
-    }, 'waterway-label');
+    }, 'place_other');
 });
 map.on('mousemove', function (e) {
     var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
