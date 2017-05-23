@@ -30,12 +30,12 @@ var map = new mapboxgl.Map({
 var stops = [["0", "rgba(0,0,0,0)"]];
 
 var dataKeyField = 'gwb_code_10'
-var dataValueField = 'p_1gezw';
+var dataValueField = 'a_inw';
 
 var googleSheetKey = '1JaE4c71YzHkkPCLFWdxYm33Cms7yEjJFoWbOmtzz5Ag';
 var googleSheetName = encodeURIComponent('cbsgemeenten2016');
-var query = encodeURIComponent('select A,H where H > 50000');
-var googleSheetUrl = `https://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}&callback=googleDocCallback`
+var query = encodeURIComponent('select A,F where F > 0');
+var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}&callback=googleDocCallback`
 
 Papa.parse(googleSheetUrl, {
     "download": true,
