@@ -71,16 +71,28 @@ map.on('load', function () {
         "type": "fill",
         "source": "gemeenten",
         "source-layer": "gemeenten2016",
+        "filter": [ '==', 'water', 'NEE'],
         "paint": {
             "fill-color": {
                 "property": "gm_code",
                 "type": "categorical",
                 "stops": stops
             },
-			"fill-outline-color": 'yellow',            
             "fill-opacity": 0.5
         }
     }, 'waterway-label');
+    map.addLayer({
+        'id': "gemeentewater",
+        "minzoom": 5,
+        "type": "fill",
+        "source": "gemeenten",
+        "source-layer": "gemeenten2016",
+        "filter": [ '==', 'water', 'JA'],
+        "paint": {
+            "fill-color": "hsl(205,56%, 73%)", 
+            "fill-opacity": 0.5
+        }
+    })
     map.addLayer({
         "id": "gemeentenline",
 	    "minzoom": 5,
