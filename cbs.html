@@ -50,9 +50,13 @@ Papa.parse("data/cbsgemeenten2016.csv", {
                 }
             }
             var keyFieldNumber = data[0].indexOf(dataKeyField);
+            // http://colorbrewer2.org/#type=sequential&scheme=Greens&n=8
             for (i = 1; i < data.length; i++) {
-                var green = 255  *(data[i][valueFieldNumber] - minValue) / (maxValue - minValue);
-                var color = "rgba(" + 0 + "," + parseInt(green) + "," + 0 + ",1)";
+                var ratio = (data[i][valueFieldNumber] - minValue) / (maxValue - minValue);
+		var red = Math.floor(247 * ratio);
+		var green = 90 + Math.floor((252 - 90) * ratio);
+		var blue = 50 + Math.floor((245 - 50) * ratio);
+                var color = "rgba(" + red + "," + green + "," + blue + ",1)";
                 stops.push([data[i][keyFieldNumber], color]);
             }
         }
@@ -100,8 +104,8 @@ map.on('load', function () {
         "source": "gemeenten",
         "source-layer": "gemeenten2016",
         "paint": {
-            "line-color": 'yellow',            
-            "line-width": 2,
+            "line-color": 'gray',            
+            "line-width": 0.5,
             "line-opacity": 0.5
         }
     }, 'place_other');
