@@ -42,7 +42,15 @@ var googleSheetName = encodeURIComponent('cbsgemeenten2016');
 var query = encodeURIComponent('select A,B where B > 0');
 var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}&callback=googleDocCallback`
 
-Papa.parse(googleSheetUrl, {
+
+map.on('load', function () {
+    map.addSource("gemeenten", {
+        type: 'vector',
+        tiles:["http://saturnus.geodan.nl/mvt/gemeenten2016/{z}/{x}/{y}.mvt"],
+        "bounds": [3.38,50.73,7.2432,53.5455]
+    });
+
+    Papa.parse(googleSheetUrl, {
     "download": true,
     "complete": function(results) {
             var data = results.data;
@@ -61,63 +69,55 @@ Papa.parse(googleSheetUrl, {
             var keyFieldNumber = data[0].indexOf(dataKeyField);
             for (i = 1; i < data.length; i++) {
                 var classNum = Math.floor(8  *(data[i][valueFieldNumber] - minValue) / (maxValue - minValue));
-		if (classNum >= colors.length) {
-			classNum = colors.length - 1;
-		}
+                if (classNum >= colors.length) {
+                    classNum = colors.length - 1;
+                }
                 var color = colors[classNum];
                 stops.push([data[i][keyFieldNumber], color]);
             }
+            map.addLayer({
+                "id": "gemeenten",
+                "minzoom": 5,
+                "type": "fill",
+                "source": "gemeenten",
+                "source-layer": "gemeenten2016",
+                "filter": [ '==', 'water', 'NEE'],
+                "paint": {
+                    "fill-color": {
+                        "property": "gm_code",
+                        "type": "categorical",
+                        "stops": stops,
+                "default" : "rgba(0,0,0,0)"
+                    },
+                    "fill-opacity": 0.8
+                }
+            }, 'place_other');
+            map.addLayer({
+                'id': "gemeentewater",
+                "minzoom": 5,
+                "type": "fill",
+                "source": "gemeenten",
+                "source-layer": "gemeenten2016",
+                "filter": [ '==', 'water', 'JA'],
+                "paint": {
+                    "fill-color": "hsl(205,56%, 73%)", 
+                    "fill-opacity": 0.5
+                }
+            }, 'place_other');
+            map.addLayer({
+                "id": "gemeentenline",
+                "minzoom": 5,
+                "type": "line",
+                "source": "gemeenten",
+                "source-layer": "gemeenten2016",
+                "paint": {
+                    "line-color": 'gray',            
+                    "line-width": 0.5,
+                    "line-opacity": 0.5
+                }
+            }, 'place_other');
         }
     });
-
-map.on('load', function () {
-    map.addSource("gemeenten", {
-        type: 'vector',
-        tiles:["http://saturnus.geodan.nl/mvt/gemeenten2016/{z}/{x}/{y}.mvt"],
-        "bounds": [3.38,50.73,7.2432,53.5455]
-    });
-
-    map.addLayer({
-        "id": "gemeenten",
-	    "minzoom": 5,
-        "type": "fill",
-        "source": "gemeenten",
-        "source-layer": "gemeenten2016",
-        "filter": [ '==', 'water', 'NEE'],
-        "paint": {
-            "fill-color": {
-                "property": "gm_code",
-                "type": "categorical",
-                "stops": stops,
-		"default" : "rgba(0,0,0,0)"
-            },
-            "fill-opacity": 0.8
-        }
-    }, 'place_other');
-    map.addLayer({
-        'id': "gemeentewater",
-        "minzoom": 5,
-        "type": "fill",
-        "source": "gemeenten",
-        "source-layer": "gemeenten2016",
-        "filter": [ '==', 'water', 'JA'],
-        "paint": {
-            "fill-color": "hsl(205,56%, 73%)", 
-            "fill-opacity": 0.5
-        }
-    }, 'place_other');
-    map.addLayer({
-        "id": "gemeentenline",
-	    "minzoom": 5,
-        "type": "line",
-        "source": "gemeenten",
-        "source-layer": "gemeenten2016",
-        "paint": {
-            "line-color": 'gray',            
-            "line-width": 0.5,
-            "line-opacity": 0.5
-        }
-    }, 'place_other');
 });
 map.on('mousemove', function (e) {
     var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});

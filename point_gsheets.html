@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>    
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="node_modules/papaparse/papaparse.min.js"></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:20%; width:100%; }
+        #info { position:absolute; top:80%; height:20%; width: 100%; outline: 1px solid black; background: white; overflow: auto;}
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<div id='info'></div>
+<script>
+//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    zoom: 7,
+    center: [4.913, 52.18]
+});
+
+
+
+// First value is the default, used where there is no data
+var stops = [["0", "rgba(255,0,0,0.5)"]];
+
+// http://colorbrewer2.org/#type=sequential&scheme=OrRd&n=8
+var colors=['#fff7ec','#fee8c8','#fdd49e','#fdbb84','#fc8d59','#ef6548','#d7301f','#990000'];
+
+var dataKeyField = 'gwb_code_10'
+var dataValueField = 'result';
+
+var googleSheetKey = '1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI';
+var googleSheetName = encodeURIComponent('winkels');
+var query = encodeURIComponent('select A,B,C,D');
+var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}&callback=googleDocCallback`
+
+map.on('load', function() {
+    Papa.parse(googleSheetUrl, {
+        "download": true,
+        "complete": function(results) {
+                var data = results.data;
+                var features = [];
+                for (i = 1; i < data.length; i++) {
+                    var feature = {
+                            "type": "Feature",
+                            "geometry": {
+                                "type": "Point",
+                                "coordinates": [data[i][0], data[i][1]]
+                            },
+                            "properties": {
+                                "title": data[i][2],
+                                "color": data[i][3]
+                            }
+                    };
+                    features.push(feature);
+                }
+                map.addSource("winkels", {            
+                        "type": "geojson",
+                        "data": {
+                            "type": "FeatureCollection",
+                            "features": features
+                        }
+                    });
+                map.addLayer ({
+                    "id": "points",
+                    "type": "circle",
+                    "source": "winkels", 
+                    "paint" : {                        
+                         "circle-color": {
+                             "property": 'color',
+                             "type": "identity"
+                         },
+                         "circle-radius": {
+                             "base": 1.75,
+                             "stops": [[7,2],[14,4], [22,180]]
+                         }
+                    }
+                });
+                map.addLayer({        
+                    "id": "labelledpoints",
+                    "type": "symbol",
+                    "source": "winkels",
+                    "layout": {                        
+                        //"icon-image": "circle-11",
+                        "text-field": "{title}",
+                        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                        "text-offset": [0, 0.6],
+                        "text-anchor": "top",                        
+                    }
+                });
+            }
+    });
+});
+
+map.on('mousemove', function (e) {
+    var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
+    document.getElementById('info').innerHTML = JSON.stringify(features, null, 2);
+});
+</script>
+
+</body>
+</html>
