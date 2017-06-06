@@ -25,14 +25,16 @@ var map = new mapboxgl.Map({
 
 map.on('load', function () {
 
+    map.addSource("gmadressen", {        
+        "type": 'vector',
+        "tiles":["http://d1.acc.geodan.nl:9000/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=addresses:addressesbuildings&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/x-protobuf;type=mapbox-vector&TILECOL={x}&TILEROW={y}"],
+        "bounds": [3.38,50.73,7.2432,53.5455]
+    });
+
     map.addLayer({
-        "id": "terrain-data",
+        "id": "towns",
         "type": "line",
-        "source": {
-            type: 'vector',
-            tiles:["http://d1.acc.geodan.nl:9000/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=addresses:addressesbuildings&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/x-protobuf;type=mapbox-vector&TILECOL={x}&TILEROW={y}"]
-            //"scheme": "tms"
-        },
+        "source": "gmadressen",
         "source-layer": "towns",
         "layout": {
             "line-join": "round",
@@ -41,6 +43,33 @@ map.on('load', function () {
         "paint": {
             "line-color": "#ff69b4",
             "line-width": 1
+        }        
+    });
+    map.addLayer({
+        "id": "buildings",
+        "type": "line",
+        "source": "gmadressen",
+        "source-layer": "buildings",
+        "layout": {
+            "line-join": "round",
+            "line-cap": "round"
+        },
+        "paint": {
+            "line-color": "black",
+            "line-width": 1
+        }        
+    });
+    map.addLayer({
+        "id": "addresspoints",
+        "type": "circle",
+        "source": "gmadressen",
+        "source-layer": "addresspoints",
+        "paint" : {
+            "circle-color": "darkgreen",
+            "circle-radius": {
+                "base": 1.75,
+                "stops": [[14,2],[22,4]]
+            }
         }
     });
 });
