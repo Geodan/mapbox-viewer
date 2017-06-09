@@ -35,9 +35,8 @@ map.on('load', function () {
         ],
         "bounds": [3.38,50.73,7.2432,53.5455],
         "minzoom": 5,
-        "maxZoom": 14        
+        "maxzoom": 19        
     });
-
     map.addLayer({
         "id": "towns",
         "type": "fill",
@@ -84,7 +83,22 @@ map.on('load', function () {
         "minzoom": 17,
         "maxzoom": 24,
         "paint": {
-            "circle-color": "rgba(244, 245, 11, 1)",
+            "circle-color": {
+                "type": "categorical",
+                "property": "gebrksdoel",
+                "stops": [
+                    ['kantoorfunctie', 'red'],
+                    ['woonfunctie', "rgba(244, 245, 11, 1)"],
+                    ['bijeenkomstfunctie', 'green'],
+                    ['overige gebruiksfunctie', 'pink'],
+                    ['winkelfunctie', 'black'],
+                    ['onderwijsfunctie', 'orange'],
+                    ['gemengd', 'purple'],
+                    ['industriefunctie', '#ffcccc'],
+                    ['logiesfunctie', '#ccffcc']
+                ],
+                "default": "white"
+            },
             "circle-radius": {
                 "type": "exponential",
                 "base": 3,
@@ -93,13 +107,13 @@ map.on('load', function () {
         }
     });
 });
-var toTable = function(name, obj) {
+var toTable = function(name, features) {
     var result = '';
-    if (obj && obj.length) {
+    if (features && features.length) {
         result = '<table><thead><tr><th colspant="2">'+name+'</th></tr></thead><tbody>';
-        var subobj = obj[0].properties;
-        for (var key in subobj) {
-            result += '<tr><td>' + key + '</td><td>' + subobj[key] + '</td></tr>';
+        var properties = features[0].properties;
+        for (var key in properties) {
+            result += '<tr><td>' + key + '</td><td>' + properties[key] + '</td></tr>';
         }
         result += '</tbody></table>';
     }
