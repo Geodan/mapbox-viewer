@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title></title>
+    <title>GeodanMaps adressen</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
@@ -19,7 +19,6 @@
 <div id='map'></div>
 <div id='info'></div>
 <script>
-//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'styles/freetilehosting/positron.json',
@@ -28,7 +27,8 @@ var map = new mapboxgl.Map({
 });
 
 map.on('load', function () {
-
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
     map.addSource("GMadressen", {        
         "type": 'vector',
         "tiles": [
@@ -36,7 +36,8 @@ map.on('load', function () {
         ],
         "bounds": [3.38,50.73,7.2432,53.5455],
         "minzoom": 5,
-        "maxzoom": 19        
+        "maxzoom": 19, 
+        "attribution": '<a href="http://geodanmaps.nl" target="gmaps">&copy; GeodanMaps</a>'       
     });
     map.addLayer({
         "id": "towns",
@@ -102,8 +103,8 @@ map.on('load', function () {
             },
             "circle-radius": {
                 "type": "exponential",
-                "base": 3,
-                "stops": [[17,3],[20,10],[22,15]]
+                "base": 4,
+                "stops": [[17,4],[18,6],[20,10],[22,15]]
             }
         }
     });
@@ -121,7 +122,6 @@ var toTable = function(name, features) {
 };
 map.on('mousemove', function (e) {
     var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
-    //document.getElementById('info').innerHTML = JSON.stringify(features, null, 2);
     var townInfo = toTable('plaats', features.filter(feature=>feature.layer.id=='towns'));
     var buildingInfo = toTable('gebouw', features.filter(feature=>feature.layer.id=='buildings'));
     var addressInfo = toTable('adres', features.filter(feature=>feature.layer.id=='addresspoints'));
