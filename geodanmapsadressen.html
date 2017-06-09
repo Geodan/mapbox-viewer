@@ -11,6 +11,7 @@
         #map { position:absolute; top:0; bottom:0; left: 0; right:350px; }
         #info {position:absolute; top:0; bottom:0; right:0; width:350px;}
         table {font-family: Verdana, Arial, sans; font-size:8pt;}
+        th {background-color: lightgray;}
     </style>
 </head>
 <body>
@@ -110,12 +111,11 @@ map.on('load', function () {
 var toTable = function(name, features) {
     var result = '';
     if (features && features.length) {
-        result = '<table><thead><tr><th colspant="2">'+name+'</th></tr></thead><tbody>';
+        result = '<tr><th colspan="2">'+name+'</th></tr>';
         var properties = features[0].properties;
         for (var key in properties) {
             result += '<tr><td>' + key + '</td><td>' + properties[key] + '</td></tr>';
-        }
-        result += '</tbody></table>';
+        }        
     }
     return result;
 };
@@ -125,7 +125,7 @@ map.on('mousemove', function (e) {
     var townInfo = toTable('plaats', features.filter(feature=>feature.layer.id=='towns'));
     var buildingInfo = toTable('gebouw', features.filter(feature=>feature.layer.id=='buildings'));
     var addressInfo = toTable('adres', features.filter(feature=>feature.layer.id=='addresspoints'));
-    document.getElementById('info').innerHTML = townInfo + buildingInfo + addressInfo;
+    document.getElementById('info').innerHTML = '<table>' + townInfo + buildingInfo + addressInfo + '</table>';
 });
 
 map.on("mousemove", "buildings", function(e) {
