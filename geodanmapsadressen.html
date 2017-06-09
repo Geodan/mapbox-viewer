@@ -8,12 +8,15 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
     <style>
         body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
+        #map { position:absolute; top:0; bottom:0; left: 0; right:350px; }
+        #info {position:absolute; top:0; bottom:0; right:0; width:350px;}
+        table {font-family: Verdana, Arial, sans; font-size:8pt;}
     </style>
 </head>
 <body>
 
 <div id='map'></div>
+<div id='info'></div>
 <script>
 //mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
 var map = new mapboxgl.Map({
@@ -25,53 +28,99 @@ var map = new mapboxgl.Map({
 
 map.on('load', function () {
 
-    map.addSource("gmadressen", {        
+    map.addSource("GMadressen", {        
         "type": 'vector',
-        "tiles":["http://d1.acc.geodan.nl:9000/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=addresses:addressesbuildings&STYLE=&TILEMATRIX=EPSG:900913:{z}&TILEMATRIXSET=EPSG:900913&FORMAT=application/x-protobuf;type=mapbox-vector&TILECOL={x}&TILEROW={y}"],
-        "bounds": [3.38,50.73,7.2432,53.5455]
+        "tiles": [
+            "http://d1.acc.geodan.nl:9000/gwc/service/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=addresses:addressesbuildings&STYLE=&TILEMATRIX=EPSG:3857_512:{z}&TILEMATRIXSET=EPSG:3857_512&FORMAT=application/x-protobuf;type=mapbox-vector&TILECOL={x}&TILEROW={y}"
+        ],
+        "bounds": [3.38,50.73,7.2432,53.5455],
+        "minzoom": 5,
+        "maxZoom": 14        
     });
 
     map.addLayer({
         "id": "towns",
-        "type": "line",
-        "source": "gmadressen",
+        "type": "fill",
+        "source": "GMadressen",
         "source-layer": "towns",
-        "layout": {
-            "line-join": "round",
-            "line-cap": "round"
-        },
+        "minzoom": 5,
+        "maxzoom": 22,
         "paint": {
-            "line-color": "#ff69b4",
-            "line-width": 1
+            "fill-color": "rgba(237, 248, 177, 1)",
+            "fill-opacity": 0.5,
+            "fill-outline-color": "rgba(44, 127, 184, 1)"
         }        
     });
     map.addLayer({
         "id": "buildings",
-        "type": "line",
-        "source": "gmadressen",
+        "type": "fill",
+        "source": "GMadressen",
         "source-layer": "buildings",
-        "layout": {
-            "line-join": "round",
-            "line-cap": "round"
-        },
+        "minzoom": 14,
+        "maxzoom": 24,
         "paint": {
-            "line-color": "black",
-            "line-width": 1
-        }        
+            "fill-color": "rgba(44, 127, 184, 1)",
+            "fill-outline-color": "rgba(193, 193, 177, 1)"
+        }  
+    });
+    map.addLayer({
+        "id": "buildingshover",
+        "type": "fill",
+        "source": "GMadressen",
+        "source-layer": "buildings",
+        "minzoom": 14,
+        "maxzoom": 24,
+        "paint": {
+            "fill-color": "rgba(144, 127, 184, 1)",
+            "fill-outline-color": "rgba(193, 193, 177, 1)"
+        },
+        "filter": ['==', "gebwbagid", ""]
     });
     map.addLayer({
         "id": "addresspoints",
         "type": "circle",
-        "source": "gmadressen",
+        "source": "GMadressen",
         "source-layer": "addresspoints",
-        "paint" : {
-            "circle-color": "darkgreen",
+        "minzoom": 17,
+        "maxzoom": 24,
+        "paint": {
+            "circle-color": "rgba(244, 245, 11, 1)",
             "circle-radius": {
-                "base": 1.75,
-                "stops": [[14,2],[22,4]]
+                "type": "exponential",
+                "base": 3,
+                "stops": [[17,3],[20,10],[22,15]]
             }
         }
     });
+});
+var toTable = function(name, obj) {
+    var result = '';
+    if (obj && obj.length) {
+        result = '<table><thead><tr><th colspant="2">'+name+'</th></tr></thead><tbody>';
+        var subobj = obj[0].properties;
+        for (var key in subobj) {
+            result += '<tr><td>' + key + '</td><td>' + subobj[key] + '</td></tr>';
+        }
+        result += '</tbody></table>';
+    }
+    return result;
+};
+map.on('mousemove', function (e) {
+    var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
+    //document.getElementById('info').innerHTML = JSON.stringify(features, null, 2);
+    var townInfo = toTable('plaats', features.filter(feature=>feature.layer.id=='towns'));
+    var buildingInfo = toTable('gebouw', features.filter(feature=>feature.layer.id=='buildings'));
+    var addressInfo = toTable('adres', features.filter(feature=>feature.layer.id=='addresspoints'));
+    document.getElementById('info').innerHTML = townInfo + buildingInfo + addressInfo;
+});
+
+map.on("mousemove", "buildings", function(e) {
+    map.setFilter("buildingshover", ["==", "gebwbagid", e.features[0].properties.gebwbagid]);
+});
+
+// Reset the buildingshover layer's filter when the mouse leaves the layer.
+map.on("mouseleave", "buildings", function() {
+    map.setFilter("buildingshover", ["==", "gebwbagid", ""]);
 });
 </script>
 
