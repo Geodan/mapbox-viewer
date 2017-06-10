@@ -141,6 +141,146 @@ map.on('load', function () {
         [
           "has",
           "huisnummer"
+        ],
+        [
+          "!has",
+          "huisnrtoev"
+        ],
+        [
+          "!has",
+          "huisletter"
+        ]
+      ]
+    });
+    map.addLayer({
+      "id": "labelshuisnrtoev",
+      "type": "symbol",
+      "source": "GMadressen",
+      "source-layer": "addresspoints",
+      "minzoom": 18,
+      "maxzoom": 24,
+      "paint": {
+        "text-color": "#cccccc",
+        "text-halo-width": 0.5,
+        "text-halo-blur": 0.5,
+        "text-halo-color" : "rgba(0,0,0,0.7)"
+      },
+      "layout": {
+        "text-field": "{huisnummer}-{huisnrtoev}",
+        "text-pitch-alignment": "auto",
+        "text-rotation-alignment": "auto",
+        "text-letter-spacing": 0,
+        "text-transform": "none",
+        "text-font": [
+          "Open Sans Bold"
+        ],
+        "visibility": "visible",
+        "text-size": 12,
+        "text-offset": [0.6, -0.6],
+        "text-justify": "left",
+        "text-anchor" : "left"
+      },
+      "filter": [
+        "all",
+        [
+          "has",
+          "huisnummer"
+        ],
+        [
+          "has",
+          "huisnrtoev"
+        ],
+        [
+          "!has",
+          "huisletter"
+        ]
+      ]
+    });
+    map.addLayer({
+      "id": "labelshuisletter",
+      "type": "symbol",
+      "source": "GMadressen",
+      "source-layer": "addresspoints",
+      "minzoom": 18,
+      "maxzoom": 24,
+      "paint": {
+        "text-color": "#cccccc",
+        "text-halo-width": 0.5,
+        "text-halo-blur": 0.5,
+        "text-halo-color" : "rgba(0,0,0,0.7)"
+      },
+      "layout": {
+        "text-field": "{huisnummer}{huisletter}",
+        "text-pitch-alignment": "auto",
+        "text-rotation-alignment": "auto",
+        "text-letter-spacing": 0,
+        "text-transform": "none",
+        "text-font": [
+          "Open Sans Bold"
+        ],
+        "visibility": "visible",
+        "text-size": 12,
+        "text-offset": [0.6, -0.6],
+        "text-justify": "left",
+        "text-anchor" : "left"
+      },
+      "filter": [
+        "all",
+        [
+          "has",
+          "huisnummer"
+        ],
+        [
+          "has",
+          "huisletter"
+        ],
+        [
+          "!has",
+          "huisnrtoev"
+        ]
+      ]
+    });
+    map.addLayer({
+      "id": "labelshuisnrall",
+      "type": "symbol",
+      "source": "GMadressen",
+      "source-layer": "addresspoints",
+      "minzoom": 18,
+      "maxzoom": 24,
+      "paint": {
+        "text-color": "#cccccc",
+        "text-halo-width": 0.5,
+        "text-halo-blur": 0.5,
+        "text-halo-color" : "rgba(0,0,0,0.7)"
+      },
+      "layout": {
+        "text-field": "{huisnummer}{huisletter}-{huisnrtoev}",
+        "text-pitch-alignment": "auto",
+        "text-rotation-alignment": "auto",
+        "text-letter-spacing": 0,
+        "text-transform": "none",
+        "text-font": [
+          "Open Sans Bold"
+        ],
+        "visibility": "visible",
+        "text-size": 12,
+        "text-offset": [0.6, -0.6],
+        "text-justify": "left",
+        "text-anchor" : "left"
+      },
+      "filter": [
+        "all",
+        [
+          "has",
+          "huisnummer"
+        ],
+        [
+          "has",
+          "huisletter"
+        ],
+        [
+          "has",
+          "huisnrtoev"
         ]
       ]
     });
