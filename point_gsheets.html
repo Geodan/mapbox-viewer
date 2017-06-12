@@ -4,17 +4,27 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>    
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
     <script src="node_modules/papaparse/papaparse.min.js"></script>
     <style>
         body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:20%; width:100%; }
+        #sheeturl { position: absolute; top: 0; height: 2em; width: 100%;}
+        #inputurl { position: absolute; left: 0; width: 90%;}
+        #submiturl { position: absolute; left: 90%; width: 5%;}
+        #reseturl { position: absolute; left: 95%; width: 5%;}
+        #map { position:absolute; top:2em; bottom:20%; width:100%; }
         #info { position:absolute; top:80%; height:20%; width: 100%; outline: 1px solid black; background: white; overflow: auto;}
     </style>
 </head>
 <body>
-
+<div id='sheeturl'>
+    <form>
+        <input id="inputurl" type="url" value="https://docs.google.com/spreadsheets/d/1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI"></input>
+        <input id="submiturl" type="button" value="update"></input>
+        <input id="reseturl" type="button" value="reset"></input>
+    </form>
+</div>
 <div id='map'></div>
 <div id='info'></div>
 <script>
@@ -37,10 +47,16 @@ var colors=['#fff7ec','#fee8c8','#fdd49e','#fdbb84','#fc8d59','#ef6548','#d7301f
 var dataKeyField = 'gwb_code_10'
 var dataValueField = 'result';
 
-var googleSheetKey = '1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI';
+var googleSheetKey;
+if (window.localStorage.sheetKey) {
+    googleSheetKey = window.localStorage.sheetKey;
+} else {
+ googleSheetKey = '1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI';
+}
 var googleSheetName = encodeURIComponent('winkels');
 var query = encodeURIComponent('select A,B,C,D');
-var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}&callback=googleDocCallback`
+var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}`
+document.querySelector('#inputurl').value = googleSheetUrl;
 
 map.on('load', function() {
     Papa.parse(googleSheetUrl, {
@@ -62,7 +78,7 @@ map.on('load', function() {
                     };
                     features.push(feature);
                 }
-                map.addSource("winkels", {            
+                map.addSource("winkels", {
                         "type": "geojson",
                         "data": {
                             "type": "FeatureCollection",
@@ -72,8 +88,8 @@ map.on('load', function() {
                 map.addLayer ({
                     "id": "points",
                     "type": "circle",
-                    "source": "winkels", 
-                    "paint" : {                        
+                    "source": "winkels",
+                    "paint" : {
                          "circle-color": {
                              "property": 'color',
                              "type": "identity"
@@ -84,16 +100,16 @@ map.on('load', function() {
                          }
                     }
                 });
-                map.addLayer({        
+                map.addLayer({
                     "id": "labelledpoints",
                     "type": "symbol",
                     "source": "winkels",
-                    "layout": {                        
+                    "layout": {
                         //"icon-image": "circle-11",
                         "text-field": "{title}",
                         "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
                         "text-offset": [0, 0.6],
-                        "text-anchor": "top",                        
+                        "text-anchor": "top",
                     }
                 });
             }
@@ -104,6 +120,27 @@ map.on('mousemove', function (e) {
     var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
     document.getElementById('info').innerHTML = JSON.stringify(features, null, 2);
 });
+
+document.querySelector('#submiturl').addEventListener('click', function (){
+    var newurl = document.querySelector('#inputurl').value;
+    var parts = newurl.split('/');
+    var keypart = 0;
+    var longest = 0;
+    for (var i = 0; i < parts.length; i++) {
+        if (parts[i].length > longest) {
+            keypart = i;
+            longest = parts[i].length;
+        }
+    }
+    window.localStorage.sheetKey = parts[keypart];
+    location.reload();
+});
+
+document.querySelector('#reseturl').addEventListener('click', function() {
+    window.localStorage.removeItem('sheetKey');
+    location.reload();
+});
+
 </script>
 
 </body>
