@@ -56,7 +56,7 @@ if (window.localStorage.sheetKey) {
 var googleSheetName = encodeURIComponent('winkels');
 var query = encodeURIComponent('select A,B,C,D');
 var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}`
-document.querySelector('#inputurl').value = googleSheetUrl;
+document.querySelector('#inputurl').value = `https://docs.google.com/spreadsheets/d/${googleSheetKey}/?sheet=${googleSheetName}`;
 
 map.on('load', function() {
     Papa.parse(googleSheetUrl, {
