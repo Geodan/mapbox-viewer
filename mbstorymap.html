@@ -30,6 +30,9 @@
             width: 50%;
         }
         #info { position:absolute;height:100pt;bottom:0;width:50%;font-size:8pt;}
+        #info table {border-collapse: collapse; width: 100%;}
+        #info table th {background-color: lightgray;}
+        #info table, #info table th, #info table td { border: 1px solid black;}
         #spacer {height:100%;}
     </style>
     <script src="mbstorymap.js"></script>
@@ -47,22 +50,22 @@
     <input id='positron' type='radio' name='rtoggle' value='positron' checked>
     <label for='positron'>positron</label>
     <input id='positroncolor' type='radio' name='rtoggle' value='positroncolor'>
-    <label for='positroncolor'>positroncolor</label>    
+    <label for='positroncolor'>positroncolor</label>
     <input id='darkmatter' type='radio' name='rtoggle' value='darkmatter'>
     <label for='darkmatter'>dark matter</label>
     <input id='dark' type='radio' name='rtoggle' value='dark'>
     <label for='dark'>dark</label>
     <input id='klokantech3d' type='radio' name='rtoggle' value='klokantech3d'>
-    <label for='klokantech3d'>klokantech 3D</label>        
+    <label for='klokantech3d'>klokantech 3D</label>
 </div>
 <div id='info'></div>
 <div id='title'><h3>MapBox Vector Tiles</h3></div>
 <div id='story'>
-    
-    
+
+
     <section id="intro" class="active">
     <h3>Intro</h3>
-    De kaart hier links is door de browser getekend. De kaart is gekanteld, maar veel labels staan horizontaal. 
+    De kaart hier links is door de browser getekend. De kaart is gekanteld, maar veel labels staan horizontaal.
     <p>
     Je kunt de kaart in- en uitzoomen met twee vingers of het muiswieltje.
     </p>
@@ -72,7 +75,7 @@
 
     <section id="setstyle">
         <h3>Stijlen</h3>
-        Omdat de kaart door de browser getekend wordt, kun je dezelfde data op verschillende manieren weergeven. 
+        Omdat de kaart door de browser getekend wordt, kun je dezelfde data op verschillende manieren weergeven.
         De vectordata van deze kaart staat op een server van Geodan en heeft de volgende kaartlagen:
         <ul>
             <li>water (vlakken)</li>
@@ -90,16 +93,24 @@
             <li>housenumber (punten)</li>
             <li>poi (punten)</li>
         </ul>
-        Kies &eacute;&eacute;n van stijlen bovenaan de kaart voor een andere weergave. Bij sommige stijlen is bepaalde data helemaal weggelaten. 
+        Kies &eacute;&eacute;n van stijlen bovenaan de kaart voor een andere weergave. Bij sommige stijlen is bepaalde data helemaal weggelaten.
         Huisnummers zijn hier bijvoorbeeld alleen zichtbaar in de 'basic' stijl.
     </section>
     <section id="data">
         <h3>Data, attributen en stijllagen</h3>
-        Omdat de vectordata niet op de server, maar in de browser aanwezig is, kun je de gegevens ook alfanumeriek weergeven. 
-        Beweeg bijvoorbeeld met de muis over de kaart voor meer informatie onder de muispointer.
+        Omdat de vectordata niet op de server, maar in de browser aanwezig is, kun je de gegevens ook
+        alfanumeriek weergeven. Onderaan de kaart wordt de informatie getoond van kaartgegevens onder de muispointer.
+        onder de muispointer.
         <p></p>
-        Deze kaart is gemaakt met MapBox-gl. In MapBox-gl is een <i>layer</i> een combinatie van een <i>source</i> en een stijlinstelling. 
-        De <i>source</i> is de vectordata met bijbehorende data-attributen. Als de <i>source</i> bijvoorbeeld een kaartlaag 'transportation' bevat met attributen waarin de verschillende wegtypen worden aangeduid, dan kunnen daarvan meerderdere stijllagen worden gemaakt, bijvoorbeeld aparte stijllagen voor snelwegen, doorgaande wegen, straten, tunnels, trein- en tramrails enz. 
+        Deze kaart is gemaakt met MapBox-gl. In MapBox-gl is een <i>layer</i> een combinatie van een <i>source</i> en een stijlinstelling.
+        De <i>source</i> is de vectordata met bijbehorende data-attributen. Als de <i>source</i> bijvoorbeeld een kaartlaag 'transportation' bevat met attributen waarin de verschillende wegtypen worden aangeduid, dan kunnen daarvan meerderdere stijllagen worden gemaakt, bijvoorbeeld aparte stijllagen voor snelwegen, doorgaande wegen, straten, tunnels, trein- en tramrails enz.
+    </section>
+    <section id="postgismvt">
+        <h3>VectorTiles uit PostGIS</h3>
+        De vector tiles voor de kaarten uit de vorige paragrafen zijn kant en klaar <a href="https://openmaptiles.org/downloads/" target="vtdownload">gedownload</a>,
+        maar je kunt ook direct vector tiles uit bijvoorbeeld een PostGIS database genereren. Een andere vector tile server is Geoserver.
+        Deze kaart toont alle rails uit de Geodan OSM PostGIS database die met behulp van de PostGIS functies 'ST_AsMVT()' en 'ST_AsMVTGeom()' uit de database worden gehaald.
+        Het uitvoeren van de database queries kan soms wel even duren, vooral bij grote datasets zoals de OSM. Er is daarom een NGINX cache voor PostGIS gezet zodat dezelfde tiles maar &eacute;&eacute;n keer hoeven te worden gegenereerd.
     </section>
     <div id="spacer"></div>
 </div>

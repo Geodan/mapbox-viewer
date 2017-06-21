@@ -7,7 +7,7 @@ function init() {
     story.onscroll = handleScroll;
     map = new mapboxgl.Map({
         container: 'map', // container id
-        style: 'styles/openmaptiles/ktbasic.json', 
+        style: 'styles/openmaptiles/ktbasic.json',
         center: [4.92, 52.374],
         bearing: 120,
         zoom: 11.5,
@@ -34,7 +34,7 @@ function init() {
             map.setPitch(pitch);
             setTimeout(rotateMap, 25);
         }
-        //rotateMap();  
+        //rotateMap();
         /*map.flyTo({
             center: map.center,
             bearing: 180,
@@ -46,7 +46,7 @@ function init() {
 
 var chapters = {
     'intro': {
-        style: 'styles/openmaptiles/ktbasic.json', 
+        style: 'styles/openmaptiles/ktbasic.json',
         center: [4.92, 52.374],
         bearing: 120,
         zoom: 11.5,
@@ -55,7 +55,7 @@ var chapters = {
         pitch: 0
     },
     'setstyle': {
-        style: 'styles/openmaptiles/positron.json', 
+        style: 'styles/openmaptiles/positron.json',
         center: [4.90, 52.374],
         bearing: 0,
         zoom: 8,
@@ -63,10 +63,10 @@ var chapters = {
         maxBounds:[0,49,10,55],
         pitch: 0,
         setup: function() {
-            document.querySelector('#menu').style.display = 'block'; // display menu            
+            document.querySelector('#menu').style.display = 'block'; // display menu
             var styles = document.getElementById('menu').getElementsByTagName('input');
             function applyStyle(style) {
-                var styleId = style.target.id;    
+                var styleId = style.target.id;
                 map.setStyle('styles/openmaptiles/' + styleId + '.json');
             }
             for (var i = 0; i < styles.length; i++) {
@@ -76,18 +76,37 @@ var chapters = {
         }
     },
     'data': {
-        style: 'styles/openmaptiles/ktbasic.json', 
+        style: 'styles/openmaptiles/ktbasic.json',
         center: [5.29969 , 51.69176],
         bearing: 0,
         zoom: 17.5,
         minZoom: 5,
         maxBounds:[0,49,10,55],
-        pitch: 0, 
+        pitch: 0,
         setup: function() {
             map.on('mousemove', function (e) {
                 var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
                 document.getElementById('info').innerHTML = formatInfo(features); //JSON.stringify(features, null, 2);
             });
+        }
+    },
+    'postgismvt': {
+        style: 'styles/freetilehosting/positron.json',
+        center: [4.9132, 52.34227],
+        bearing: 0,
+        zoom: 12,
+        minZoom: 0,
+        maxBounds:[-180,-90,180,90],
+        pitch: 0,
+        setup: function() {
+            var loaded = false;
+            map.on('styledata', function() {
+                if (!loaded) {
+                    loaded = true;
+                    addRailLayers(map);
+                }
+            });
+            document.querySelector('#menu').style.display='none';
         }
     }
 };
@@ -97,7 +116,7 @@ function formatInfo(features) {
     if (!features.length) {
         return "";
     }
-    var result = "<table><tr><th>layer</th><th>properties</th></tr>";
+    var result = '<table border="1"><thead><tr><th>stijllaag</th><th>feature eigenschappen</th></tr></thead>';
     for (i = 0; i < features.length; i++) {
         result += "<tr><td>" + features[i].layer.id + "</td><td>";
         var first = true;
@@ -116,7 +135,7 @@ function formatInfo(features) {
 }
 
 // On every scroll event, check which element is on screen
-function handleScroll() {    
+function handleScroll() {
     var chapterNames = Object.keys(chapters);
     for (var i = 0; i < chapterNames.length; i++) {
         var chapterName = chapterNames[i];
@@ -134,10 +153,12 @@ function setActiveChapter(chapterName) {
     if (chapters[activeChapterName].cleanup) {
         chapters[activeChapterName].cleanup();
     }
+    map.setStyle(chapters[chapterName].style);
+    map.setMinZoom(chapters[chapterName].minZoom);
+    map.setMaxBounds(chapters[chapterName].maxBounds);
     if (chapters[chapterName].setup) {
         chapters[chapterName].setup();
     }
-    map.setStyle(chapters[chapterName].style);
     map.flyTo(chapters[chapterName]);
 
     document.getElementById(chapterName).setAttribute('class', 'active');
@@ -146,7 +167,135 @@ function setActiveChapter(chapterName) {
     activeChapterName = chapterName;
 }
 
-function isElementOnScreen(id) {    
+function isElementOnScreen(id) {
     var element = document.getElementById(id);
     return ((element.offsetTop + element.offsetHeight - 100) > document.getElementById('story').scrollTop);
+}
+
+
+function addRailLayers(map)
+{
+    map.addSource("rail", {
+            type: 'vector',
+            tiles:["http://saturnus.geodan.nl/mvt/rail/{z}/{x}/{y}.mvt"]
+        });
+
+    map.addLayer({
+      "id": "rail",
+      "type": "line",
+      "source": "rail",
+      "source-layer": "rail",
+      "minzoom": 12,
+      "maxzoom": 24,
+      "filter": [
+        "none",
+        [
+          "==",
+          "railway",
+          "tram"
+        ],
+        [
+          "==",
+          "railway",
+          "abandoned"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      }
+    }, 'place_other');
+    map.addLayer({
+      "id": "rail-route",
+      "type": "line",
+      "source": "rail",
+      "source-layer": "rail",
+      "minzoom": 5,
+      "maxzoom": 11.9999,
+      "filter": [
+        "all",
+        [
+          "in",
+          "route",
+          "railway", "train"
+        ],
+        [
+          "!=",
+          "railway",
+          "abandoned"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(179, 141, 39, 1)",
+        "line-width": 3
+      }
+    }, 'place_other');
+    map.addLayer({
+      "id": "tram",
+      "type": "line",
+      "source": "rail",
+      "source-layer": "rail",
+      "minzoom": 12,
+      "filter": [
+        "any",
+        [
+          "==",
+          "railway",
+          "tram"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(103, 45, 45, 1)"
+      }
+    }, 'place_other');
+    map.addLayer({
+      "id": "subway",
+      "type": "line",
+      "source": "rail",
+      "source-layer": "rail",
+      "minzoom": 12,
+      "filter": [
+        "all",
+        [
+          "==",
+          "railway",
+          "subway"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(143, 96, 144, 1)",
+        "line-width": 1,
+        "line-gap-width": 1
+      }
+    }, 'place_other');
+    map.addLayer({
+      "id": "lightrail",
+      "type": "line",
+      "source": "rail",
+      "source-layer": "rail",
+      "minzoom": 12,
+      "filter": [
+        "all",
+        [
+          "==",
+          "railway",
+          "light_rail"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "rgba(143, 96, 144, 1)",
+        "line-width": 1
+      }
+    });
 }
