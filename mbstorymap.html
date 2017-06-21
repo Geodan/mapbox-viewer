@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0;font-family: Verdana, Arial, sans; overflow: hidden;}
+        section {
+            padding:  25px 50px;
+            line-height: 25px;
+            border-bottom: 1px solid #ddd;
+            opacity: 0.25;
+            font-size: 13px;
+        }
+        section.active {
+           opacity: 1;
+        }
+        #title {position: absolute; left:50%; width:50%; top: 0; height: 3em;text-align:center;}
+        #story {position:absolute;left:50%;width:50%;top:3em;padding:5px;height:100%;overflow-y:scroll;}
+        #map { position:absolute; top:0; bottom: 100pt; width:50%; }
+        #menu {
+            position: absolute;
+            background: #fff;
+            padding: 10px;
+            font-family: 'Open Sans', sans-serif;
+            display: none;
+            width: 50%;
+        }
+        #info { position:absolute;height:100pt;bottom:0;width:50%;font-size:8pt;}
+        #spacer {height:100%;}
+    </style>
+    <script src="mbstorymap.js"></script>
+</head>
+<body onload="init()">
+
+<div id='map'></div>
+<div id='menu'>
+    <input id='ktbasic' type='radio' name='rtoggle' value='ktbasic' checked='checked'>
+    <label for='ktbasic'>basic (klokantech)</label>
+    <input id='osmliberty' type='radio' name='rtoggle' value='osmliberty'>
+    <label for='osmliberty'>OSM liberty</label>
+    <input id='osmbright' type='radio' name='rtoggle' value='osmbright'>
+    <label for='osmbright'>OSM bright</label>
+    <input id='positron' type='radio' name='rtoggle' value='positron' checked>
+    <label for='positron'>positron</label>
+    <input id='positroncolor' type='radio' name='rtoggle' value='positroncolor'>
+    <label for='positroncolor'>positroncolor</label>    
+    <input id='darkmatter' type='radio' name='rtoggle' value='darkmatter'>
+    <label for='darkmatter'>dark matter</label>
+    <input id='dark' type='radio' name='rtoggle' value='dark'>
+    <label for='dark'>dark</label>
+    <input id='klokantech3d' type='radio' name='rtoggle' value='klokantech3d'>
+    <label for='klokantech3d'>klokantech 3D</label>        
+</div>
+<div id='info'></div>
+<div id='title'><h3>MapBox Vector Tiles</h3></div>
+<div id='story'>
+    
+    
+    <section id="intro" class="active">
+    <h3>Intro</h3>
+    De kaart hier links is door de browser getekend. De kaart is gekanteld, maar veel labels staan horizontaal. 
+    <p>
+    Je kunt de kaart in- en uitzoomen met twee vingers of het muiswieltje.
+    </p>
+    <p>De kaart roteren kan met je vingers of houd de CTRL toets ingedrukt terwijl je met de muis aan de kaart trekt. Punt-labels blijven horizontaal staan.
+    </p>
+    </section>
+
+    <section id="setstyle">
+        <h3>Stijlen</h3>
+        Omdat de kaart door de browser getekend wordt, kun je dezelfde data op verschillende manieren weergeven. 
+        De vectordata van deze kaart staat op een server van Geodan en heeft de volgende kaartlagen:
+        <ul>
+            <li>water (vlakken)</li>
+            <li>waterway (lijnen)</li>
+            <li>landcover (vlakken)</li>
+            <li>landuse (vlakken)</li>
+            <li>park (vlakken)</li>
+            <li>boundary (lijnen)</li>
+            <li>aeroway (lijnen)</li>
+            <li>transportation (lijnen)</li>
+            <li>building (vlakken)</li>
+            <li>water_name (punten)</li>
+            <li>transportation_name (punten)</li>
+            <li>place (punten)</li>
+            <li>housenumber (punten)</li>
+            <li>poi (punten)</li>
+        </ul>
+        Kies &eacute;&eacute;n van stijlen bovenaan de kaart voor een andere weergave. Bij sommige stijlen is bepaalde data helemaal weggelaten. 
+        Huisnummers zijn hier bijvoorbeeld alleen zichtbaar in de 'basic' stijl.
+    </section>
+    <section id="data">
+        <h3>Data, attributen en stijllagen</h3>
+        Omdat de vectordata niet op de server, maar in de browser aanwezig is, kun je de gegevens ook alfanumeriek weergeven. 
+        Beweeg bijvoorbeeld met de muis over de kaart voor meer informatie onder de muispointer.
+        <p></p>
+        Deze kaart is gemaakt met MapBox-gl. In MapBox-gl is een <i>layer</i> een combinatie van een <i>source</i> en een stijlinstelling. 
+        De <i>source</i> is de vectordata met bijbehorende data-attributen. Als de <i>source</i> bijvoorbeeld een kaartlaag 'transportation' bevat met attributen waarin de verschillende wegtypen worden aangeduid, dan kunnen daarvan meerderdere stijllagen worden gemaakt, bijvoorbeeld aparte stijllagen voor snelwegen, doorgaande wegen, straten, tunnels, trein- en tramrails enz. 
+    </section>
+    <div id="spacer"></div>
+</div>
+</body>
+</html>
