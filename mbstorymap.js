@@ -108,6 +108,25 @@ var chapters = {
             });
             document.querySelector('#menu').style.display='none';
         }
+    },
+    'geodanmaps': {
+        style: 'styles/gmadressen.json',
+        center: [4.9132, 52.34227],
+        bearing: 0,
+        zoom: 18,
+        minZoom: 0,
+        maxBounds:[-180,-90,180,90],
+        pitch: 0,
+        setup: function() {
+            map.on("mousemove", "buildings", function(e) {
+                map.setFilter("buildingshover", ["==", "gebwbagid", e.features[0].properties.gebwbagid]);
+            });
+
+            // Reset the buildingshover layer's filter when the mouse leaves the layer.
+            map.on("mouseleave", "buildings", function() {
+                map.setFilter("buildingshover", ["==", "gebwbagid", ""]);
+            });
+        }
     }
 };
 

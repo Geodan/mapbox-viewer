@@ -18,16 +18,19 @@
         section.active {
            opacity: 1;
         }
-        #title {position: absolute; left:50%; width:50%; top: 0; height: 3em;text-align:center;}
-        #story {position:absolute;left:50%;width:50%;top:3em;padding:5px;height:100%;overflow-y:scroll;}
+        #container { position: absolute; left: 50%; top: 0; height:100%; width: 50%; bottom: 0;}
+        #title {position: absolute; left:0; width:100%; top: 0; height: 3em;text-align:center;}
+        #story {position:absolute;left:0;width:100%;top:3em;padding:5px;height:100%;overflow-y:scroll;}
         #map { position:absolute; top:0; bottom: 100pt; width:50%; }
+        .shadow {-webkit-box-shadow: -2px 0px 2px 0px rgba(50, 50, 50, 0.75);-moz-box-shadow:-2px 0px 2px 0px rgba(50, 50, 50, 0.75);box-shadow:-2px 0px 2px 0px rgba(50, 50, 50, 0.75);}
         #menu {
             position: absolute;
             background: #fff;
-            padding: 10px;
-            font-family: 'Open Sans', sans-serif;
+            padding: 10px;                        
             display: none;
             width: 50%;
+            font-size: 13px;
+
         }
         #info { position:absolute;height:100pt;bottom:0;width:50%;font-size:8pt;}
         #info table {border-collapse: collapse; width: 100%;}
@@ -59,18 +62,18 @@
     <label for='klokantech3d'>klokantech 3D</label>
 </div>
 <div id='info'></div>
+<div id='container' class="shadow">
 <div id='title'><h3>MapBox Vector Tiles</h3></div>
 <div id='story'>
-
-
     <section id="intro" class="active">
     <h3>Intro</h3>
-    De kaart hier links is door de browser getekend. De kaart is gekanteld, maar veel labels staan horizontaal.
+    De kaart links is door de browser getekend. De kaart is gekanteld, maar veel labels staan horizontaal.
     <p>
     Je kunt de kaart in- en uitzoomen met twee vingers of het muiswieltje.
     </p>
     <p>De kaart roteren kan met je vingers of houd de CTRL toets ingedrukt terwijl je met de muis aan de kaart trekt. Punt-labels blijven horizontaal staan.
     </p>
+    Scroll deze tekst omlaag voor de volgende kaart.
     </section>
 
     <section id="setstyle">
@@ -98,9 +101,8 @@
     </section>
     <section id="data">
         <h3>Data, attributen en stijllagen</h3>
-        Omdat de vectordata niet op de server, maar in de browser aanwezig is, kun je de gegevens ook
-        alfanumeriek weergeven. Onderaan de kaart wordt de informatie getoond van kaartgegevens onder de muispointer.
-        onder de muispointer.
+        Omdat de vectordata niet op de server, maar in de browser aanwezig is, kun je de gegevens ook direct
+        alfanumeriek weergeven. Als je met de muis over de kaart beweegt, wordt onder de kaart de informatie getoond van kaartgegevens onder de muispointer.
         <p></p>
         Deze kaart is gemaakt met MapBox-gl. In MapBox-gl is een <i>layer</i> een combinatie van een <i>source</i> en een stijlinstelling.
         De <i>source</i> is de vectordata met bijbehorende data-attributen. Als de <i>source</i> bijvoorbeeld een kaartlaag 'transportation' bevat met attributen waarin de verschillende wegtypen worden aangeduid, dan kunnen daarvan meerderdere stijllagen worden gemaakt, bijvoorbeeld aparte stijllagen voor snelwegen, doorgaande wegen, straten, tunnels, trein- en tramrails enz.
@@ -108,11 +110,20 @@
     <section id="postgismvt">
         <h3>VectorTiles uit PostGIS</h3>
         De vector tiles voor de kaarten uit de vorige paragrafen zijn kant en klaar <a href="https://openmaptiles.org/downloads/" target="vtdownload">gedownload</a>,
-        maar je kunt ook direct vector tiles uit bijvoorbeeld een PostGIS database genereren. Een andere vector tile server is Geoserver.
-        Deze kaart toont alle rails uit de Geodan OSM PostGIS database die met behulp van de PostGIS functies 'ST_AsMVT()' en 'ST_AsMVTGeom()' uit de database worden gehaald.
+        maar je kunt ook direct vector tiles uit bijvoorbeeld een PostGIS database genereren. Deze kaart toont alle rails uit de Geodan OSM PostGIS database die met behulp van de PostGIS (2.4 beta) functies 'ST_AsMVT()' en 'ST_AsMVTGeom()' uit de database worden gehaald.
         Het uitvoeren van de database queries kan soms wel even duren, vooral bij grote datasets zoals de OSM. Er is daarom een NGINX cache voor PostGIS gezet zodat dezelfde tiles maar &eacute;&eacute;n keer hoeven te worden gegenereerd.
+        <p></p>
+        Deze PostGIS database heeft spoorwegen voor de hele wereld. Zo te zien zijn er nog heel wat spoorbeheerders die nog niet tot de Geodan klantenkring behoren.
+    </section>
+    <section id="geodanmaps">
+        <h3>VectorTiles en GeodanMaps</h3>
+        Bij GeodanMaps wordt ook met Vector Tiles geexperimenteerd. Deze kaart werkt daarom nog alleen binnen het Geodan netwerk (of VPN).
+        Bij GeodanMaps worden de tiles door de geoserver software gegenereerd. De adrespunten zijn ingekleurd op basis van het BAG gebruiksdoel. Omdat de
+        vector data in de browser aanwezig is, kan dit worden gebruikt om bijvoorbeeld de gebouwen op te lichten op het moment dat je er met de muis overheen gaat.
+        De plaatsing van woonplaatslabels wordt door de kaartsoftware (mapbox-gl) berekend op basis van de woonplaatsvlakken. In sommige gevallen kun je daarbij zien dat de achterliggende data in tiles is ingedeeld.
     </section>
     <div id="spacer"></div>
+    </div>
 </div>
 </body>
 </html>
