@@ -2,6 +2,7 @@ var map;
 var storyHeight;
 
 function init() {
+    shrinkForScrollbarWidth();
     var story = document.querySelector('#story');
     storyHeight = story.clientHeight;
     story.onscroll = handleScroll;
@@ -318,3 +319,22 @@ function addRailLayers(map)
       }
     });
 }
+
+function shrinkForScrollbarWidth()
+{
+  // Create the measurement node
+  var scrollDiv = document.createElement("div");
+  scrollDiv.className = "scrollbar-measure";
+  document.body.appendChild(scrollDiv);
+
+  // Get the scrollbar width
+  var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+
+  // Delete the DIV
+  document.body.removeChild(scrollDiv);
+
+
+  var story = document.querySelector('#story');
+  story.style.width=(story.offsetWidth - scrollbarWidth)+'px';
+}
+
