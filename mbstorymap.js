@@ -111,7 +111,7 @@ var chapters = {
         }
     },
     'geodanmaps': {
-        style: 'styles/gmadressen.json',
+        style: 'styles/bagagnadressen.json',
         center: [4.9132, 52.34227],
         bearing: 0,
         zoom: 18,
