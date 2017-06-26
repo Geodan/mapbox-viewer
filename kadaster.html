@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:20%; width:100%; }
+        #info { position:absolute; top:80%; height:20%; width: 100%; outline: 1px solid black; background: white; overflow: auto;}
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<div id='info'></div>
+<script>
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    zoom: 16,
+    center: [4.913, 52.342]
+});
+
+map.on('load', function () {
+
+    map.addSource("percelen", {
+            type: 'vector',
+            tiles:["http://saturnus.geodan.nl/mvt/kadastralegrenzen/{z}/{x}/{y}.mvt"]
+        });
+
+    map.addLayer({
+      "id": "percelen",
+      "type": "line",
+      "source": "percelen",
+      "source-layer": "kadastralegrenzen",
+      "minzoom": 12,
+      "maxzoom": 24,
+      "layout": {
+        "visibility": "visible"
+      }
+    }, 'place_other');
+    map.on('mousemove', function (e) {
+      var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
+      document.getElementById('info').innerHTML = JSON.stringify(features, null, 2);
+    });
+});
+</script>
+
+</body>
+</html>
