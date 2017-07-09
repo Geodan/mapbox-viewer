@@ -45,6 +45,14 @@ function init() {
     });
 }
 
+var hilitebuilding = function(e) {
+  map.setFilter("buildingshover", ["==", "gebwbagid", e.features[0].properties.gebwbagid]);
+};
+
+var unhilitebuilding = function() {
+  map.setFilter("buildingshover", ["==", "gebwbagid", ""]);
+};
+
 var chapters = {
     'intro': {
         style: 'styles/openmaptiles/ktbasic.json',
@@ -119,14 +127,14 @@ var chapters = {
         maxBounds:[-180,-90,180,90],
         pitch: 0,
         setup: function() {
-            map.on("mousemove", "buildings", function(e) {
-                map.setFilter("buildingshover", ["==", "gebwbagid", e.features[0].properties.gebwbagid]);
-            });
-
+            map.on("mousemove", "buildings", hilitebuilding);
+  
             // Reset the buildingshover layer's filter when the mouse leaves the layer.
-            map.on("mouseleave", "buildings", function() {
-                map.setFilter("buildingshover", ["==", "gebwbagid", ""]);
-            });
+            map.on("mouseleave", "buildings", unhilitebuilding);
+        },
+        cleanup: function() {
+          map.off("mousemove", "buildings", hilitebuilding);
+          map.off("mouseleave", "buildings", unhilitebuilding);
         }
     }
 };
