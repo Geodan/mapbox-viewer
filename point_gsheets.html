@@ -6,7 +6,6 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
-    <script src="node_modules/papaparse/papaparse.min.js"></script>
     <style>
         body { margin:0; padding:0; }
         #sheeturl { position: absolute; top: 0; height: 2em; width: 100%;}
@@ -47,72 +46,89 @@ var colors=['#fff7ec','#fee8c8','#fdd49e','#fdbb84','#fc8d59','#ef6548','#d7301f
 var dataKeyField = 'gwb_code_10'
 var dataValueField = 'result';
 
-var googleSheetKey;
+var googleSheetKey = '1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI';
 if (window.localStorage.sheetKey) {
     googleSheetKey = window.localStorage.sheetKey;
-} else {
- googleSheetKey = '1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI';
 }
 var googleSheetName = encodeURIComponent('winkels');
 var query = encodeURIComponent('select A,B,C,D');
+
 var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}`
 document.querySelector('#inputurl').value = `https://docs.google.com/spreadsheets/d/${googleSheetKey}/?sheet=${googleSheetName}`;
 
-map.on('load', function() {
-    Papa.parse(googleSheetUrl, {
-        "download": true,
-        "complete": function(results) {
-                var data = results.data;
-                var features = [];
-                for (i = 1; i < data.length; i++) {
-                    var feature = {
-                            "type": "Feature",
-                            "geometry": {
-                                "type": "Point",
-                                "coordinates": [data[i][0], data[i][1]]
-                            },
-                            "properties": {
-                                "title": data[i][2],
-                                "color": data[i][3]
-                            }
-                    };
-                    features.push(feature);
+var BASE_URL = "https://sheets.googleapis.com/";
+var SHEETAPI = "v4/spreadsheets/";
+var APIKEY = "AIzaSyDk63UHzy44BUAjhOwSadxVlICDTYmct6k"
+var RANGE = "A:D"
+
+loadSheet = function(sheetid, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', BASE_URL + SHEETAPI + sheetid + "/values/" + RANGE + "?key=" + APIKEY + "");
+        xhr.onreadystatechange = function (event) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    callback (null, JSON.parse(xhr.responseText));
+                } else {
+                    callback('Error', xhr.statusText);
                 }
-                map.addSource("winkels", {
-                        "type": "geojson",
-                        "data": {
-                            "type": "FeatureCollection",
-                            "features": features
-                        }
-                    });
-                map.addLayer ({
-                    "id": "points",
-                    "type": "circle",
-                    "source": "winkels",
-                    "paint" : {
-                         "circle-color": {
-                             "property": 'color',
-                             "type": "identity"
-                         },
-                         "circle-radius": {
-                             "base": 1.75,
-                             "stops": [[7,2],[14,4], [22,180]]
-                         }
-                    }
-                });
-                map.addLayer({
-                    "id": "labelledpoints",
-                    "type": "symbol",
-                    "source": "winkels",
-                    "layout": {
-                        //"icon-image": "circle-11",
-                        "text-field": "{title}",
-                        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-                        "text-offset": [0, 0.6],
-                        "text-anchor": "top",
-                    }
-                });
             }
+        };
+        xhr.send();
+  };
+
+
+map.on('load', function() {
+    loadSheet(googleSheetKey, function(err, results) {
+        var data = results.values;
+        var features = [];
+        for (i = 1; i < data.length; i++) {
+            var feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [data[i][0], data[i][1]]
+                    },
+                    "properties": {
+                        "title": data[i][2],
+                        "color": data[i][3]
+                    }
+            };
+            features.push(feature);
+        }
+        map.addSource("winkels", {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": features
+                }
+            });
+        map.addLayer ({
+            "id": "points",
+            "type": "circle",
+            "source": "winkels",
+            "paint" : {
+                    "circle-color": {
+                        "property": 'color',
+                        "type": "identity"
+                    },
+                    "circle-radius": {
+                        "base": 1.75,
+                        "stops": [[7,2],[14,4], [22,180]]
+                    }
+            }
+        });
+        map.addLayer({
+            "id": "labelledpoints",
+            "type": "symbol",
+            "source": "winkels",
+            "layout": {
+                //"icon-image": "circle-11",
+                "text-field": "{title}",
+                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                "text-offset": [0, 0.6],
+                "text-anchor": "top",
+            }
+        });
     });
 });
 
