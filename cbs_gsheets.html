@@ -4,9 +4,8 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>    
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
-    <script src="node_modules/papaparse/papaparse.min.js"></script>
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:20%; width:100%; }
@@ -18,7 +17,27 @@
 <div id='map'></div>
 <div id='info'></div>
 <script>
-//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+var BASE_URL = "https://sheets.googleapis.com/";
+var SHEETAPI = "v4/spreadsheets/";
+var APIKEY = "AIzaSyDk63UHzy44BUAjhOwSadxVlICDTYmct6k"
+var RANGE = "A:B"
+
+loadSheet = function(sheetid, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', BASE_URL + SHEETAPI + sheetid + "/values/" + RANGE + "?key=" + APIKEY + "");
+    xhr.onreadystatechange = function (event) {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                callback (null, JSON.parse(xhr.responseText));
+            } else {
+                callback('Error', xhr.statusText);
+            }
+        }
+    };
+    xhr.send();
+};
+
+
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'styles/freetilehosting/positron.json',
@@ -50,10 +69,8 @@ map.on('load', function () {
         "bounds": [3.38,50.73,7.2432,53.5455]
     });
 
-    Papa.parse(googleSheetUrl, {
-    "download": true,
-    "complete": function(results) {
-            var data = results.data;
+    loadSheet(googleSheetKey, function(err, results) {
+            var data = results.values;
             var valueFieldNumber = data[0].indexOf(dataValueField);
             var minValue = Number.MAX_VALUE;
             var maxValue = -Number.MAX_VALUE;
@@ -100,7 +117,7 @@ map.on('load', function () {
                 "source-layer": "gemeenten2016",
                 "filter": [ '==', 'water', 'JA'],
                 "paint": {
-                    "fill-color": "hsl(205,56%, 73%)", 
+                    "fill-color": "hsl(205,56%, 73%)",
                     "fill-opacity": 0.5
                 }
             }, 'place_other');
@@ -111,12 +128,11 @@ map.on('load', function () {
                 "source": "gemeenten",
                 "source-layer": "gemeenten2016",
                 "paint": {
-                    "line-color": 'gray',            
+                    "line-color": 'gray',
                     "line-width": 0.5,
                     "line-opacity": 0.5
                 }
             }, 'place_other');
-        }
     });
 });
 map.on('mousemove', function (e) {
