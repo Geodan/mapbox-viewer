@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='node_modules/voronoi/rhill-voronoi-core.js'></script>
+    <script src='node_modules/proj4/dist/proj4-src.js'></script>
+    <style>
+        body { margin:0; padding:0; }
+        #sheeturl { position: absolute; top: 0; height: 2em; width: 100%;}
+        #inputurl { position: absolute; left: 0; width: 90%;}
+        #submiturl { position: absolute; left: 90%; width: 5%;}
+        #reseturl { position: absolute; left: 95%; width: 5%;}
+        #map { position:absolute; top:2em; bottom:20%; width:100%; }
+        #info { position:absolute; top:80%; height:20%; width: 100%; outline: 1px solid black; background: white; overflow: auto;}
+    </style>
+</head>
+<body>
+<div id='sheeturl'>
+    <form>
+        <input id="inputurl" type="url" value="https://docs.google.com/spreadsheets/d/1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI"></input>
+        <input id="submiturl" type="button" value="update"></input>
+        <input id="reseturl" type="button" value="reset"></input>
+    </form>
+</div>
+<div id='map'></div>
+<div id='info'></div>
+<script>
+//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    zoom: 7,
+    center: [4.913, 52.18]
+});
+
+
+
+// First value is the default, used where there is no data
+var stops = [["0", "rgba(255,0,0,0.5)"]];
+
+// http://colorbrewer2.org/#type=sequential&scheme=OrRd&n=8
+var colors=['#fff7ec','#fee8c8','#fdd49e','#fdbb84','#fc8d59','#ef6548','#d7301f','#990000'];
+
+var dataKeyField = 'gwb_code_10'
+var dataValueField = 'result';
+
+var googleSheetKey = '1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI';
+if (window.localStorage.sheetKey) {
+    googleSheetKey = window.localStorage.sheetKey;
+}
+var googleSheetName = encodeURIComponent('winkels');
+var query = encodeURIComponent('select A,B,C,D');
+
+var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}`
+document.querySelector('#inputurl').value = `https://docs.google.com/spreadsheets/d/${googleSheetKey}/?sheet=${googleSheetName}`;
+
+var BASE_URL = "https://sheets.googleapis.com/";
+var SHEETAPI = "v4/spreadsheets/";
+var APIKEY = "AIzaSyDk63UHzy44BUAjhOwSadxVlICDTYmct6k"
+var RANGE = "A:D"
+
+loadSheet = function(sheetid, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', BASE_URL + SHEETAPI + sheetid + "/values/" + RANGE + "?valueRenderOption=UNFORMATTED_VALUE&key=" + APIKEY + "");
+    xhr.onreadystatechange = function (event) {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                callback (null, JSON.parse(xhr.responseText));
+            } else {
+                callback('Error', xhr.statusText);
+            }
+        }
+    };
+    xhr.send();
+};
+
+map.on('load', function() {
+    loadSheet(googleSheetKey, function(err, results) {
+        var voronoiInput = [];
+        var data = results.values;
+        var features = [];
+        for (i = 1; i < data.length; i++) {
+            var input = {x: data[i][0], y: data[i][1]};
+            voronoiInput.push(input);
+            var feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [data[i][0], data[i][1]]
+                    },
+                    "properties": {
+                        "title": data[i][2],
+                        "color": data[i][3]
+                    }
+            };
+            features.push(feature);
+        }
+        map.addSource("winkels", {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": features
+                }
+            });
+        
+        var voronoi = new Voronoi();
+        
+        // project coordinates to spherical mercator
+        var project = proj4('EPSG:4326', 'EPSG:3857');
+        voronoiInput.forEach(function(point){
+            var p = project.forward(point);
+            point.x = p.x;
+            point.y = p.y;
+        })
+        var bl = project.forward([3.0, 49]);
+        var tr = project.forward([7.0, 55.0]);
+        var bbox = {xl:bl[0], xr: tr[0], yt: bl[1], yb: tr[1]};
+        var result = voronoi.compute(voronoiInput, bbox);
+
+        result.vertices.forEach(function(vertex){
+            var p = project.inverse(vertex);
+            vertex.x = p.x;
+            vertex.y = p.y;
+        })
+
+        // set cell id, lookup from imput
+        for (var i = 0; i < voronoiInput.length; i++) {
+            var index = voronoiInput[i].voronoiId; // set by voronoi.compute
+            result.cells[index].id = data[i][2];
+        }
+        
+        var polygons = result.cells.map(function(cell){
+            var points = [];
+            if (cell.halfedges.length == 0) {
+                return points;
+            }
+            var sitepoint = project.inverse([cell.site.x, cell.site.y]);
+            // edges are counter clockwise, polygons should be clockwise, so start at end
+            var i = cell.halfedges.length - 1;
+            var p = cell.halfedges[i].getEndpoint();
+            points.push([p.x, p.y]);            
+            while (i >= 0) {
+                var p = cell.halfedges[i].getStartpoint();
+                points.push([p.x, p.y]);
+                i--;
+            }            
+            return points;
+        });
+
+        var diagram = [];
+        for (var i = 0; i < polygons.length; i++) {
+            if (polygons[i].length) {
+                var feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [polygons[i]]
+                    },
+                    "properties": {
+                        "id": result.cells[i].id
+                    }
+                }
+                diagram.push(feature);
+            }
+        }
+        map.addSource("voronoi", {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": diagram
+                }
+            });
+        map.addLayer ({
+            "id": "voronoi",
+            "type": "fill",
+            "source": "voronoi",
+            "layout": {
+                "visibility": "visible"
+            },
+            "paint": {
+                "fill-color": "rgba(194, 0, 0, 0.5)",
+                "fill-antialias": true,
+                "fill-outline-color": "black"
+            }
+        });
+
+        map.addLayer ({
+            "id": "points",
+            "type": "circle",
+            "source": "winkels",
+            "paint" : {
+                    "circle-color": {
+                        "property": 'color',
+                        "type": "identity"
+                    },
+                    "circle-radius": {
+                        "base": 1.75,
+                        "stops": [[7,2],[14,4], [22,180]]
+                    }
+            }
+        });
+        map.addLayer({
+            "id": "labelledpoints",
+            "type": "symbol",
+            "source": "winkels",
+            "layout": {
+                //"icon-image": "circle-11",
+                "text-field": "{title}",
+                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                "text-offset": [0, 0.6],
+                "text-anchor": "top",
+            }
+        });
+    });
+});
+
+map.on('mousemove', function (e) {
+    var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
+    document.getElementById('info').innerHTML = JSON.stringify(features, null, 2);
+});
+
+document.querySelector('#submiturl').addEventListener('click', function (){
+    var newurl = document.querySelector('#inputurl').value;
+    var parts = newurl.split('/');
+    var keypart = 0;
+    var longest = 0;
+    for (var i = 0; i < parts.length; i++) {
+        if (parts[i].length > longest) {
+            keypart = i;
+            longest = parts[i].length;
+        }
+    }
+    window.localStorage.sheetKey = parts[keypart];
+    location.reload();
+});
+
+document.querySelector('#reseturl').addEventListener('click', function() {
+    window.localStorage.removeItem('sheetKey');
+    location.reload();
+});
+
+</script>
+
+</body>
+</html>

@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/Geodan/mapbox-viewer#readme",
   "dependencies": {
-    "papaparse": "^4.3.2"
+    "papaparse": "^4.3.2",
+    "proj4": "^2.4.4",
+    "voronoi": "^1.0.0"
   }
 }
