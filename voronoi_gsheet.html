@@ -61,7 +61,7 @@ document.querySelector('#inputurl').value = `https://docs.google.com/spreadsheet
 var BASE_URL = "https://sheets.googleapis.com/";
 var SHEETAPI = "v4/spreadsheets/";
 var APIKEY = "AIzaSyDk63UHzy44BUAjhOwSadxVlICDTYmct6k"
-var RANGE = "A:D"
+var RANGE = "A:E"
 
 loadSheet = function(sheetid, callback) {
     var xhr = new XMLHttpRequest();
@@ -80,8 +80,10 @@ loadSheet = function(sheetid, callback) {
 
 map.on('load', function() {
     loadSheet(googleSheetKey, function(err, results) {
+        var data = results.values.filter(function(row){
+            return row[4];
+        });
         var voronoiInput = [];
-        var data = results.values;
         var features = [];
         for (i = 0; i < data.length; i++) {
             var input = {x: data[i][0], y: data[i][1]};
