@@ -83,7 +83,7 @@ map.on('load', function() {
         var voronoiInput = [];
         var data = results.values;
         var features = [];
-        for (i = 1; i < data.length; i++) {
+        for (i = 0; i < data.length; i++) {
             var input = {x: data[i][0], y: data[i][1]};
             voronoiInput.push(input);
             var feature = {
@@ -131,6 +131,7 @@ map.on('load', function() {
         for (var i = 0; i < voronoiInput.length; i++) {
             var index = voronoiInput[i].voronoiId; // set by voronoi.compute
             result.cells[index].id = data[i][2];
+            result.cells[index].color = data[i][3];
         }
         
         var polygons = result.cells.map(function(cell){
@@ -161,7 +162,8 @@ map.on('load', function() {
                         "coordinates": [polygons[i]]
                     },
                     "properties": {
-                        "id": result.cells[i].id
+                        "id": result.cells[i].id,
+                        "color": result.cells[i].color
                     }
                 }
                 diagram.push(feature);
@@ -182,7 +184,11 @@ map.on('load', function() {
                 "visibility": "visible"
             },
             "paint": {
-                "fill-color": "rgba(194, 0, 0, 0.5)",
+                "fill-color": {
+                    "property": "color",
+                    "type": "identity"
+                },
+                "fill-opacity": 0.5,
                 "fill-antialias": true,
                 "fill-outline-color": "black"
             }
