@@ -21,9 +21,9 @@
 <body>
 <div id='sheeturl'>
     <form>
-        <input id="inputurl" type="url" value="https://docs.google.com/spreadsheets/d/1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI"></input>
-        <input id="submiturl" type="button" value="update"></input>
-        <input id="reseturl" type="button" value="reset"></input>
+        <input id="inputurl" type="url" value="Not yet initialized"></input>
+        <input id="submiturl" type="button" value="submit"></input>
+        <input id="reseturl" type="button" value="default"></input>
     </form>
 </div>
 <div id='map'></div>
@@ -45,18 +45,12 @@ var stops = [["0", "rgba(255,0,0,0.5)"]];
 // http://colorbrewer2.org/#type=sequential&scheme=OrRd&n=8
 var colors=['#fff7ec','#fee8c8','#fdd49e','#fdbb84','#fc8d59','#ef6548','#d7301f','#990000'];
 
-var dataKeyField = 'gwb_code_10'
-var dataValueField = 'result';
-
 var googleSheetKey = '1sQ7a2UosYR4d1qXgSdvxw6BSuDmcOP4l6L8wLVAriQI';
 if (window.localStorage.sheetKey) {
     googleSheetKey = window.localStorage.sheetKey;
 }
-var googleSheetName = encodeURIComponent('winkels');
-var query = encodeURIComponent('select A,B,C,D');
 
-var googleSheetUrl = `http://saturnus.geodan.nl/spreadsheets/d/${googleSheetKey}/gviz/tq?tqx=out:csv&sheet=${googleSheetName}&tq=${query}`
-document.querySelector('#inputurl').value = `https://docs.google.com/spreadsheets/d/${googleSheetKey}/?sheet=${googleSheetName}`;
+document.querySelector('#inputurl').value = `https://docs.google.com/spreadsheets/d/${googleSheetKey}`;
 
 var BASE_URL = "https://sheets.googleapis.com/";
 var SHEETAPI = "v4/spreadsheets/";
@@ -71,7 +65,7 @@ loadSheet = function(sheetid, callback) {
             if (xhr.status === 200) {
                 callback (null, JSON.parse(xhr.responseText));
             } else {
-                callback('Error', xhr.statusText);
+                callback('Error', 'Error: ' + xhr.status + " " + xhr.statusText);
             }
         }
     };
@@ -80,6 +74,10 @@ loadSheet = function(sheetid, callback) {
 
 map.on('load', function() {
     loadSheet(googleSheetKey, function(err, results) {
+        if (err) {
+            document.querySelector("#map").innerHTML = "<h2>" + results  + "</h2";
+            return;
+        }
         var data = results.values.filter(function(row){
             return row[4];
         });
