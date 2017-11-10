@@ -31,7 +31,9 @@ map.on('load', function () {
 
     map.addSource("gebouwkenmerken", {
             type: 'vector',
-            tiles:["http://saturnus.geodan.nl/mvt/gebouwkenmerken/{z}/{x}/{y}.mvt"]
+            tiles:["http://saturnus.geodan.nl/mvt/gebouwkenmerken/{z}/{x}/{y}.mvt"],
+	    minzoom: 13,
+	    maxzoom: 18
         });
 
     map.addLayer({
@@ -39,7 +41,7 @@ map.on('load', function () {
       "type": "fill",
       "source": "gebouwkenmerken",
       "source-layer": "gebouwkenmerken",
-      "minzoom": 12,
+      "minzoom": 13,
       "maxzoom": 24,
       "layout": {
         "visibility": "visible"
@@ -101,6 +103,8 @@ map.on('load', function () {
       "type": "fill-extrusion",
       "source": "gebouwkenmerken",
       "source-layer": "gebouwkenmerken",
+      "minzoom": 13,
+      "maxzoom": 24,
       "paint": {
         "fill-extrusion-color": {
           "property": "pandtype",
@@ -150,7 +154,7 @@ map.on('load', function () {
           ]
         },
         "fill-extrusion-height": {
-          "property": "nokhoogte",
+          "property": "hoogte",
           "type": "identity"
         },
         "fill-extrusion-base": 0,
