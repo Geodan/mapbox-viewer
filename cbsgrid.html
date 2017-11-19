@@ -90,6 +90,22 @@ Papa.parse("data/cbsgemeenten2016.csv", {
                 manualColumnResize: true,
                 fixedColumnsLeft: 1,
                 afterSelection: function(r,c, r2, c2, preventScrolling) {
+                    if (r == r2 && c == c2) {
+                        // single cell selected
+                        if (dataValueField !=colNames[c]) {
+                            // column changed, redraw map
+                            dataValueField =colNames[c];
+                            stops = classifyData(keyColumn, c, data);
+                            map.setPaintProperty('gemeenten', 'fill-color', {
+                                "property": mapKeyField,
+                                "type": "categorical",
+                                "stops": stops
+                            });
+                        }
+                        // visualize gemeente on map
+                        map.setFilter('gemeenteselect', ['==', mapKeyField, grid.getDataAtCell(r, colNames.indexOf(dataKeyField))]);
+                    }
+                    /*
                     if (c == c2 && r2 - r == data.length - 1) {
                         // column selected
                         dataValueField =colNames[c];
@@ -103,6 +119,7 @@ Papa.parse("data/cbsgemeenten2016.csv", {
                         // single cell or row selected
                         map.setFilter('gemeenteselect', ['==', mapKeyField, grid.getDataAtCell(r, colNames.indexOf(dataKeyField))]);
                     }
+                    */
                 }
             });
             var valueColumn = colNames.indexOf(dataValueField);
