@@ -18,14 +18,186 @@
 //mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'styles/freetilehosting/positron.json',
+    //style: 'styles/freetilehosting/positron.json',
+    style: {
+        version: 8,
+        name: 'bgt',
+        sources: {
+                    "gebouwen": {
+                        type: 'vector',
+                        tiles:["http://saturnus.geodan.nl/mvt/bgtpand/{z}/{x}/{y}.mvt"]
+                    },
+                    "bgtwegdeel": {
+                        type: 'vector',
+                        tiles:["http://saturnus.geodan.nl/mvt/bgtwegdeel/{z}/{x}/{y}.mvt"]
+                    },
+                    "bgtwaterdeel": {
+                        type: 'vector',
+                        tiles:["http://saturnus.geodan.nl/mvt/bgtwaterdeel/{z}/{x}/{y}.mvt"]
+                    },
+                    "bgtbegroeidterreindeel": {
+                        type: 'vector',
+                        tiles:["http://saturnus.geodan.nl/mvt/bgtbegroeidterreindeel/{z}/{x}/{y}.mvt"]
+                    },
+                    "bgtonbegroeidterreindeel": {
+                        type: 'vector',
+                        tiles:["http://saturnus.geodan.nl/mvt/bgtonbegroeidterreindeel/{z}/{x}/{y}.mvt"]
+                    },
+                    "bgtondersteunendwegdeel": {
+                        type: 'vector',
+                        tiles:["http://saturnus.geodan.nl/mvt/bgtondersteunendwegdeel/{z}/{x}/{y}.mvt"]
+                    },
+                    "openlayers":  {
+                        type: "raster",
+                        tiles: [
+			                "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+			                "http://b.tile.openstreetmap.org/{z}/{x}/{y}.png"
+			            ],
+                        "tileSize": 256
+                    }
+                },
+        layers: [
+                {
+                    id: "bgtwaterdeel",
+                    "minzoom": 13,
+                    "type": "fill",
+                    "source": "bgtwaterdeel",
+                    "source-layer": "bgtwaterdeel",
+                    "paint":  {
+                        "fill-color": {
+                            "property": "bgt_type",
+                            "type": "categorical",
+                            "stops": [
+                                ["waterloop", "rgba(187, 222, 233, 1)"],
+                                ["watervlakte", "rgba(187, 222, 233, 1)"],
+                                ["zee", "rgba(182, 218, 227, 1)"],
+                                ["greppel, droge sloot", "rgba(222, 227, 217, 1)"],
+                                ["transitie", "rgba(187, 222, 233, 1)"]
+                            ]
+                        },
+                        /* "fill-outline-color": "#ffffff",*/
+                        "fill-opacity": 1.0
+                    }
+                },{
+                    id: "bgtwegdeel",
+                    "minzoom": 13,
+                    "type": "fill",
+                    "source": "bgtwegdeel",
+                    "source-layer": "bgtwegdeel",
+                    "paint":  {
+                        "fill-color": {
+                            "property": "bgt_functie",
+                            "type": "categorical",
+                            "stops": [
+                                ["fietspad", "rgba(235, 219, 219, 1)"],
+                                ["inrit", "rgba(189, 183, 178, 1)"],
+                                ["OV-baan", "rgba(247, 250, 238, 1)"],
+                                ["parkeervlak", "rgba(237, 237, 237, 1)"],
+                                ["rijbaan autosnelweg", "rgba(174, 167, 194, 1)"],
+                                ["rijbaan autoweg", "rgba(204, 175, 197, 1)"],
+                                ["rijbaan lokale weg", "rgba(252, 252, 252, 1)"],
+                                ["rijbaan regionale weg", "rgba(252, 252, 252, 1)"],
+                                ["transitie", "rgba(250, 243, 243, 0.5)"],
+                                ["voetgangersgebied", "rgba(247, 233, 233, 1)"],
+                                ["voetpad", "rgba(247, 233, 233, 1)"],
+                                ["voetpad op trap", "rgba(247, 233, 233, 1)"],
+                                ["overweg", "rgba(243, 245, 247, 1)"],
+                                ["ruiterpad", "rgba(215, 215, 183, 1)"],
+                                ["woonerf", "rgba(250, 243, 243, 1)"],
+                                ["spoorbaan", "rgba(204, 203, 190, 1)"],
+                                ["baan voor vliegverkeer", "rgba(235, 236, 237, 1)"]
+                            ]
+                        },
+                        /* "fill-outline-color": "rgba(0,0,0,0)",*/
+                        "fill-opacity": 1.0
+                    }
+                },
+                {
+                    id: "bgtondersteunendwegdeel",
+                    "minzoom": 13,
+                    "type": "fill",
+                    "source": "bgtondersteunendwegdeel",
+                    "source-layer": "bgtondersteunendwegdeel",
+                    "paint":  {
+                        "fill-color": {
+                            "property": "bgt_fysiekvoorkomen",
+                            "type": "categorical",
+                            "stops": [
+                                ["groenvoorziening", "rgba(217,222,200, 1)"],
+                                ["gesloten verharding", "rgba(225,226,227, 1)"],
+                                ["half verhard", "rgba(222,222,221, 1)"],
+                                ["onverhard", "rgba(222, 222,194, 1)"],
+                                ["open verharding", "rgba(230,221,217, 1)"],
+                                ["transitie", "rgba(226,226,207, 1)"]
+                            ]
+                        },
+                        "fill-outline-color": "rgba(141,134,134,1)",
+                        "fill-opacity": 1.0
+                    }
+                },
+                {
+                    id: "bgtbegroeidterreindeel",
+                    "minzoom": 13,
+                    "type": "fill",
+                    "source": "bgtbegroeidterreindeel",
+                    "source-layer": "bgtbegroeidterreindeel",
+                    "paint":  {
+                        "fill-color": "rgba(231,2401,211,1)",
+                        "fill-outline-color": "rgba(189,130,116,1)"
+                    }
+                },
+                {
+                    id: "bgtonbegroeidterreindeel",
+                    "minzoom": 13,
+                    "type": "fill",
+                    "source": "bgtonbegroeidterreindeel",
+                    "source-layer": "bgtonbegroeidterreindeel",
+                    "paint":  {
+                        "fill-color": {
+                            "property": "bgt_fysiekvoorkomen",
+                            "type": "categorical",
+                            "stops": [
+                                ["erf", "rgba(230,230,214, 1)"],
+                                ["gesloten verharding", "rgba(228,229,230, 1)"],
+                                ["half verhard", "rgba(230,230,229, 1)"],
+                                ["onverhard", "rgba(230,230,207, 1)"],
+                                ["open verharding", "rgba(237,228,221, 1)"],
+                                ["transitie", "rgba(226,226,207, 1)"],
+                                ["zand", "rgba(240,236,198, 1)"],
+                            ]
+                        },
+                        /* "fill-outline-color": "#ffffff",*/
+                        "fill-opacity": 1.0
+                    }
+                },
+                {
+                    id: "gebouwen",
+                    "minzoom": 13,
+                    "type": "fill",
+                    "source": "gebouwen",
+                    "source-layer": "bgtpand",
+                    "paint": {
+                        "fill-color": "rgba(209, 200, 197, 1)",
+                        "fill-outline-color": "rgba(141, 134, 134, 1)",
+                        "fill-opacity": 1.0
+                    }
+                },
+                {
+                    id: "openlayers",
+                    "minzoom": 0,
+                    "maxzoom": 12.99,
+                    "type": "raster",
+                    "source": "openlayers"
+                }
+                ]
+    },
     zoom: 16,
     center: [4.913, 52.342]
 });
 
 map.on('load', function () {
 
-    map.addLayer({
+    /* map.addLayer({
         "id": "gebouwen",
 	"minzoom": 12,
         "type": "fill",
@@ -39,7 +211,7 @@ map.on('load', function () {
 			"fill-outline-color": "#ffffff",
             "fill-opacity": 0.5
         }
-    }, 'waterway-label');
+    });
     map.addLayer({
         "id": "wegen",
 	"minzoom": 12,
@@ -48,26 +220,14 @@ map.on('load', function () {
             type: 'vector',
             tiles:["http://saturnus.geodan.nl/mvt/wegen/{z}/{x}/{y}.mvt"]
         },
-        "source-layer": "wegen",        
+        "source-layer": "wegen",
         "paint": {
             "fill-color": "#f4490a",
 			"fill-outline-color": "#ff994a",
             "fill-opacity": 0.5
         }
-    }, 'waterway-label');
-    map.addLayer({
-        "id": "terrorism",
-        "type": "symbol",
-        "source": {
-            type: 'vector',
-            tiles:["http://saturnus.geodan.nl/mvt/terrorism/{z}/{x}/{y}.mvt"]
-        },
-        "source-layer": "terrorism",
-        "layout": {
-            // see https://openmaptiles.github.io/positron-gl-style/sprite.json
-            "icon-image": "circle-11"
-        }
     });
+    */
 });
 </script>
 
