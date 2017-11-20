@@ -109,7 +109,7 @@ map.on("load", function(){
                 for (var i = 1; i < sourceFeatures.length; i++) {
                     combinedFeature = turf.union(combinedFeature, sourceFeatures[i]);
                 }
-                map.getSource('gebouwbuffer').setData(turf.buffer(combinedFeature, 0.05, 'kilometers'));
+                map.getSource('gebouwbuffer').setData(turf.buffer(combinedFeature, 0.05, {units:'kilometers'}));
                 map.getSource('clickobject').setData(combinedFeature);
             }
             console.log(sourceFeatures.length); 
