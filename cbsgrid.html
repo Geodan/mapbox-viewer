@@ -19,12 +19,14 @@
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:20%; width:100%; }
+        #metadata { position: absolute; bottom: 20%; left: 10px; background: lightyellow; border: 1 px solid darkgray;padding: 2px;}
         #table { position:absolute; top:80%; height:20%; width: 100%; outline: 1px solid black; background: white; overflow: auto;}
     </style>
 </head>
 <body>
 
 <div id='map'></div>
+<div id="metadata"></div>
 <div id='table'></div>
 <script>
 
@@ -42,6 +44,7 @@ var dataKeyField = 'gwb_code_10'; // unique id data elements
 var mapKeyField = 'gm_code'; // unique id map elements
 var dataValueField = 'p_1gezw';
 var data = null;
+var metadata = null;
 var colNames = null;
 var keyColumn = 0;
 
@@ -73,6 +76,21 @@ function classifyData(keyColumn, valueColumn, data)
     return stops;
 }
 
+function updateMetaData(fieldName)
+{
+    var metadataElement =document.getElementById('metadata');
+    if (metadata) {
+        var result = metadata.filter(function(element) {
+            return element[0] == fieldName;
+        });
+        if (result.length) {
+            metadataElement.innerText = result[0][1] + " (" + result[0][0] + ")"
+        } else {
+            metadataElement.innerText = fieldName;
+        }
+    }
+}
+
 Papa.parse("data/cbsgemeenten2016.csv", {
     "download": true,
     "complete": function(results) {
@@ -95,6 +113,7 @@ Papa.parse("data/cbsgemeenten2016.csv", {
                         if (dataValueField !=colNames[c]) {
                             // column changed, redraw map
                             dataValueField =colNames[c];
+                            updateMetaData(dataValueField);
                             stops = classifyData(keyColumn, c, data);
                             map.setPaintProperty('gemeenten', 'fill-color', {
                                 "property": mapKeyField,
@@ -105,21 +124,6 @@ Papa.parse("data/cbsgemeenten2016.csv", {
                         // visualize gemeente on map
                         map.setFilter('gemeenteselect', ['==', mapKeyField, grid.getDataAtCell(r, colNames.indexOf(dataKeyField))]);
                     }
-                    /*
-                    if (c == c2 && r2 - r == data.length - 1) {
-                        // column selected
-                        dataValueField =colNames[c];
-                        stops = classifyData(keyColumn, c, data);
-                        map.setPaintProperty('gemeenten', 'fill-color', {
-                            "property": mapKeyField,
-                            "type": "categorical",
-                            "stops": stops
-                        });
-                    } else if (r == r2) {
-                        // single cell or row selected
-                        map.setFilter('gemeenteselect', ['==', mapKeyField, grid.getDataAtCell(r, colNames.indexOf(dataKeyField))]);
-                    }
-                    */
                 }
             });
             var valueColumn = colNames.indexOf(dataValueField);
@@ -127,6 +131,14 @@ Papa.parse("data/cbsgemeenten2016.csv", {
             stops = classifyData(keyColumn, valueColumn, data);
         }
     });
+
+Papa.parse("data/cbsgemeenten2016meta.csv", {
+    "download": true,
+    "complete": function(results) {
+        metadata = results.data;
+        updateMetaData(dataValueField);
+    }
+});
 
 map.on('load', function () {
     //map.setLayoutProperty('country-label-lg', 'text-field', '{name_' + language + '}');
