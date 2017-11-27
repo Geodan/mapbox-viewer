@@ -10,7 +10,7 @@
             "type": "raster",
             "tileSize": 256,
             "tiles": [
-                "https://geodata1.nationaalgeoregister.nl/luchtfoto/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&styles=default&layers=luchtfoto_jpeg"
+                "https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&styles=default&layers=Actueel_ortho25"
             ]            
         }
     },    
