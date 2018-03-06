@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    zoom: 8,
+    center: [4.913, 52.342]
+});
+
+map.on('load', function () {
+
+    map.addSource('buurten', {
+      type: 'geojson',
+      data: 'https://saturnus.geodan.nl/mapbox-viewer/data/cbsgebiedsindelingen_cbs_buurt_2017_gegeneraliseerd.json'
+    });
+    map.addLayer({
+        "id": "buurten",
+        "type": "fill",
+        "source": "buurten",
+        'layout': {},
+        'paint': {
+            'fill-color': '#ccc',
+            'fill-opacity': 0.6,
+            'fill-outline-color': '#444'
+        }
+    });
+});
+</script>
+
+</body>
+</html>
