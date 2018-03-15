@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+        #legend { position: absolute; top: 1em; right: 1em; width: 20%; max-width: 200px; background-color: white; border: 1px solid gray; padding: 1em;}
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<div id='legend'><img src="http://localhost:8080/mapproxy/cbsadministratief/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=CBSbevolking2017&format=image/png"></div>
+<script>
+//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+var map = new mapboxgl.Map({
+    container: 'map',
+    zoom: 9,
+     center: [4.913196, 52.342259],
+    style: "styles/qgis.json",
+    hash: false
+});
+
+
+map.on('load', () => {
+	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
+});
+function getFeatureInfo(lngLat){
+    var deltas=deltas = [2.8177, 1.4089, 0.7044, 0.35222, 0.17611, 0.088055, 0.044028, 0.02201, 0.011006, 0.005503, 0.002751, 0.0013759, 0.0006879, 0.00034397, 0.0001719833, 0.00008599165682, 0.00004299582841, 0.00002149791421, 0.0000107489571, 0.000005374478551];
+    var delta=deltas[Math.round(map.getZoom())];
+    var url="http://localhost:8080/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=CBSbevolking2017&query_layers=CBSbevolking2017&width=2&height=2&x=1&y=1&version=1.1.1&srs=epsg:4326&info_format=text/xml&bbox="+(lngLat.lng-delta)+","+(lngLat.lat-delta)+","+(lngLat.lng+delta)+","+(lngLat.lat+delta)
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == XMLHttpRequest.DONE) {
+        alert(xhr.responseText);
+      }
+    }
+    xhr.open('GET', url, true);
+    xhr.send(null);
+}
+map.on('click', function (e) {
+        console.log(e);
+        getFeatureInfo(e.lngLat)
+    });
+
+
+</script>
+
+</body>
+</html>
