@@ -1,0 +1,35 @@
+{
+    "version": 8,
+    "name": "WMS",
+    "metadata": {
+        "mapbox:autocomposite": true,
+        "mapbox:type": "default"
+    },
+    "sources": {
+        "pdoklufo": {
+            "type": "raster",
+            "tileSize": 256,
+            "tiles": [
+                "http://localhost:8080/mapproxy/cbsadministratief/wmts/CBSbevolking2017/spherical_mercator/{z}/{x}/{y}.png"
+            ]            
+        }
+    },    
+    "layers": [{
+        "id": "background",
+        "type": "background",
+        "paint": {
+            "background-color": "rgb(4,7,14)"
+        }
+    }, {
+        "id": "pdoklufo",
+        "type": "raster",
+        "source": "pdoklufo",
+        "source-layer": "mapbox_satellite_full"
+    }],
+    "created": 0,
+    "modified": 0,
+    "owner": "mapbox",
+    "id": "pdoklufo",
+    "draft": false,
+    "visibility": "public"
+}
