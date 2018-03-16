@@ -4,6 +4,7 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='node_modules/proj4/dist/proj4-src.js'></script>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
     <style>
@@ -26,18 +27,148 @@ var map = new mapboxgl.Map({
     hash: false
 });
 
+var data = {"type": "Feature", "properties": {}, "geometry": { "type": "LineString", "coordinates": [[0,0],[0,1]]}};
+//var data = {"type": "Feature", "properties": {}, "geometry": {}};
 
 map.on('load', () => {
 	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
+    map.addSource('selectedfeature', { type: 'geojson', data: data});
+    map.addLayer({
+        "id": "selectedfeature",
+        "type": "line",
+        "source": "selectedfeature",
+        "paint": {
+            "line-color": "red",
+            "line-opacity": 0.75,
+            "line-width": 2
+        }
+    });
 });
-function getFeatureInfo(lngLat){
-    var deltas=deltas = [2.8177, 1.4089, 0.7044, 0.35222, 0.17611, 0.088055, 0.044028, 0.02201, 0.011006, 0.005503, 0.002751, 0.0013759, 0.0006879, 0.00034397, 0.0001719833, 0.00008599165682, 0.00004299582841, 0.00002149791421, 0.0000107489571, 0.000005374478551];
-    var delta=deltas[Math.round(map.getZoom())];
-    var url="http://localhost:8080/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=CBSbevolking2017&query_layers=CBSbevolking2017&width=2&height=2&x=1&y=1&version=1.1.1&srs=epsg:4326&info_format=text/xml&bbox="+(lngLat.lng-delta)+","+(lngLat.lat-delta)+","+(lngLat.lng+delta)+","+(lngLat.lat+delta)
+
+// srs optional, defaults to 'EPSG:3857'
+// adds projected .x and .y properties to lngLat
+function projectLngLat(lngLat, srs)
+{
+    if (!srs) {
+        srs = 'EPSG:3857';
+    }
+    var project = proj4('EPSG:4326', srs);
+    var p = project.forward({x: lngLat.lng, y: lngLat.lat});    
+    lngLat.x = p.x;
+    lngLat.y = p.y;
+    return lngLat;
+}
+
+function XMLtoGeoJSON(xmlString)
+{
+    var result = {"type": "FeatureCollection", "features": []};
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(xmlString,"text/xml");
+    var root = xmlDoc.getElementsByTagName("GetFeatureInfoResponse");
+    if (root && root.length) {
+        var layers = root[0].getElementsByTagName("Layer");
+        var layerInfo = {};
+        for (var i = 0; i < layers.length; i++) {
+            layerInfo.name = layers[i].getAttribute('name');
+            var features = layers[i].getElementsByTagName('Feature');
+            if (features && features.length) {
+                for (var j = 0; j < features.length; j++) {
+                    var featureInfo = {};                  
+                    featureInfo.properties = {};
+                    var attributes = features[j].getElementsByTagName('Attribute');
+                    if (attributes && attributes.length) {
+                        for (var k = 0; k < attributes.length; k++) {
+                            var attrName = attributes[k].getAttribute('name');
+                            if (attrName != 'geometry') {
+                                featureInfo.properties[attrName] = attributes[k].getAttribute('value');
+                            } else {
+                                var geometryString = attributes[k].getAttribute('value');
+                                var endPos = geometryString.indexOf('(');
+                                var type = geometryString.substring(0, endPos).trim();
+                                geometryString = geometryString.substring(endPos).replace(/\),\(/g, ') (').replace(/, /g, ',').replace(/,/g, '],[').replace(/\(/g, '[').replace(/\)/g, ']').replace(/ /g, ',');
+                                featureInfo.geometry = {"type": type, "coordinates": [JSON.parse(geometryString)]};
+                            }
+                        }
+                    }
+                    
+                    featureObject = {"type": "Feature", "properties": featureInfo.properties, "geometry": featureInfo.geometry, "layername": layerInfo.name};
+                    
+                    var bBoxInfo = {};
+                    var boundingBox = features[j].getElementsByTagName('BoundingBox');
+                    if (boundingBox && boundingBox.length) {
+                        bBoxInfo.left = boundingBox[0].getAttribute('minx');
+                        bBoxInfo.right = boundingBox[0].getAttribute('maxx');
+                        bBoxInfo.top = boundingBox[0].getAttribute('maxy');
+                        bBoxInfo.bottom = boundingBox[0].getAttribute('miny');
+                        bBoxInfo.srs = boundingBox[0].getAttribute('SRS');
+                        featureObject.bbox = [parseFloat(bBoxInfo.left), parseFloat(bBoxInfo.bottom), parseFloat(bBoxInfo.right), parseFloat(bBoxInfo.top)];
+                    }
+                    
+                    if (result.crs) {
+                        if (bBoxInfo.srs != result.crs.properties.name) {
+                            // set deviating feature crs
+                            featureObject.crs = {"type": "name", "properties": {"name": bBoxInfo.srs}}
+                        }
+                    } else {
+                        if (bBoxInfo.srs) {
+                            // set global GeoJSON crs
+                            result.crs = {"type": "name", "properties": {"name": bBoxInfo.srs}}
+                        }
+                    }
+                    result.features.push(featureObject);
+                }
+            }
+        }        
+    } else {
+        // unknown xml format or not xml?
+    }
+    return result;
+}
+
+function transformArray(project, array)
+{
+    for (var i = 0; i < array.length; i++) {
+        if (typeof array[i] != 'number') {
+            transformArray(project, array[i]);
+        } else {
+            if (i % 2 == 0) {
+                var p = project.forward([array[i], array[i+1]]);
+                array[i] = p[0];
+                array[i+1] = p[1];
+                i++;
+            }
+        }
+    }    
+}
+
+function geoJSONTransform(geoJSON, inSRS, outSRS)
+{
+    var project = proj4(inSRS, outSRS);
+    if (geoJSON.crs) {
+        geoJSON.crs.properties.name = outSRS;
+    }
+    geoJSON.features.forEach(function(feature){
+        transformArray(project, feature.geometry.coordinates);
+        if (feature.bbox) {
+            transformArray(project, feature.bbox);
+        }        
+    });
+    return geoJSON;
+}
+
+function getFeatureInfo(lngLat, callback){
+    var clickedPoint = map.project(lngLat);
+    var leftbottom = projectLngLat(map.unproject({x: 0, y: map.getCanvas().height}));
+    var righttop = projectLngLat(map.unproject({x: map.getCanvas().width, y: 0}));
+
+    var url="http://localhost:8080/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=CBSbevolking2017&query_layers=CBSbevolking2017&width="+map.getCanvas().width+"&height="+map.getCanvas().height+"&x="+Math.round(clickedPoint.x)+"&y="+Math.round(clickedPoint.y)+"&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="+(leftbottom.x)+","+(leftbottom.y)+","+(righttop.x)+","+(righttop.y)
+    
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState == XMLHttpRequest.DONE) {
-        alert(xhr.responseText);
+          if (callback) {
+              callback(XMLtoGeoJSON(xhr.responseText));
+          }                 
       }
     }
     xhr.open('GET', url, true);
@@ -45,7 +176,15 @@ function getFeatureInfo(lngLat){
 }
 map.on('click', function (e) {
         console.log(e);
-        getFeatureInfo(e.lngLat)
+        getFeatureInfo(e.lngLat, function(data){
+            if (data && data.crs) {
+                if (data.crs.properties.name.toUpperCase() != 'EPSG:4326') {
+                    data = geoJSONTransform(data, data.crs.properties.name, 'EPSG:4326');
+                }
+            }
+            console.log(JSON.stringify(data));
+            map.getSource('selectedfeature').setData(data);
+        });
     });
 
 
