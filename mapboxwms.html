@@ -11,14 +11,19 @@
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
         #legend { position: absolute; top: 1em; right: 1em; width: 20%; max-width: 200px; background-color: white; border: 1px solid gray; padding: 1em;}
+        #info { position: absolute; top: 1em; left: 1em; width: 20%; max-width: 200px; background-color: white; border: 1px solid gray; padding: 1em;}
+        #coordinatecontainer {position: absolute; left: 50%; bottom: 1em;}
+        #coordinates {position: relative; left: -50%; background-color: white; border: px solid gray; padding: 1em;}
     </style>
 </head>
 <body>
 
 <div id='map'></div>
 <div id='legend'><img src="http://localhost:8080/mapproxy/cbsadministratief/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=CBSbevolking2017&format=image/png"></div>
+<div id='info'></div>
+<div id='coordinatecontainer'><div id='coordinates'></div></div>
 <script>
-//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZ2kmWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
 var map = new mapboxgl.Map({
     container: 'map',
     zoom: 9,
@@ -27,8 +32,7 @@ var map = new mapboxgl.Map({
     hash: false
 });
 
-var data = {"type": "Feature", "properties": {}, "geometry": { "type": "LineString", "coordinates": [[0,0],[0,1]]}};
-//var data = {"type": "Feature", "properties": {}, "geometry": {}};
+var data = {"type": "FeatureCollection", "features": []};
 
 map.on('load', () => {
 	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
@@ -40,7 +44,7 @@ map.on('load', () => {
         "paint": {
             "line-color": "red",
             "line-opacity": 0.75,
-            "line-width": 2
+            "line-width": 4
         }
     });
 });
@@ -85,8 +89,8 @@ function XMLtoGeoJSON(xmlString)
                                 var geometryString = attributes[k].getAttribute('value');
                                 var endPos = geometryString.indexOf('(');
                                 var type = geometryString.substring(0, endPos).trim();
-                                geometryString = geometryString.substring(endPos).replace(/\),\(/g, ') (').replace(/, /g, ',').replace(/,/g, '],[').replace(/\(/g, '[').replace(/\)/g, ']').replace(/ /g, ',');
-                                featureInfo.geometry = {"type": type, "coordinates": [JSON.parse(geometryString)]};
+                                geometryString = geometryString.substring(endPos).split(',').map(pair=>"["+pair.trim().replace(" ", ",")+"]").join(",").replace(/\(/g,"[").replace(/\)/g,"]");
+                                featureInfo.geometry = {"type": type, "coordinates": JSON.parse(geometryString)};
                             }
                         }
                     }
@@ -104,15 +108,15 @@ function XMLtoGeoJSON(xmlString)
                         featureObject.bbox = [parseFloat(bBoxInfo.left), parseFloat(bBoxInfo.bottom), parseFloat(bBoxInfo.right), parseFloat(bBoxInfo.top)];
                     }
                     
-                    if (result.crs) {
-                        if (bBoxInfo.srs != result.crs.properties.name) {
-                            // set deviating feature crs
-                            featureObject.crs = {"type": "name", "properties": {"name": bBoxInfo.srs}}
+                    if (result.srs) {
+                        if (bBoxInfo.srs != result.srs) {
+                            // set deviating feature srs
+                            featureObject.srs =  bBoxInfo.srs;
                         }
                     } else {
                         if (bBoxInfo.srs) {
-                            // set global GeoJSON crs
-                            result.crs = {"type": "name", "properties": {"name": bBoxInfo.srs}}
+                            // set global GeoJSON srs
+                            result.srs =  bBoxInfo.srs;
                         }
                     }
                     result.features.push(featureObject);
@@ -144,8 +148,8 @@ function transformArray(project, array)
 function geoJSONTransform(geoJSON, inSRS, outSRS)
 {
     var project = proj4(inSRS, outSRS);
-    if (geoJSON.crs) {
-        geoJSON.crs.properties.name = outSRS;
+    if (geoJSON.srs) {
+        geoJSON.srs = outSRS;
     }
     geoJSON.features.forEach(function(feature){
         transformArray(project, feature.geometry.coordinates);
@@ -175,18 +179,23 @@ function getFeatureInfo(lngLat, callback){
     xhr.send(null);
 }
 map.on('click', function (e) {
-        console.log(e);
-        getFeatureInfo(e.lngLat, function(data){
-            if (data && data.crs) {
-                if (data.crs.properties.name.toUpperCase() != 'EPSG:4326') {
-                    data = geoJSONTransform(data, data.crs.properties.name, 'EPSG:4326');
+    document.getElementById('info').innerHTML = '';
+    getFeatureInfo(e.lngLat, function(data){
+            if (data && data.srs) {
+                if (data.srs.toUpperCase() != 'EPSG:4326') {
+                    data = geoJSONTransform(data, data.srs, 'EPSG:4326');
                 }
             }
-            console.log(JSON.stringify(data));
+            document.getElementById('info').innerHTML = data.features.map(feature=>feature.properties.statnaam).join('<br>');
             map.getSource('selectedfeature').setData(data);
         });
     });
 
+map.on('mousemove', function (e) {
+    document.getElementById('coordinates').innerHTML =
+        // e.lngLat is the longitude, latitude geographical position of the event
+        JSON.stringify(e.lngLat);
+});
 
 </script>
 

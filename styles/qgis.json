@@ -6,7 +6,7 @@
         "mapbox:type": "default"
     },
     "sources": {
-        "pdoklufo": {
+        "qgiscbs": {
             "type": "raster",
             "tileSize": 256,
             "tiles": [
@@ -18,18 +18,18 @@
         "id": "background",
         "type": "background",
         "paint": {
-            "background-color": "rgb(4,7,14)"
+            "background-color": "rgb(160,160,160)"
         }
     }, {
-        "id": "pdoklufo",
+        "id": "qgiscbs",
         "type": "raster",
-        "source": "pdoklufo",
-        "source-layer": "mapbox_satellite_full"
+        "source": "qgiscbs", 
+        "backgound-color": "gray"
     }],
     "created": 0,
     "modified": 0,
-    "owner": "mapbox",
-    "id": "pdoklufo",
+    "owner": "geodan",
+    "id": "qgiscbs",
     "draft": false,
     "visibility": "public"
 }
