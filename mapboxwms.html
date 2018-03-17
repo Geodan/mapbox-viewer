@@ -161,11 +161,15 @@ function geoJSONTransform(geoJSON, inSRS, outSRS)
 }
 
 function getFeatureInfo(lngLat, callback){
-    var clickedPoint = map.project(lngLat);
-    var leftbottom = projectLngLat(map.unproject({x: 0, y: map.getCanvas().height}));
-    var righttop = projectLngLat(map.unproject({x: map.getCanvas().width, y: 0}));
-
-    var url="http://localhost:8080/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=CBSbevolking2017&query_layers=CBSbevolking2017&width="+map.getCanvas().width+"&height="+map.getCanvas().height+"&x="+Math.round(clickedPoint.x)+"&y="+Math.round(clickedPoint.y)+"&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="+(leftbottom.x)+","+(leftbottom.y)+","+(righttop.x)+","+(righttop.y)
+    // mapbox-ql requests wmts level round(map.getZoom()) + 1
+    var wmtsResolution = (2 * 20037508.342789244) / (256 * Math.pow(2, (Math.round(map.getZoom())+1)));
+    // get webmercator coordinates for clicked point
+    var clickedPointMercator = projectLngLat(lngLat);
+    // create 3 x 3 pixel bounding box in webmercator coordinates
+    var leftbottom = {x: clickedPointMercator.x - 1.5 * wmtsResolution, y: clickedPointMercator.y - 1.5 * wmtsResolution};
+    var righttop = {x: clickedPointMercator.x + 1.5 * wmtsResolution, y: clickedPointMercator.y + 1.5 * wmtsResolution};
+    // getFeatureinfo url for center pixel of 3x3 pixel area
+    var url="http://localhost:8080/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=CBSbevolking2017&query_layers=CBSbevolking2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="+(leftbottom.x)+","+(leftbottom.y)+","+(righttop.x)+","+(righttop.y)
     
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
