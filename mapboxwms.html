@@ -47,6 +47,8 @@ map.on('load', () => {
             "line-width": 4
         }
     });
+    // hack for geoJSON attribution, https://github.com/mapbox/mapbox-gl-js/issues/1485#issuecomment-298253549
+    map.style.sourceCaches['selectedfeature']._source.attribution = "&copy; foobar";
 });
 
 // srs optional, defaults to 'EPSG:3857'
