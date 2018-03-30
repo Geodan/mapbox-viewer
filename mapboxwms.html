@@ -8,19 +8,22 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
     <style>
-        body { margin:0; padding:0; }
+        body { margin:0; padding:0; font-family: Arial, Helvetica, sans-serif;}
         #map { position:absolute; top:0; bottom:0; width:100%; }
-        #legend { position: absolute; top: 1em; right: 1em; width: 20%; max-width: 200px; background-color: white; border: 1px solid gray; padding: 1em;}
-        #info { position: absolute; top: 1em; left: 1em; width: 20%; max-width: 200px; background-color: white; border: 1px solid gray; padding: 1em;}
+        #infocontainer { position: absolute; top: 1em; left: 1em; background: transparent;}
+        #legend { position: relative; background-color: white; border: 1px solid gray; padding: 2em; border: 1px solid gray; border-radius: 4px; box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);}
+        #info { position: relative; margin-top: 1em; min-width:100px; background-color: white; border: 1px solid gray; padding: 1em; border-radius: 4px; box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);}
         #coordinatecontainer {position: absolute; left: 50%; bottom: 1em;}
-        #coordinates {position: relative; left: -50%; background-color: white; border: px solid gray; padding: 1em;}
+        #coordinates {position: relative; left: -50%; background-color: white; border: px solid gray; padding: 1em; border-radius: 4px; box-shadow: 0 0 0 2px rgba(0,0,0,0.1);}
     </style>
 </head>
 <body>
 
 <div id='map'></div>
-<div id='legend'><img src="http://localhost:8080/mapproxy/cbsadministratief/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=CBSbevolking2017&format=image/png"></div>
-<div id='info'></div>
+  <div id='infocontainer'>
+  <div id='legend'><img src="https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsadministratief2017legenda&format=image/png"></div>
+  <div id='info'></div>
+</div>
 <div id='coordinatecontainer'><div id='coordinates'></div></div>
 <script>
 //mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZ2kmWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
@@ -36,6 +39,7 @@ var data = {"type": "FeatureCollection", "features": []};
 
 map.on('load', () => {
 	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
+    map.addControl(new mapboxgl.NavigationControl({position: 'bottom-right'}));
     map.addSource('selectedfeature', { type: 'geojson', data: data});
     map.addLayer({
         "id": "selectedfeature",
@@ -171,7 +175,7 @@ function getFeatureInfo(lngLat, callback){
     var leftbottom = {x: clickedPointMercator.x - 1.5 * wmtsResolution, y: clickedPointMercator.y - 1.5 * wmtsResolution};
     var righttop = {x: clickedPointMercator.x + 1.5 * wmtsResolution, y: clickedPointMercator.y + 1.5 * wmtsResolution};
     // getFeatureinfo url for center pixel of 3x3 pixel area
-    var url="http://localhost:8080/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=CBSbevolking2017&query_layers=CBSbevolking2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="+(leftbottom.x)+","+(leftbottom.y)+","+(righttop.x)+","+(righttop.y)
+    var url="https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsadministratief2017&query_layers=cbsadministratief2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="+(leftbottom.x)+","+(leftbottom.y)+","+(righttop.x)+","+(righttop.y)
     
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {

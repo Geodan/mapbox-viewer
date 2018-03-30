@@ -10,7 +10,7 @@
             "type": "raster",
             "tileSize": 256,
             "tiles": [
-                "http://localhost:8080/mapproxy/cbsadministratief/wmts/CBSbevolking2017/spherical_mercator/{z}/{x}/{y}.png"
+                "https://saturnus.geodan.nl/mapproxy/cbsadministratief/wmts/cbsadministratief2017/spherical_mercator/{z}/{x}/{y}.png"
             ],
             "attribution": "&copy; Geodan, CBS"
         }
