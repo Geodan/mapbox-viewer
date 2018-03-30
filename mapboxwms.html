@@ -37,7 +37,7 @@ var map = new mapboxgl.Map({
 
 var data = {"type": "FeatureCollection", "features": []};
 
-map.on('load', () => {
+map.on('load', function() {
 	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
     map.addControl(new mapboxgl.NavigationControl({position: 'bottom-right'}));
     map.addSource('selectedfeature', { type: 'geojson', data: data});
@@ -95,7 +95,7 @@ function XMLtoGeoJSON(xmlString)
                                 var geometryString = attributes[k].getAttribute('value');
                                 var endPos = geometryString.indexOf('(');
                                 var type = geometryString.substring(0, endPos).trim();
-                                geometryString = geometryString.substring(endPos).split(',').map(pair=>"["+pair.trim().replace(" ", ",")+"]").join(",").replace(/\(/g,"[").replace(/\)/g,"]");
+                                geometryString = geometryString.substring(endPos).split(',').map(function(pair){return "["+pair.trim().replace(" ", ",")+"]"}).join(",").replace(/\(/g,"[").replace(/\)/g,"]");
                                 featureInfo.geometry = {"type": type, "coordinates": JSON.parse(geometryString)};
                             }
                         }
@@ -196,7 +196,7 @@ map.on('click', function (e) {
                     data = geoJSONTransform(data, data.srs, 'EPSG:4326');
                 }
             }
-            document.getElementById('info').innerHTML = data.features.map(feature=>feature.properties.statnaam).join('<br>');
+            document.getElementById('info').innerHTML = data.features.map(function(feature){return feature.properties.statnaam}).join('<br>');
             map.getSource('selectedfeature').setData(data);
         });
     });
