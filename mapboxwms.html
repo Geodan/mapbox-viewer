@@ -11,8 +11,9 @@
         body { margin:0; padding:0; font-family: Arial, Helvetica, sans-serif;}
         #map { position:absolute; top:0; bottom:0; width:100%; }
         #infocontainer { position: absolute; top: 10px; left: 10px; background: transparent;}
-        #legend { position: relative; background-color: white; border: 1px solid gray; padding: 2em; border: 1px solid gray; border-radius: 4px; box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);}
-        #info { position: relative; margin-top: 1em; min-width:100px; background-color: white; border: 1px solid gray; padding: 1em; border-radius: 4px; box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);}
+        #mapselector {position: relative; margin-top: 0; padding: 1em; background: white; border: 1px solid gray; border-radius: 4px; box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);}
+        #legend { position: relative; margin-top: 1em; padding: 2em; background-color: white; border: 1px solid gray; border-radius: 4px; box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);}
+        #info { position: relative; margin-top: 1em; padding: 1em; min-width:100px; background-color: white; border: 1px solid gray; border-radius: 4px; box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);}
         #coordinatecontainer {position: absolute; left: 50%; bottom: 1em;}
         #coordinates {position: relative; left: -50%; background-color: white; border: px solid gray; padding: 1em; border-radius: 4px; box-shadow: 0 0 0 2px rgba(0,0,0,0.1);}
         #placeholder {color:gray;}
@@ -22,23 +23,55 @@
 
 <div id='map'></div>
   <div id='infocontainer'>
-  <div id='legend'><img src="https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsadministratief2017legenda&format=image/png"></div>
-  <div id='info'><span id="placeholder">Klik op een gebied</span></div>
+    <div id='mapselector'>
+      <input type="radio" name="mapselector" id="cbsindeling" checked="true"><label for="cbsindeling">CBS indelingen</label><br>
+      <input type="radio" name="mapselector" id="cbsbevolking"><label for="cbsbevolking">CBS bevolking</label><br>
+    </div>
+    <div id='legend'><img src="https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsadministratief2017legenda&format=image/png"></div>
+    <div id='info'><span id="placeholder">Klik op een gebied</span></div>
+  </div>
+
 </div>
 <div id='coordinatecontainer'><div id='coordinates'></div></div>
 <script>
-//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZ2kmWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+//mapboxgl.accessToken = ;
 var map = new mapboxgl.Map({
     container: 'map',
     zoom: 9,
      center: [4.913196, 52.342259],
-    style: "styles/qgis.json",
+    style: "styles/openmaptiles/positronworld.json",
     hash: false
 });
 
 var data = {"type": "FeatureCollection", "features": []};
 
+var cbsIndeling = {
+        "id" : "cbsadministratief",
+        "type": "raster",
+        "source": {
+            "type": "raster",
+            "tileSize": 256,
+            "tiles": [
+                "https://saturnus.geodan.nl/mapproxy/cbsadministratief/wmts/cbsadministratief2017/spherical_mercator/{z}/{x}/{y}.png"
+            ],
+            "attribution": "&copy; Geodan, CBS"
+        }
+    }
+    var cbsBevolking = {
+        "id" : "cbsbevolking2017",
+        "type": "raster",
+        "source": {
+            "type": "raster",
+            "tileSize": 256,
+            "tiles": [
+                "https://saturnus.geodan.nl/mapproxy/cbsbevolking2017/wmts/cbsbevolking2017/spherical_mercator/{z}/{x}/{y}.png"
+            ],
+            "attribution": "&copy; Geodan, CBS"
+        }
+    }
+
 map.on('load', function() {
+    map.addLayer(cbsIndeling);
 	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
     map.addControl(new mapboxgl.NavigationControl({position: 'bottom-right'}));
     map.addSource('selectedfeature', { type: 'geojson', data: data});
@@ -54,6 +87,26 @@ map.on('load', function() {
     });
     // hack for geoJSON attribution, https://github.com/mapbox/mapbox-gl-js/issues/1485#issuecomment-298253549
     map.style.sourceCaches['selectedfeature']._source.attribution = "&copy; foobar";
+
+    var radioBevolking = document.getElementById("cbsbevolking");
+    var radioCBSIndeling = document.getElementById("cbsindeling");
+    radioBevolking.addEventListener("click", function(e){
+        if (radioBevolking.checked) {
+            map.removeLayer("cbsadministratief");
+            map.addLayer(cbsBevolking, "selectedfeature");
+            document.getElementById('legend').innerHTML='<img src="https://saturnus.geodan.nl/mapproxy/cbsbevolking2017/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsbevolking2017legenda&format=image/png">';
+            featureinfoUrl = "https://saturnus.geodan.nl/mapproxy/cbsbevolking2017/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsbevolking2017&query_layers=cbsbevolking2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="
+        }
+
+    });
+    radioCBSIndeling.addEventListener("click", function(e){
+        if (radioCBSIndeling.checked) {
+            map.removeLayer("cbsbevolking2017");
+            map.addLayer(cbsIndeling, "selectedfeature")
+            document.getElementById('legend').innerHTML='<img src="https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsadministratief2017legenda&format=image/png">';
+            featureinfoUrl = "https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsadministratief2017&query_layers=cbsadministratief2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox=";
+        }
+    });
 });
 
 // srs optional, defaults to 'EPSG:3857'
@@ -167,6 +220,8 @@ function geoJSONTransform(geoJSON, inSRS, outSRS)
     return geoJSON;
 }
 
+var featureinfoUrl = "https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsadministratief2017&query_layers=cbsadministratief2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox=";
+
 function getFeatureInfo(lngLat, callback){
     // mapbox-ql requests wmts level round(map.getZoom()) + 1
     var wmtsResolution = (2 * 20037508.342789244) / (256 * Math.pow(2, (Math.round(map.getZoom())+1)));
@@ -176,7 +231,7 @@ function getFeatureInfo(lngLat, callback){
     var leftbottom = {x: clickedPointMercator.x - 1.5 * wmtsResolution, y: clickedPointMercator.y - 1.5 * wmtsResolution};
     var righttop = {x: clickedPointMercator.x + 1.5 * wmtsResolution, y: clickedPointMercator.y + 1.5 * wmtsResolution};
     // getFeatureinfo url for center pixel of 3x3 pixel area
-    var url="https://saturnus.geodan.nl/mapproxy/cbsadministratief/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsadministratief2017&query_layers=cbsadministratief2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="+(leftbottom.x)+","+(leftbottom.y)+","+(righttop.x)+","+(righttop.y)
+    var url=featureinfoUrl+(leftbottom.x)+","+(leftbottom.y)+","+(righttop.x)+","+(righttop.y);
     
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -207,6 +262,8 @@ map.on('mousemove', function (e) {
         // e.lngLat is the longitude, latitude geographical position of the event
         JSON.stringify(e.lngLat);
 });
+
+
 
 </script>
 
