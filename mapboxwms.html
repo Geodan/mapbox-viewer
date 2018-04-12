@@ -41,7 +41,7 @@
         <input type="radio" name="mapselector" id="cbsbevolking"><label for="cbsbevolking">CBS bevolking</label><br>
     </div>
     <div id="legendcontainer">
-        <div id='legend'><img src="https://saturnus.geodan.nl/mapproxy/cbsindeling2017/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsindeling2017legenda&format=image/png"></div>
+        <div id='legend'><img src="/mapproxy/cbsindeling2017/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsindeling2017legenda&format=image/png"></div>
         <span id="collapselegend">
             <svg enable-background="new 0 0 24 24" viewBox="0 0 24 24">
                 <polyline fill="none" points="3,15.5 12,6.5 21,15.5 " stroke="#000000" stroke-miterlimit="10" stroke-width="2"/>
@@ -85,7 +85,7 @@ var cbsIndeling = {
             "type": "raster",
             "tileSize": 256,
             "tiles": [
-                "https://saturnus.geodan.nl/mapproxy/cbsindeling2017/wmts/cbsindeling2017/spherical_mercator/{z}/{x}/{y}.png"
+                "/mapproxy/cbsindeling2017/wmts/cbsindeling2017/spherical_mercator/{z}/{x}/{y}.png"
             ],
             "attribution": "&copy; Geodan, CBS"
         }
@@ -97,13 +97,14 @@ var cbsIndeling = {
             "type": "raster",
             "tileSize": 256,
             "tiles": [
-                "https://saturnus.geodan.nl/mapproxy/cbsbevolking2017/wmts/cbsbevolking2017/spherical_mercator/{z}/{x}/{y}.png"
+                "/mapproxy/cbsbevolking2017/wmts/cbsbevolking2017/spherical_mercator/{z}/{x}/{y}.png"
             ],
             "attribution": "&copy; Geodan, CBS"
         }
     }
 
 map.on('load', function() {
+    //map.addLayer(cbsIndeling, "place_other");
     map.addLayer(cbsIndeling);
 	map.addControl(new mapboxgl.ScaleControl({position: 'bottom-left'}));
     map.addControl(new mapboxgl.NavigationControl({position: 'bottom-right'}));
@@ -127,8 +128,9 @@ map.on('load', function() {
         if (radioBevolking.checked) {
             map.removeLayer("cbsindeling2017");
             map.addLayer(cbsBevolking, "selectedfeature");
-            document.getElementById('legend').innerHTML='<img src="https://saturnus.geodan.nl/mapproxy/cbsbevolking2017/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsbevolking2017legenda&format=image/png">';
-            featureinfoUrl = "https://saturnus.geodan.nl/mapproxy/cbsbevolking2017/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsbevolking2017&query_layers=cbsbevolking2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="
+            //map.addLayer(cbsBevolking, "place_other");
+            document.getElementById('legend').innerHTML='<img src="/mapproxy/cbsbevolking2017/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsbevolking2017legenda&format=image/png">';
+            featureinfoUrl = "/mapproxy/cbsbevolking2017/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsbevolking2017&query_layers=cbsbevolking2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox="
         }
 
     });
@@ -136,8 +138,9 @@ map.on('load', function() {
         if (radioCBSIndeling.checked) {
             map.removeLayer("cbsbevolking2017");
             map.addLayer(cbsIndeling, "selectedfeature")
-            document.getElementById('legend').innerHTML='<img src="https://saturnus.geodan.nl/mapproxy/cbsindeling2017/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsindeling2017legenda&format=image/png">';
-            featureinfoUrl = "https://saturnus.geodan.nl/mapproxy/cbsindeling2017/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsindeling2017&query_layers=cbsindeling2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox=";
+            //map.addLayer(cbsIndeling, "place_other")
+            document.getElementById('legend').innerHTML='<img src="/mapproxy/cbsindeling2017/wms?service=wms&version=1.3.0&request=getLegendGraphic&layer=cbsindeling2017legenda&format=image/png">';
+            featureinfoUrl = "/mapproxy/cbsindeling2017/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsindeling2017&query_layers=cbsindeling2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox=";
         }
     });
 
@@ -265,7 +268,7 @@ function geoJSONTransform(geoJSON, inSRS, outSRS)
 }
 
 
-var featureinfoUrl = "https://saturnus.geodan.nl/mapproxy/cbsindeling2017/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsindeling2017&query_layers=cbsindeling2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox=";
+var featureinfoUrl = "/mapproxy/cbsindeling2017/wms?styles=&format=png&request=GetFeatureInfo&layers=cbsindeling2017&query_layers=cbsindeling2017&width=3&height=3&x=1&y=1&version=1.1.1&srs=epsg:3857&info_format=text/xml&bbox=";
 
 function getFeatureInfo(lngLat, callback){
     // mapbox-ql requests wmts level round(map.getZoom()) + 1
