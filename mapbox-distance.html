@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+        #info { position: absolute; 
+            left: 10px;
+            padding-left: 0.5em;
+            top: 10px; 
+            width:8em; 
+            background-color: white; 
+            border: 1px solid gray; 
+            border-radius: 4px;}
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<div id="info">distance</div>
+<script>
+//mapboxgl.accessToken = '<your access token here>';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    center: [-38, 38],
+    zoom: 3
+});
+
+// translate point to between -180 and +180 degrees
+function toFrontWorldHalf(point) {
+    if (point[0] < -180) {
+        point[0] = 180 + (point[0] % 180)
+    } else if (point[0] > 180) {
+        point[0] = -180 + (point[0] % 180);
+    }
+    return point;
+}
+
+// get geographic coordinates along line A to B
+function getPointsAlongLine(startPoint, endPoint)
+{
+    toFrontWorldHalf(startPoint);
+    toFrontWorldHalf(endPoint);
+    
+    const degrees = {"units": "degrees"};
+    const line = turf.lineString([startPoint, endPoint]);
+    const length = turf.length(line, degrees);
+    const count = Math.ceil(length / 1); // steps of 1 degree
+    const dist = length / count;
+    const points = [];
+    for (var i = 0; i < count; i++) {
+        const along = turf.along(line, 0.00000001 + i * dist, degrees);
+        points.push(along.geometry.coordinates);
+    }
+    points.push(turf.along(line, length, degrees).geometry.coordinates);
+    //points.push(line.geometry.coordinates[1]);
+    return points;
+}
+
+const geoJson = {
+    "type": "FeatureCollection",
+    "features": [{
+        "type": "Feature",
+        "geometry": {
+            "type": "LineString",
+            "coordinates": []
+        },
+        "properties": {            
+        }
+    }]
+};
+
+const startPoint = [4.755150, 52.3077]; // Amsterdam Schiphol airport
+
+function formatDistance(distance)
+{
+    if (distance < 1) {
+        return (distance * 1000).toFixed(0) + "m";
+    }
+    if (distance < 100) {
+        return distance.toFixed(3) + " km";
+    }
+    return distance.toFixed(0) + " km";
+}
+
+map.on('load', function () {
+    const endPoint = [-74, 41];
+    const points = getPointsAlongLine(startPoint, endPoint);
+    document.getElementById('info').innerHTML = formatDistance(turf.length(turf.lineString([startPoint, endPoint]), {"units": "kilometers"}));
+    geoJson.features[0].geometry.coordinates = points;
+    map.addLayer({        
+        "id": "shortestline",
+        "type": "line",
+        "source": {            
+            "type": "geojson",
+            "data": geoJson,
+        },
+        "layout": {
+            "line-join": "round",
+            "line-cap": "round"
+        },
+        "paint": {
+            "line-color": "#c30",
+            "line-width": 3,
+            "line-dasharray": [3, 2]
+        }
+    });
+});
+
+map.on('click', function(e) {
+    let lng = e.lngLat.lng;
+    let lat = e.lngLat.lat;
+    const clickPoint = [lng, lat];
+    const points = getPointsAlongLine(startPoint, clickPoint);
+    geoJson.features[0].geometry.coordinates = points;
+    map.getSource('shortestline').setData(geoJson);
+    document.getElementById('info').innerHTML = formatDistance(turf.length(turf.lineString([startPoint, clickPoint]), {"units": "kilometers"}));
+})
+
+</script>
+
+</body>
+</html>
