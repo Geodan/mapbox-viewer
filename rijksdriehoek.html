@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>MapBox-gl EPSG:28992 (RD)</title>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+
+</head>
+<body>
+    <p>
+    The Dutch projection EPSG:28992, aka 'Rijkdriekhoekmeting' has a corresponding z-x-y-grid defined as a grid bounded by coordinates:<br>
+    min-x: -285401.920<br>
+    min-y: 22598.080<br>
+    max-x: 595401.920<br>
+    max-y: 903401.920<br>
+    This corresponds to a square grid width of 595401.920 - -285401.920 = 880802 meters and height of 880802 meters.
+    </p>
+    <p>
+    The WebMercator projection EPSG:3857, has a corresponding z-x-y grid defined as grid bounded by coordinates:<br>
+    min-x: -20037508.3428<br>
+    min-y: -20037508.3428<br>
+    max-x: 20037508.3428<br>
+    max-y: 20037508.3428<br>
+    This corresponds to a square grid width of 20037508.3428 - -20037508.3428 = 40075016.6856 x 40075016.6856 meters.
+    </p>
+    Here is a map at mapbox zoom-level 0, attached to a WMTS service that serves tiles in EPSG:28992:
+    <style>
+        
+        #maprd {
+            position:absolute;
+            width: 100%;
+            height: 600px;
+            border: 1px solid gray;
+        }
+    </style>
+    <div id="maprd"></div>
+    <script>
+        var map = new mapboxgl.Map({
+            container: 'maprd',
+            zoom: 0,
+            center: [0, 0],
+            renderWorldCopies: false,
+            style: {
+                "version" : 8,
+                "name": "Rijksdriehoek OpenTopo",
+                "sources": {
+                    "brtachtergrondkaart" : {
+                        "type": "raster",
+                        "tilesize": 256,
+                        "tiles": ["https://geodata.nationaalgeoregister.nl/tiles/service/tms/1.0.0/brtachtergrondkaart/EPSG:28992/{z}/{x}/{y}.png"],
+                        "attribution":"PDOK",
+                        "scheme": "tms", 
+                        "maxzoom":14
+                    },
+                    "opentopo" : {
+                        "type": "raster",
+                        "tilesize": 256,
+                        "tiles" : ["https://geodata.nationaalgeoregister.nl/tiles/service/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=opentopo&STYLE=_null&TILEMATRIXSET=EPSG%3A28992&TILEMATRIX=EPSG%3A28992%3A{z}&TILEROW={y}&TILECOL={x}&FORMAT=image%2Fpng"],
+                        "attribution":"PDOK",
+                        "scheme": "xyz", 
+                        "maxzoom":14
+                    }
+                },
+                "layers" : [
+                    {
+                        "id": "BRT Achtergrondkaart",
+                        "type" : "raster",
+                        "source":"brtachtergrondkaart"
+                    },
+                    {
+                        "id": "OpenTopo",
+                        "type":"raster",
+                        "source": "opentopo"
+                    }]
+            }
+        });
+    //map.on("moveend",() => map.setZoom(Math.round(map.getZoom())))
+    </script>
+</body>
+</html>
