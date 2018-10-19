@@ -10,23 +10,33 @@
 
 </head>
 <body>
-    <p>
+    <table>
+        <tr><td>
     The Dutch projection EPSG:28992, aka 'Rijkdriekhoekmeting' has a corresponding z-x-y-grid defined as a grid bounded by coordinates:<br>
     min-x: -285401.920<br>
     min-y: 22598.080<br>
     max-x: 595401.920<br>
     max-y: 903401.920<br>
     This corresponds to a square grid width of 595401.920 - -285401.920 = 880802 meters and height of 880802 meters.
-    </p>
-    <p>
+        </td>
+    <td>
     The WebMercator projection EPSG:3857, has a corresponding z-x-y grid defined as grid bounded by coordinates:<br>
     min-x: -20037508.3428<br>
     min-y: -20037508.3428<br>
     max-x: 20037508.3428<br>
     max-y: 20037508.3428<br>
     This corresponds to a square grid width of 20037508.3428 - -20037508.3428 = 40075016.6856 x 40075016.6856 meters.
-    </p>
-    Here is a map at mapbox zoom-level 0, attached to a WMTS service that serves tiles in EPSG:28992:
+    </td>
+    </tr></table><p></p>
+    Below is a map at mapbox zoom-level 0, attached to a WMTS service that serves tiles in EPSG:28992. Note that the image can be blurry at intermediate zoom levels. Intermediate zoom levels are not supported by most other map viewers<br>
+    In order to fully support this and other projections, mapbox-gl would need some additional extensions for the following modules:
+    <ul>
+        <li>GeoJSON: geojson geographic coordinates need to be transformed internally so that geographic coordinates inside the projected area are transformed to the correct mapbox-gl screen location</li>
+        <li>WMS: WMS requests comming from mapbox-gl contain a BBOX parameter. The values for this parameter should be transformed to support the new projection</li>
+        <li>Vector tiles: when preparing vector tile sets, the vector coordinates should be transformed to the new projection </li>
+        <li>Mouse and click position: When converting mouse and clickpositions to geographic coordinates, the positions should be transformed to account for the new projection</li>
+        <li>Scale bar: the scalebar should take into account the new projection</li>
+    </ul>
     <style>
         
         #maprd {
