@@ -32,9 +32,9 @@
     In order to fully support this and other projections, mapbox-gl would need some additional extensions for the following modules:
     <ul>
         <li>GeoJSON: geojson geographic coordinates need to be transformed internally so that geographic coordinates inside the projected area are transformed to the correct mapbox-gl screen location</li>
-        <li>WMS: WMS requests comming from mapbox-gl contain a BBOX parameter. The values for this parameter should be transformed to support the new projection</li>
+        <li>WMS: WMS requests originating from mapbox-gl contain a BBOX parameter. The values for this parameter should be transformed to support the new projection</li>
         <li>Vector tiles: when preparing vector tile sets, the vector coordinates should be transformed to the new projection </li>
-        <li>Mouse and click position: When converting mouse and clickpositions to geographic coordinates, the positions should be transformed to account for the new projection</li>
+        <li>Mouse and click position: When converting mouse and click positions to geographic coordinates, the positions should be transformed to account for the new projection</li>
         <li>Scale bar: the scalebar should take into account the new projection</li>
     </ul>
     <style>
