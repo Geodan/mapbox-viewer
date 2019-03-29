@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+var map = new mapboxgl.Map({
+    container: 'map', // container id
+    style: 'styles/openmaptiles/ktbasic.json', 
+    center: [4.913196, 52.342259],
+    zoom: 9
+});
+map.on('load', ()=>{
+    const image = new Image();
+    image.onload = function() {    
+        map.addImage('icon-1', image);
+        map.loadImage('icons/geodan-15.png', function(error, image2) { 
+        
+            map.addImage('icon-2', image2, {pixelRatio: 4});
+            map.addLayer({
+                "id": "provincepattern",
+                "type": "fill",
+                "source": {
+                    "type": "vector",
+                    "tiles": ["https://tiles.edugis.nl/v1/mvt/public.cbsprovincie2019/{z}/{x}/{y}?columns=statnaam"],
+                    "minzoom": 5,
+                    "maxzoom": 12
+                },
+                "source-layer": "public.cbsprovincie2019",
+                "paint": {
+                    "fill-pattern": ["match",["get","statnaam"],["Utrecht","Limburg"],"icon-1","icon-2"],
+                    "fill-color": ["match",["get","stat2"],["Utrecht","Limburg"],"green","pink"],
+                    "fill-outline-color": "white"
+                }
+            })
+        })
+    };
+    image.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMDAiPgo8cmVjdCB3aWR0aD0iNTYiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjhkMjAzIj48L3JlY3Q+CjxwYXRoIGQ9Ik0yOCA2NkwwIDUwTDAgMTZMMjggMEw1NiAxNkw1NiA1MEwyOCA2NkwyOCAxMDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZjYyOSIgc3Ryb2tlLXdpZHRoPSIyIj48L3BhdGg+CjxwYXRoIGQ9Ik0yOCAwTDI4IDM0TDAgNTBMMCA4NEwyOCAxMDBMNTYgODRMNTYgNTBMMjggMzQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZTUwMyIgc3Ryb2tlLXdpZHRoPSIyIj48L3BhdGg+Cjwvc3ZnPg==";
+});
+</script>
+
+</body>
+</html>
