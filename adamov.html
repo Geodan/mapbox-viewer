@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Amsterdam Public Transport</title>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+    <script src="https://twgljs.org/dist/3.x/twgl.min.js"></script>
+    <script src="Trafficlayer.js"></script>
+    <script>
+    
+    class OVMap {
+        constructor(map) {
+            this.map = map;
+        }
+        _loadOv() {
+            if (!this.loadCounter) {
+                this.loadCounter = 1;
+            } else {
+                this.loadCounter++;
+            }
+            //fetch('https://saturnus.geodan.nl/ovpositions/trips').then(result=>{
+            fetch('https://saturnus.geodan.nl/ovinfo/api/Positions/Live').then(result=>{
+                if (!result.ok) {
+
+                } else {
+                    result.json().then(json=>{
+                        if (!json.features) {
+                            json.features = [];
+                        }
+                        for (let feature of json.features) {
+                            let mappedFeature = this.datasetMap.get(feature.properties.realtimeTripId);
+                            if (!mappedFeature) {
+                                mappedFeature = JSON.parse(JSON.stringify(feature));
+                                mappedFeature.geometry = {
+                                    "type": "LineString",
+                                    "coordinates": [feature.geometry.coordinates]
+                                }
+                                this.datasetMap.set(feature.properties.realtimeTripId, mappedFeature);
+                            }
+                            mappedFeature.properties.loadCounter = this.loadCounter;
+                            mappedFeature.geometry.coordinates.push(feature.geometry.coordinates);
+                            if (mappedFeature.geometry.coordinates.length > 6) {
+                                mappedFeature.geometry.coordinates.splice(0, mappedFeature.geometry.coordinates.length - 6);
+                            }
+                        }
+                        const deleteTrips = []
+                        for (let trip of this.datasetMap) {
+                            if (this.loadCounter - trip[1].properties.loadCounter > 6) {
+                                deleteTrips.push(trip[0]);
+                                console.log(`marking trip ${trip[1].properties.routeShortName} to ${trip[1].properties.tripHeadsign} for deletion`)
+                            } else {
+                                if (this.loadCounter != trip[1].properties.loadCounter) {
+                                    if (trip[1].geometry.coordinates.length > 2) {
+                                        trip[1].geometry.coordinates.shift();
+                                    }
+                                }
+                            }
+                        }
+                        deleteTrips.forEach(trip=>this.datasetMap.delete(trip));
+
+                        const allTrips = Array.from(this.datasetMap.values());
+                        const allPositions = {
+                            type: "FeatureCollection",
+                            features: allTrips.map(feature=>{
+                                return {
+                                    "type": "Feature",
+                                    "properties": feature.properties,
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": feature.geometry.coordinates[feature.geometry.coordinates.length - 1]
+                                    }
+                                }
+                            })
+                        };
+                        this.map.getSource('ovtraffic1').setData(allPositions);
+                        this.map.getSource('ovtraffic2').setData({
+                            type: "FeatureCollection",
+                            features: allTrips
+                        })
+                        this.map.getSource('ovlabel').setData(allPositions);
+                    })
+                }
+            })
+            setTimeout(()=>this._loadOv(), 5000);
+        }
+        mapLoaded(e){
+            let trafficLayer = new TrafficLayer('traffic', 'https://research.geodan.nl/sites/ndw_viewer/traffic.json')
+            trafficLayer.loadTraffic();
+            this.map.addLayer(trafficLayer);
+
+            this.map.addLayer({
+            "id": "building3d",
+            "type": "fill-extrusion",
+            "source" : {
+                "id": "gebouwkenmerken2",
+                "type": "vector",
+                "tiles": ["https://saturnus.geodan.nl/mvt/gebouwkenmerken/{z}/{x}/{y}.mvt"],
+                "minzoom": 11,
+                "maxzoom" : 18,
+            },
+            "source-layer": "gebouwkenmerken",
+            "minzoom": 11,
+            "maxzoom": 24,
+            "paint": {
+                "fill-extrusion-color": "#4665DB",
+                "fill-extrusion-base": 0,
+                "fill-extrusion-height": ["get", "hoogte"],
+                "fill-extrusion-opacity": 0.8
+            },
+            });
+
+
+            const empty = {"type": "FeatureCollection", "Features": []}
+            this.datasets = [empty,empty,empty,empty,empty];
+            this.datasetMap = new Map();
+
+            this.map.addLayer({
+            "id": "liander_storingen",
+            //"type": "fill",
+            'type': 'fill-extrusion',
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "layout": {
+            },
+            "paint": {
+                //"fill-color": '#FF0000',
+                //"fill-opacity": 0.8,
+
+                'fill-extrusion-color': '#FF00AA',
+        
+                'fill-extrusion-height': 80,
+                'fill-extrusion-base': 0,
+                'fill-extrusion-opacity': .8
+
+            }
+        })
+        this.map.addLayer({
+            "id": "ovtraffic1",
+            "type": "circle",
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "paint": {
+                "circle-radius": 5,
+                "circle-color": ["match", ["get", "vehicle"], 
+                "Bus", "red", 
+                "Tram, Streetcar, Light rail", "lightgreen",
+                "Ferry", "lightblue",
+                "Subway, Metro", "orange",
+                "black"]
+            }
+        })
+        this.map.addLayer({
+            "id": "ovtraffic2",
+            "type": "line",
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "paint": {
+                "line-width": 3,
+                "line-dasharray": [3,1],
+                "line-color": ["match", ["get", "vehicle"], 
+                "Bus", "red", 
+                "Tram, Streetcar, Light rail", "lightgreen",
+                "Ferry", "lightblue",
+                "Subway, Metro", "orange",
+                "black"]
+            }
+        })  
+        this.map.addLayer({
+            "id": "ovlabel",
+            "type": "symbol",
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "layout": {
+                "text-field": "{routeShortName}",
+                "text-offset": [0.5,-0.5]
+            },
+            /*"paint": {
+                "text-color": "black",
+                "text-halo-width": 2,
+                "text-halo-color": "rgba(255,255,255,0.6)",
+                "text-halo-blur": 4
+            },*/
+            "paint": {
+                "text-color": ["match", ["get", "vehicle"], 
+                    "Bus", "rgba(255,0,0,1)", //red
+                    "Tram, Streetcar, Light rail", "rgba(144,238,144,1)", //lightgreen
+                    "Ferry", "rgba(173,216,230,1)", //lightblue
+                    "Subway, Metro", "rgba(255, 165, 0, 1)", //orange
+                    "rgba(0,0,0,1)"], //black,
+                "text-halo-width": 2,
+                "text-halo-color": "rgba(0,0,0,0.6)",
+                "text-halo-blur": 4
+            },
+            /* "paint": {
+                "text-color": "black",
+                "text-halo-width": 2,
+                //"text-halo-color": "rgba(255,255,255,0.6)",
+                "text-halo-color": ["match", ["get", "vehicle"], 
+                    "Bus", "rgba(255,0,0,0.5)", //red
+                    "Tram, Streetcar, Light rail", "rgba(144,238,144,0.6)", //lightgreen
+                    "Ferry", "rgba(173,216,230,0.6)", //lightblue
+                    "Subway, Metro", "rgba(255, 165, 0, 0.6)", //orange
+                    "rgba(0,0,0,0.6)"], //black
+                "text-halo-blur": 4
+            }*/
+
+        })
+        setTimeout(()=>this._loadOv(), 1000);
+        //setTimeout(()=>this._loadLianderStoringen(), 500);
+        }
+    }  
+    </script>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'styles/freetilehosting/darkmatter.json',
+            center: [4.8984, 52.3708],
+            zoom: 13,
+            pitch: 58,
+            bearing: 25
+        });
+
+        map.on('load', function () {
+            let ovMap = new OVMap(map);
+            ovMap.mapLoaded();
+        });
+    </script>
+        
+</body>
+</html>
