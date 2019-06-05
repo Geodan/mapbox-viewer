@@ -8,24 +8,158 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
     <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
+        body { margin:0; padding:0; font-family: Arial, Helvetica, sans-serif;}
+        #map { position:absolute; left:0;top:0; bottom:0; width:100%; }
+        #inset { position: absolute; 
+            left: 10px; 
+            top: 10px; 
+            width: 150px; 
+            height: 240px; 
+            padding: 5px;
+            background-color: black; border: 1px solid whitesmoke;
+            border-radius: 3px;
+            color: lightgray;
+        }
+        #inset div {
+            padding-top: 1px;
+        }
     </style>
     <script src="https://twgljs.org/dist/3.x/twgl.min.js"></script>
     <script src="Trafficlayer.js"></script>
     <script>
     
+    function updateOvColor(index, color) {
+        /* 
+        ["case", 
+            [">", ["get", "punctuality"], 180], "red",                
+            ["match", ["get", "vehicle"], 
+                "Bus", "rgb(250, 128, 114)", // salmon
+                "Tram, Streetcar, Light rail", "lightgreen",
+                "Ferry", "lightblue",
+                "Subway, Metro", "orange",
+                "black"]
+            ]
+        */
+        const circleColor = this.map.getPaintProperty('ovtraffic1', 'circle-color');
+        circleColor[3][index] = color;
+        this.map.setPaintProperty('ovtraffic1', 'circle-color', circleColor);
+        const lineColor = this.map.getPaintProperty('ovtraffic2', 'line-color');
+        lineColor[index] = color;
+        this.map.setPaintProperty('ovtraffic2', 'line-color', lineColor);
+        const textColor = this.map.getPaintProperty('ovlabel', 'text-color');
+        textColor[index] = color;
+        this.map.setPaintProperty('ovlabel', 'text-color', textColor);
+    }
+
+
+    function updateColor(color, itemName) {
+        switch(itemName) {
+            case 'building':
+                this.map.setPaintProperty('building3d', 'fill-extrusion-color', color);
+                break;
+            case 'train':
+                {
+                    this.map.setPaintProperty('train', 'line-color', color);
+                    const circleColor = this.map.getPaintProperty('trainpoints', 'circle-color');
+                    circleColor[3] = color;
+                    this.map.setPaintProperty('trainpoints', 'circle-color', circleColor);
+                    this.map.setPaintProperty('trainlabel', 'text-color', color);
+                }
+                break;
+            case 'delayed':
+                {
+                    const circleColor = this.map.getPaintProperty('ovtraffic1', 'circle-color');
+                    circleColor[2] = color;
+                    this.map.setPaintProperty('ovtraffic1', 'circle-color', circleColor);
+                    const trainCircleColor = this.map.getPaintProperty('trainpoints', 'circle-color');
+                    trainCircleColor[2] = color;
+                    this.map.setPaintProperty('trainpoints', 'circle-color', trainCircleColor);
+                }
+                break;
+            case 'bus':
+                updateOvColor(3, color);
+                break;
+            case 'tram':
+                updateOvColor(5, color);
+                break;
+            case 'ferry':
+                updateOvColor(7, color);
+                break;
+            case 'metro':
+                updateOvColor(9, color);
+                break;
+        }
+    }
+    
     class OVMap {
         constructor(map) {
             this.map = map;
         }
+        _pointsToTrips(json, tripMap, propertyName) {
+            for (let feature of json.features) {
+            let mappedFeature = tripMap.get(feature.properties[propertyName]);
+            if (!mappedFeature) {
+                mappedFeature = JSON.parse(JSON.stringify(feature));
+                mappedFeature.geometry = {
+                "type": "LineString",
+                "coordinates": [feature.geometry.coordinates]
+                }
+                tripMap.set(feature.properties[propertyName], mappedFeature);
+            }
+            mappedFeature.properties.loadCounter = this.loadCounter;
+            mappedFeature.geometry.coordinates.push(feature.geometry.coordinates);
+            if (mappedFeature.geometry.coordinates.length > 6) {
+                mappedFeature.geometry.coordinates.splice(0, mappedFeature.geometry.coordinates.length - 6);
+            }
+            }
+            const deleteTrips = []
+            for (let trip of tripMap) {
+            if (this.loadCounter - trip[1].properties.loadCounter > 6) {
+                deleteTrips.push(trip[0]);
+                //console.log(`marking trip ${trip[1].properties.routeShortName} to ${trip[1].properties.tripHeadsign} for deletion`)
+            }
+            }
+            deleteTrips.forEach(trip=>tripMap.delete(trip));
+
+            const allTrips = Array.from(tripMap.values());
+            return allTrips;
+         }
         _loadOv() {
             if (!this.loadCounter) {
                 this.loadCounter = 1;
             } else {
                 this.loadCounter++;
             }
-            //fetch('https://saturnus.geodan.nl/ovpositions/trips').then(result=>{
+            if (this.loadCounter % 2) {
+                fetch("https://saturnus.geodan.nl/ovinfo/api/Positions/Live/NS").then(result=>{
+                    if (!result.ok) {
+            
+                    } else {
+                        result.json().then(json=>{
+                            const allTrips = this._pointsToTrips(json, this.trainMap, "treinNummer");
+                            this.map.getSource('train').setData({
+                                "type": "FeatureCollection",
+                                "features": allTrips
+                            });
+                            const allPositions = {
+                                "type": "FeatureCollection",
+                                "features": allTrips.map(feature=>{
+                                    return {
+                                        "type": "Feature",
+                                        "properties": feature.properties,
+                                        "geometry": {
+                                            "type": "Point",
+                                            "coordinates": feature.geometry.coordinates[feature.geometry.coordinates.length - 1]
+                                        }
+                                    }
+                                })
+                            }
+                            this.map.getSource('trainpoints').setData(allPositions);
+                            this.map.getSource('trainlabel').setData(allPositions);
+                        });
+                    }
+                }); 
+            }
             fetch('https://saturnus.geodan.nl/ovinfo/api/Positions/Live').then(result=>{
                 if (!result.ok) {
 
@@ -34,38 +168,7 @@
                         if (!json.features) {
                             json.features = [];
                         }
-                        for (let feature of json.features) {
-                            let mappedFeature = this.datasetMap.get(feature.properties.realtimeTripId);
-                            if (!mappedFeature) {
-                                mappedFeature = JSON.parse(JSON.stringify(feature));
-                                mappedFeature.geometry = {
-                                    "type": "LineString",
-                                    "coordinates": [feature.geometry.coordinates]
-                                }
-                                this.datasetMap.set(feature.properties.realtimeTripId, mappedFeature);
-                            }
-                            mappedFeature.properties.loadCounter = this.loadCounter;
-                            mappedFeature.geometry.coordinates.push(feature.geometry.coordinates);
-                            if (mappedFeature.geometry.coordinates.length > 6) {
-                                mappedFeature.geometry.coordinates.splice(0, mappedFeature.geometry.coordinates.length - 6);
-                            }
-                        }
-                        const deleteTrips = []
-                        for (let trip of this.datasetMap) {
-                            if (this.loadCounter - trip[1].properties.loadCounter > 6) {
-                                deleteTrips.push(trip[0]);
-                                console.log(`marking trip ${trip[1].properties.routeShortName} to ${trip[1].properties.tripHeadsign} for deletion`)
-                            } else {
-                                if (this.loadCounter != trip[1].properties.loadCounter) {
-                                    if (trip[1].geometry.coordinates.length > 2) {
-                                        trip[1].geometry.coordinates.shift();
-                                    }
-                                }
-                            }
-                        }
-                        deleteTrips.forEach(trip=>this.datasetMap.delete(trip));
-
-                        const allTrips = Array.from(this.datasetMap.values());
+                        const allTrips = this._pointsToTrips(json, this.ovMap, "realtimeTripId")
                         const allPositions = {
                             type: "FeatureCollection",
                             features: allTrips.map(feature=>{
@@ -119,7 +222,8 @@
 
             const empty = {"type": "FeatureCollection", "Features": []}
             this.datasets = [empty,empty,empty,empty,empty];
-            this.datasetMap = new Map();
+            this.ovMap = new Map();
+            this.trainMap = new Map();
 
             this.map.addLayer({
             "id": "liander_storingen",
@@ -158,12 +262,15 @@
             },
             "paint": {
                 "circle-radius": 5,
-                "circle-color": ["match", ["get", "vehicle"], 
-                "Bus", "red", 
-                "Tram, Streetcar, Light rail", "lightgreen",
-                "Ferry", "lightblue",
-                "Subway, Metro", "orange",
-                "black"]
+                "circle-color": ["case", 
+                    [">", ["get", "punctuality"], 180], "red",                
+                    ["match", ["get", "vehicle"], 
+                    "Bus", "rgb(250, 128, 114)", // salmon
+                    "Tram, Streetcar, Light rail", "lightgreen",
+                    "Ferry", "lightblue",
+                    "Subway, Metro", "orange",
+                    "black"]
+                ]
             }
         })
         this.map.addLayer({
@@ -180,13 +287,66 @@
                 "line-width": 3,
                 "line-dasharray": [3,1],
                 "line-color": ["match", ["get", "vehicle"], 
-                "Bus", "red", 
+                "Bus", "rgb(250, 128, 114)", // salmon
                 "Tram, Streetcar, Light rail", "lightgreen",
                 "Ferry", "lightblue",
                 "Subway, Metro", "orange",
                 "black"]
             }
-        })  
+        })
+        this.map.addLayer({
+            "id": "train",
+            "type": "line",
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "paint": {
+                "line-width": 3,
+                "line-dasharray": [3,1],
+                "line-color": "yellow"
+            }
+        })
+        this.map.addLayer({
+            "id": "trainpoints",
+            "type": "circle",
+            "source": {
+            "type": "geojson",
+            "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "paint": {
+                "circle-radius": 5,
+                "circle-color": ["case", [">", ["get", "vertraging"], 300], "red", "yellow"]
+            }
+        })
+        this.map.addLayer({
+            "id": "trainlabel",
+            "type": "symbol",
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            },
+            "layout": {
+                "text-field": "{aankomstStation}",
+                "text-offset": [0.5,-0.5],
+                "text-size": 10
+            },
+            "paint": {
+                "text-color": "yellow",
+                "text-halo-width": 2,
+                "text-halo-color": "rgba(0,0,0,0.6)",
+                "text-halo-blur": 4
+            },
+        })
         this.map.addLayer({
             "id": "ovlabel",
             "type": "symbol",
@@ -199,7 +359,8 @@
             },
             "layout": {
                 "text-field": "{routeShortName}",
-                "text-offset": [0.5,-0.5]
+                "text-offset": [0.5,-0.5],
+                "text-size": 10
             },
             /*"paint": {
                 "text-color": "black",
@@ -209,7 +370,7 @@
             },*/
             "paint": {
                 "text-color": ["match", ["get", "vehicle"], 
-                    "Bus", "rgba(255,0,0,1)", //red
+                    "Bus", "rgb(250, 128, 114)", //salmon
                     "Tram, Streetcar, Light rail", "rgba(144,238,144,1)", //lightgreen
                     "Ferry", "rgba(173,216,230,1)", //lightblue
                     "Subway, Metro", "rgba(255, 165, 0, 1)", //orange
@@ -240,10 +401,21 @@
 </head>
 <body>
     <div id="map"></div>
+    <div id="inset">
+        <div><input type="color" name="train" value="#FFFF00" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="train">Trein</label></div>
+        <div><input type="color" name="tram" value="#90EE90" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="tram">Tram</label></div>
+        <div><input type="color" name="bus" value="#FA8072" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="bus">Bus</label></div>
+        <div><input type="color" name="metro" value="#FFA500" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="metro">Metro</label></div>
+        <div><input type="color" name="ferry" value="#ADD8E6" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="ferry">Pont</label></div>
+        <div>&nbsp;</div>
+        <div><input type="color" name="delayed" value="#FF0000" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="delayed">Vertraagd</label></div>
+        <div>&nbsp;</div>
+        <div><input type="color" name="building" value="#4665DB" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="building">Gebouwen</label></div>
+    </div>
     <script>
         var map = new mapboxgl.Map({
             container: 'map',
-            style: 'styles/freetilehosting/darkmatter.json',
+            style: 'styles/freetilehosting/darkmatterrail.json',
             center: [4.8984, 52.3708],
             zoom: 13,
             pitch: 58,
