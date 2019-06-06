@@ -212,12 +212,12 @@
             "minzoom": 11,
             "maxzoom": 24,
             "paint": {
-                "fill-extrusion-color": "#4665DB",
+                "fill-extrusion-color": "#858eae", // #4665DB",
                 "fill-extrusion-base": 0,
                 "fill-extrusion-height": ["get", "hoogte"],
                 "fill-extrusion-opacity": 0.8
             },
-            });
+            }, "water_name");
 
 
             const empty = {"type": "FeatureCollection", "Features": []}
@@ -410,7 +410,7 @@
         <div>&nbsp;</div>
         <div><input type="color" name="delayed" value="#FF0000" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="delayed">Vertraagd</label></div>
         <div>&nbsp;</div>
-        <div><input type="color" name="building" value="#4665DB" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="building">Gebouwen</label></div>
+        <div><input type="color" name="building" value="#858eae" onchange="updateColor(this.value, this.name)" oninput="updateColor(this.value, this.name)"> <label for="building">Gebouwen</label></div>
     </div>
     <script>
         var map = new mapboxgl.Map({
