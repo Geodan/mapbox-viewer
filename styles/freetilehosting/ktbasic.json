@@ -19,10 +19,10 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://free.tilehosting.com/data/v3.json?key=2M7vcRHumvPIiYgsvvJ9"
+      "url": "https://saturnus.geodan.nl/data/v3.json?key=2M7vcRHumvPIiYgsvvJ9"
     }
   },
-  "glyphs": "https://free.tilehosting.com/fonts/{fontstack}/{range}.pbf?key=2M7vcRHumvPIiYgsvvJ9",
+  "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=2M7vcRHumvPIiYgsvvJ9",
   "layers": [
     {
       "id": "background",
