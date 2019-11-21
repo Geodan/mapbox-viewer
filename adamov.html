@@ -261,7 +261,7 @@
                 }
             },
             "paint": {
-                "circle-radius": 5,
+                "circle-radius": 3,
                 "circle-color": ["case", 
                     [">", ["get", "punctuality"], 180], "red",                
                     ["match", ["get", "vehicle"], 
@@ -321,7 +321,7 @@
                 }
             },
             "paint": {
-                "circle-radius": 5,
+                "circle-radius": 3,
                 "circle-color": ["case", [">", ["get", "vertraging"], 300], "red", "yellow"]
             }
         })
@@ -346,7 +346,7 @@
                 "text-halo-color": "rgba(0,0,0,0.6)",
                 "text-halo-blur": 4
             },
-        })
+        });
         this.map.addLayer({
             "id": "ovlabel",
             "type": "symbol",
@@ -392,7 +392,7 @@
                 "text-halo-blur": 4
             }*/
 
-        })
+        });
         setTimeout(()=>this._loadOv(), 1000);
         //setTimeout(()=>this._loadLianderStoringen(), 500);
         }
