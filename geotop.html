@@ -73,12 +73,61 @@ map.on('load', function () {
                     "#0088ff",
                     "#000000"
                   ],
-                  "fill-extrusion-height":["number", ["+",0.5,["+",50,["get","diepte_ond"]]]],
+                  "fill-extrusion-height":["number", ["+",0.501,["+",50,["get","diepte_ond"]]]],
                   "fill-extrusion-base":["number", ["+",50,["get","diepte_ond"]]],
-                  "fill-extrusion-opacity":1
+                  "fill-extrusion-opacity":0.95
                 },
                 //filter: ["any",["==",["get","diepte_ond"],-5],["==",["get","diepte_ond"],-25]]
               });
+    map.addLayer({
+                "id":"merwedekanaal_boringen2d",
+                "type": "fill-extrusion",
+                "source":{
+                  "id":"geotop3d",
+                  "type":"vector",
+                  "tiles":[
+                    "https://tiles.edugis.nl/data/public.merwede_boringen2d/mvt/{z}/{x}/{y}?geom_column=geom&columns=bro_id,jaar,diepte_bov,diepte_ond,dieptetotaal,laagdikte,lithclass,lithoklass,toelichtin&include_nulls=0"
+                  ],
+                  "minzoom":13,
+                  "maxzoom":18
+                },
+                "source-layer":"public.merwede_boringen2d",
+                "minzoom":13,
+                "maxzoom":24,
+                "paint":{
+                  "fill-extrusion-color":[
+                    "match",
+                    [
+                      "get",
+                      "lithclass"
+                    ],
+                    0,
+                    "#c1c3c6",
+                    1,
+                    "#985045",
+                    2,
+                    "#189f48",
+                    3,
+                    "#b6d169",
+                    4,
+                    "#000000",
+                    5,
+                    "#fff000",
+                    6,
+                    "#ffdc00",
+                    7,
+                    "#ffc800",
+                    8,
+                    "#ffb400",
+                    11,
+                    "#0088ff",
+                    "#000000"
+                  ],
+                  "fill-extrusion-height":["number", ["+",["get","laagdikte"],["-",["get","diepte_ond"],["get","dieptetotaal"]]]],
+                  "fill-extrusion-base":["number", ["-",["get","diepte_ond"],["get","dieptetotaal"]]],
+                  "fill-extrusion-opacity":0.95
+                }
+    })
 
     map.on('mousemove', function (e) {
       var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
