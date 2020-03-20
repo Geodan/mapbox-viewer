@@ -9,17 +9,17 @@
         "bagagnadressen": {
             "type": "vector",
             "tiles": [
-                "http://saturnus.geodan.nl/mvt/adressen/{z}/{x}/{y}.mvt"
+                "https://saturnus.geodan.nl/mvt/adressen/{z}/{x}/{y}.mvt"
             ],
             "bounds": [3.38,50.73,7.2432,53.5455],
             "minzoom": 14,
             "maxzoom": 20, 
-            "attribution": "<a href=\"http://geodanmaps.nl\" target=\"gmaps\">&copy; GeodanMaps</a>"
+            "attribution": "<a href=\"https://geodanmaps.nl\" target=\"gmaps\">&copy; GeodanMaps</a>"
         },
         "bagagngebouwen": {
             "type": "vector",
             "tiles": [
-                "http://saturnus.geodan.nl/mvt/gebouwen/{z}/{x}/{y}.mvt"
+                "https://saturnus.geodan.nl/mvt/gebouwen/{z}/{x}/{y}.mvt"
             ],
             "bounds": [3.38,50.73,7.2432,53.5455],
             "minzoom": 14,
@@ -28,7 +28,7 @@
         "kadastralegrenzen": {
             "type": "vector",
             "tiles": [
-                "http://saturnus.geodan.nl/mvt/kadastralegrenzen/{z}/{x}/{y}.mvt"
+                "https://saturnus.geodan.nl/mvt/kadastralegrenzen/{z}/{x}/{y}.mvt"
             ],
             "bounds": [3.38,50.73,7.2432,53.5455],
             "minzoom": 12,
@@ -37,12 +37,12 @@
         "bagagnwoonplaatsen": {
             "type": "vector",
             "tiles": [
-                "http://saturnus.geodan.nl/mvt/woonplaatsen/{z}/{x}/{y}.mvt"
+                "https://saturnus.geodan.nl/mvt/woonplaatsen/{z}/{x}/{y}.mvt"
             ],
             "bounds": [3.38,50.73,7.2432,53.5455],
             "minzoom": 6,
             "maxzoom": 13, 
-            "attribution": "<a href=\"http://geodanmaps.nl\" target=\"gmaps\">&copy; GeodanMaps</a>"
+            "attribution": "<a href=\"https://geodanmaps.nl\" target=\"gmaps\">&copy; GeodanMaps</a>"
         }
     },
     "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=2M7vcRHumvPIiYgsvvJ9", 

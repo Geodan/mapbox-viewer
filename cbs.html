@@ -65,7 +65,7 @@ Papa.parse("data/cbsgemeenten2016.csv", {
 map.on('load', function () {
     map.addSource("gemeenten", {
         type: 'vector',
-        tiles:["http://saturnus.geodan.nl/mvt/gemeenten2016/{z}/{x}/{y}.mvt"],
+        tiles:["https://saturnus.geodan.nl/mvt/gemeenten2016/{z}/{x}/{y}.mvt"],
         "bounds": [3.38,50.73,7.2432,53.5455]
     });
 

@@ -205,7 +205,7 @@ function addRailLayers(map)
 {
     map.addSource("rail", {
             type: 'vector',
-            tiles:["http://saturnus.geodan.nl/mvt/rail/{z}/{x}/{y}.mvt"]
+            tiles:["https://saturnus.geodan.nl/mvt/rail/{z}/{x}/{y}.mvt"]
         });
 
     map.addLayer({

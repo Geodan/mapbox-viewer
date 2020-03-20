@@ -36,49 +36,38 @@ map.on('load', function () {
                   "id":"geotop3d",
                   "type":"vector",
                   "tiles":[
-                    "https://tiles.edugis.nl/data/public.merwede_geotop2d/mvt/{z}/{x}/{y}?geom_column=geom&columns=bro_id,lithoklass,lithoclass,diepte_ond&include_nulls=0"
+                  "https://tiles.edugis.nl/data/public.merwedekzgeotop/mvt/{z}/{x}/{y}?geom_column=geomcross&columns=diepte,naam,lithoklasse,lithostrat,kans_veen,kans_klei,kans_kleiig_zand,kans_zand_fijn,kans_zand_matig_grof,kans_zand_grof,kans_grind&include_nulls=0"
                   ],
                   "minzoom":13,
                   "maxzoom":18,
                 },
-                "source-layer":"public.merwede_geotop2d",
+                "source-layer":"public.merwedekzgeotop",
                 "minzoom":13,
                 "maxzoom":24,
                 "bounds": [5.09372605041148,52.0568791491654,5.12316584903853,52.088450941008],
-                "paint":{
-                  "fill-extrusion-color":[
+                "paint": {
+                  "fill-extrusion-vertical-gradient": false,
+                  "fill-extrusion-color": [
                     "match",
-                    [
-                      "get",
-                      "lithoclass"
-                    ],
-                    "0",
-                    "#c1c3c6",
-                    "1",
-                    "#985045",
-                    "2",
-                    "#189f48",
-                    "3",
-                    "#b6d169",
-                    "4",
+                    ["get","naam",],
+                    "Antropogeen","#c1c3c6",
+                    "Veen","#985045",
+                    "Klei","#189f48",
+                    "Zandige klei","#b6d169",
+                    "Fijn zand","#fff000",
+                    "Matig grof zand","#ffdc00",
+                    "Grof zand","#ffc800",
+                    "Grind","#ffb400",
                     "#000000",
-                    "5",
-                    "#fff000",
-                    "6",
-                    "#ffdc00",
-                    "7",
-                    "#ffc800",
-                    "8",
-                    "#ffb400",
-                    "11",
-                    "#0088ff",
-                    "#000000"
                   ],
-                  "fill-extrusion-height":["number", ["+",0.501,["+",50,["get","diepte_ond"]]]],
-                  "fill-extrusion-base":["number", ["+",50,["get","diepte_ond"]]],
-                  "fill-extrusion-opacity":0.95
-                },
-                //filter: ["any",["==",["get","diepte_ond"],-5],["==",["get","diepte_ond"],-25]]
+                  "fill-extrusion-height": [
+                    "+",50.25,["get","diepte",],
+                  ],
+                  "fill-extrusion-base": [
+                    "+",49.75,["get","diepte"]
+                  ],
+                  "fill-extrusion-opacity": 0.95,
+                }
               });
     map.addLayer({
                 "id":"merwedekanaal_boringen2d",

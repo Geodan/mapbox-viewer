@@ -23,15 +23,17 @@ var map = new mapboxgl.Map({
             "wms-tiles": {
                 "type": "raster",
                 "tiles": [
-            	"http://c.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg"],
-                "tileSize": 256
+                    "https://tiles.edugis.nl/mapproxy/stamen/tiles/stamenwatercolor_EPSG900913/{z}/{x}/{y}.jpg"
+            	],
+                "tileSize": 256,
+                "scheme": "tms",
             }
         },
         "layers": [{
             "id": "aerial-photo",
             "type": "raster",
             "source": "wms-tiles",
-            "minzoom": 5,
+            "minzoom": 0,
             "maxzoom": 22
         }]
     },
