@@ -258,7 +258,7 @@ map.on('load', function () {
     map.on("mousemove", event=>{        
         let features = map.queryRenderedFeatures(event.point);
         if (features.length) {
-            if (oldFeature && oldFeature.id == features[0].id) {
+            if (oldFeature && oldFeature.id === features[0].id && oldFeature.source === features[0].source) {
                 // same feature selected
                 return;
             }
