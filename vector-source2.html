@@ -42,6 +42,11 @@ var map = new mapboxgl.Map({
                         type: 'vector',
                         tiles:["https://saturnus.geodan.nl/mvt/bgtpand/{z}/{x}/{y}.mvt"]
                     },
+                    "ligplaats": {
+                        promoteId: 'gid',
+                        type: 'vector',
+                        tiles:["https://saturnus.geodan.nl/mvt/ligplaats/{z}/{x}/{y}.mvt"]
+                    },
                     "bgtwegdeel": {
                         promoteId: 'ogc_fid',
                         type: 'vector',
@@ -222,6 +227,22 @@ var map = new mapboxgl.Map({
                     }
                 },
                 {
+                    id: "ligplaats",
+                    "minzoom": 13,
+                    "type": "fill",
+                    "source": "ligplaats",
+                    "source-layer": "ligplaats",
+                    "paint": {
+                        "fill-color": [
+                            "case",
+                            ["boolean", ["feature-state", "hover"], false], "red",
+                            "rgba(209, 200, 197, 1)"
+                        ],
+                        "fill-outline-color": "rgba(141, 134, 134, 1)",
+                        "fill-opacity": 1.0
+                    }
+                },
+                {
                     id: "openlayers",
                     "minzoom": 0,
                     "maxzoom": 12.99,
@@ -267,8 +288,11 @@ map.on('load', function () {
                     info += `<span class="label">functie:</span> ${features[0].properties.bgt_functie}<br>
                         <span class="label">fysiekvoorkomen:</span> ${features[0].properties.bgt_fysiekvoorkomen}`;
                     break;
+                case "ligplaats":
+                    info += `<span class="label">bagid:</span> ${features[0].properties.identificatie}`;
+                    break;
                 default: 
-                    info += `<span class="label">unknown layer:</span> ${featuers[0].source}`;
+                    info += `<span class="label">unknown layer:</span> ${features[0].source}`;
             }
             document.querySelector('#infobox').innerHTML = info;
             oldFeature = newFeature;
