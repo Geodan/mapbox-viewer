@@ -65,93 +65,87 @@ function updateHoogte()
 }
 
 function addLayers() {
-    map.addSource("boomregister", 
-        {
-            promoteId: 'boomid',
-            type: 'vector',
-            tiles:["https://saturnus.geodan.nl/mvt/pgsql2mvt/boomregister/{z}/{x}/{y}.mvt"],
-            bounds:[3.35869016315027,50.750546749596,7.22751067314304,53.5153564304624],
-            maxzoom: 19,
-            attribution: '<a href="http://boomregister.nl" target="boomregister">boomregister.nl</a>'
-        });
-    map.addLayer(
-        {
-            id: "boompunt",
-            "minzoom": 13,
-            "maxzoom": 15,
-            "type": "circle",
-            "source": "boomregister",
-            "source-layer": "boompunt",
-            "paint":  {
-                "circle-color":[
-                    "case",["<",["get","hoogte"],5.6],"#ffffcc",
-                    ["<",["get","hoogte"],9.53],"#d9f0a3",
-                    ["<",["get","hoogte"],13.04],"#addd8e",
-                    ["<",["get","hoogte"],15.83],"#78c679",
-                    ["<",["get","hoogte"],18.25],"#41ab5d",
-                    ["<",["get","hoogte"],21.37],"#238443",
-                    ["<=",["get","hoogte"],48],"#005a32",
-                    "#005a32"
-                ],
-                "circle-stroke-color":"white",
-                "circle-opacity":0.8,
-                "circle-radius":[
-                    "case",["<",["get","hoogte"],5.6],2,
-                    ["<",["get","hoogte"],9.53],3,
-                    ["<",["get","hoogte"],13.04],4,
-                    ["<",["get","hoogte"],15.83],5,
-                    ["<",["get","hoogte"],18.25],6,
-                    ["<",["get","hoogte"],21.37],7,
-                    ["<=",["get","hoogte"],48],8,
-                    0
-                ],
-            }
-        });
-    map.addLayer(
-        {
-            id: "boomstam",
-            "minzoom": 15,
-            "maxzoom": 22,
-            "type": "fill-extrusion",
-            "source": "boomregister",
-            "source-layer": "boomstam",
-            "paint": {
-                "fill-extrusion-color": ["case", 
-                    ["boolean", ["feature-state", "hover"], false], "orange", 
-                    ["boolean", ["feature-state", "clicked"], false], "red",
-                    "brown"],
-                "fill-extrusion-height": ["*",0.5,["get", "hoogte"]],
-                "fill-extrusion-opacity": 0.8
-            }
+    map.addSource("boomregister", {
+        promoteId: 'boomid',
+        type: 'vector',
+        tiles:["https://saturnus.geodan.nl/mvt/pgsql2mvt/boomregister/{z}/{x}/{y}.mvt"],
+        bounds:[3.35869016315027,50.750546749596,7.22751067314304,53.5153564304624],
+        maxzoom: 19,
+        attribution: '<a href="http://boomregister.nl" target="boomregister">boomregister.nl</a>'
+    });
+    map.addLayer({
+        id: "boompunt",
+        "minzoom": 13,
+        "maxzoom": 15,
+        "type": "circle",
+        "source": "boomregister",
+        "source-layer": "boompunt",
+        "paint":  {
+            "circle-color":[
+                "case",["<",["get","hoogte"],5.6],"#ffffcc",
+                ["<",["get","hoogte"],9.53],"#d9f0a3",
+                ["<",["get","hoogte"],13.04],"#addd8e",
+                ["<",["get","hoogte"],15.83],"#78c679",
+                ["<",["get","hoogte"],18.25],"#41ab5d",
+                ["<",["get","hoogte"],21.37],"#238443",
+                ["<=",["get","hoogte"],48],"#005a32",
+                "#005a32"
+            ],
+            "circle-stroke-color":"white",
+            "circle-opacity":0.8,
+            "circle-radius":[
+                "case",["<",["get","hoogte"],5.6],2,
+                ["<",["get","hoogte"],9.53],3,
+                ["<",["get","hoogte"],13.04],4,
+                ["<",["get","hoogte"],15.83],5,
+                ["<",["get","hoogte"],18.25],6,
+                ["<",["get","hoogte"],21.37],7,
+                ["<=",["get","hoogte"],48],8,
+                0
+            ],
         }
-    );
-    map.addLayer(
-        {
-            id: "boomkroon",
-            "minzoom": 15,
-            "maxzoom": 22,
-            "type": "fill-extrusion",
-            "source": "boomregister",
-            "source-layer": "boomkroon",
-            "paint": {
-                "fill-extrusion-color":[
-                    "case",
-                    ["boolean", ["feature-state", "clicked"], false], "red",
-                    ["boolean", ["feature-state", "hover"], false], "orange",
-                    ["<",["get","hoogte"],5.6],"#ffffcc",
-                    ["<",["get","hoogte"],9.53],"#d9f0a3",
-                    ["<",["get","hoogte"],13.04],"#addd8e",
-                    ["<",["get","hoogte"],15.83],"#78c679",
-                    ["<",["get","hoogte"],18.25],"#41ab5d",
-                    ["<",["get","hoogte"],21.37],"#238443",
-                    ["<=",["get","hoogte"],48],"#005a32",
-                    "#005a32"],
-                "fill-extrusion-height": ["get", "hoogte"],
-                "fill-extrusion-base" : ["*",0.5, ["get", "hoogte"]],
-                "fill-extrusion-opacity": 0.95
-            }
+    });
+    map.addLayer({
+        id: "boomstam",
+        "minzoom": 15,
+        "maxzoom": 22,
+        "type": "fill-extrusion",
+        "source": "boomregister",
+        "source-layer": "boomstam",
+        "paint": {
+            "fill-extrusion-color": ["case", 
+                ["boolean", ["feature-state", "hover"], false], "orange", 
+                ["boolean", ["feature-state", "clicked"], false], "red",
+                "brown"],
+            "fill-extrusion-height": ["*",0.5,["get", "hoogte"]],
+            "fill-extrusion-opacity": 0.8
         }
-    );    
+    });
+    map.addLayer({
+        id: "boomkroon",
+        "minzoom": 15,
+        "maxzoom": 22,
+        "type": "fill-extrusion",
+        "source": "boomregister",
+        "source-layer": "boomkroon",
+        "paint": {
+            "fill-extrusion-color":[
+                "case",
+                ["boolean", ["feature-state", "clicked"], false], "red",
+                ["boolean", ["feature-state", "hover"], false], "orange",
+                ["<",["get","hoogte"],5.6],"#ffffcc",
+                ["<",["get","hoogte"],9.53],"#d9f0a3",
+                ["<",["get","hoogte"],13.04],"#addd8e",
+                ["<",["get","hoogte"],15.83],"#78c679",
+                ["<",["get","hoogte"],18.25],"#41ab5d",
+                ["<",["get","hoogte"],21.37],"#238443",
+                ["<=",["get","hoogte"],48],"#005a32",
+                "#005a32"],
+            "fill-extrusion-height": ["get", "hoogte"],
+            "fill-extrusion-base" : ["*",0.5, ["get", "hoogte"]],
+            "fill-extrusion-opacity": 0.95
+        }
+    });
 }
 
 map.on('load', function () {
