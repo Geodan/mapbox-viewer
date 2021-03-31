@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; left: 0; height: 100%; width:80%; }
+        #graph { position: absolute; top:0; height: 100%; left: 80%; width: 20%}
+        #currentchart {position: absolute; top: 0; left:0; width:100%; height: 70%; border-bottom: 1px solid gray;}
+        #config {position: absolute; top: 70%; left: 0; width: 100%; height: 30%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<div id='graph'>
+  <canvas id='currentchart' width="1000" height="1800"></canvas>
+  <div id="config">
+    Sortering
+    <form>
+      <input type="radio" id="zetels" name="order" checked value="zetels"><label for="zetels">zetels</label><br>
+      <input type="radio" id="linksrechts" name="order" value="linksrechts"><label for="linksrechts">links - rechts</label>
+    </form>
+  </div>
+</div>
+<script>
+//mapboxgl.accessToken = 'pk.eyJ1IjoiYW5uZWIiLCJhIjoiOVR1NFVoRSJ9.x0d9OLRZADt-GJaDqE0XPg';
+
+let partijen = [
+  {
+    "name": "vvd",
+    "color": "#284cbe",
+    "zetels": 34,
+    "label": "VVD",
+    "rechts": 13
+  },
+  {
+    "name": "d66",
+    "color": "#00af3f",
+    "zetels": 24,
+    "label": "D66",
+    "rechts": 9
+  },
+  {
+    "name": "pvv (partij voor de vrijheid)", 
+    "color": "#7f93d8",
+    "zetels": 17,
+    "label": "PVV",
+    "rechts": 6
+  },
+  {
+    "name": "cda",
+    "color": "#036a71",
+    "zetels": 15,
+    "label": "CDA",
+    "rechts": 10
+  },
+  {
+    "name": "sp (socialistische partij)",
+    "color": "#ff6d6e",
+    "zetels": 9,
+    "label": "SP",
+    "rechts": 1
+  },
+  {
+    "name": "partij van de arbeid (p.v.d.a.)",
+    "color": "#e83a31",
+    "zetels": 9,
+    "label": "PvdA",
+    "rechts": 5
+  },
+  {
+    "name": "groenlinks",
+    "color": "#66deae",
+    "zetels": 8,
+    "label": "Groenlinks",
+    "rechts": 4
+  },
+  {
+    "name": "forum voor democratie",
+    "color": "#793bdc",
+    "zetels": 8,
+    "label": "Forum voor Democratie",
+    "rechts": 15
+  },
+  {
+    "name": "partij voor de dieren",
+    "color": "#006b28",
+    "zetels": 6,
+    "label": "Partij voor de Dieren",
+    "rechts": 2
+  },
+  {
+    "name": "christenunie",
+    "color": "#00b3e7",
+    "zetels": 5,
+    "label": "ChristenUnie",
+    "rechts": 8
+  },
+  {
+    "name": "volt",
+    "color": "#572884",
+    "zetels": 3,
+    "label": "Volt",
+    "rechts": 11
+  },
+  {
+    "name": "ja21",
+    "color": "#1f2756",
+    "zetels": 3,
+    "label": "JA21",
+    "rechts": 14
+  },
+  {
+    "name": "staatkundig gereformeerde partij (sgp)",
+    "color": "#e95d0f",
+    "zetels": 3,
+    "label": "SGP",
+    "rechts": 12
+  },
+  {
+    "name": "denk",
+    "color": "#00b8b3",
+    "zetels": 3,
+    "label": "Denk",
+    "rechts": 3
+  },
+  {
+    "name": "50plus",
+    "color": "#b517ad",
+    "zetels": 1,
+    "label": "50plus",
+    "rechts": 7
+  },
+  {
+    "name": "bbb",
+    "color": "#96c219",
+    "zetels": 1,
+    "label": "BBB",
+    "rechts": 6
+  },
+  {
+    "name": "bij1",
+    "color": "#ff0",
+    "zetels": 1,
+    "label": "BIJ1",
+    "rechts": 3
+  }
+];
+
+let chart;
+
+function updateGraph(feature) {  
+  if (!chart) {
+    let data = {
+      labels: partijen.map(partij=>partij.label),
+      datasets: [{
+        backgroundColor: partijen.map(partij=>partij.color),
+        data: partijen.map(partij=>feature.properties[partij.name])
+      },{
+        backgroundColor: partijen.map(partij=>partij.color),
+        data: partijen.map(partij=>partij.zetels)
+      },{
+        backgroundColor: partijen.map(partij=>partij.color),
+        data: partijen.map(partij=>partij.zetels)
+      }]
+    }
+  
+    let ctx = document.querySelector('#currentchart').getContext('2d');
+    chart = new Chart(ctx, {
+      // The type of chart we want to create
+      type: 'doughnut',
+  
+      // The data for our dataset
+      data: data,
+  
+      // Configuration options go here
+      options: {
+        //legend: true
+      }
+    });
+  } else {
+    chart.data.datasets[0].data = partijen.map(partij=>feature.properties[partij.name]);
+    chart.update();
+  }
+}
+
+function setCompareData(feature) {
+  if (chart && chart.data.datasets.length == 3) {
+    chart.data.datasets[1].data = partijen.map(partij=>feature.properties[partij.name]);
+    chart.update();
+  }
+}
+
+function updateSortering() {
+  let sortering = document.querySelector('input[name="order"]:checked').value;
+  switch (sortering) {
+    case "zetels": 
+      partijen = partijen.sort((partij1, partij2)=>partij1.zetels-partij2.zetels);
+      chart = undefined;
+      break;
+    case "linksrechts": 
+      partijen = partijen.sort((partij1, partij2)=>partij1.rechts - partij2.rechts);
+      chart = undefined;
+      break;
+  }
+}
+let orderbuttons = document.querySelectorAll('input[name="order"]');
+for (const button of orderbuttons){
+  button.addEventListener('click', (e) => {
+    updateSortering();
+  });
+}
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'styles/freetilehosting/positron.json',
+    zoom: 16,
+    center: [4.913, 52.342],
+    pitch: 60,
+    maxPitch: 60
+});
+
+map.on('load', function () {
+    map.addSource("stemdata", {
+      type: "vector",
+      tiles: [`http://leda.geodan.nl:8090/data/anneb.tk2021_aggr/mvt/{z}/{x}/{y}?geom_column=geomcircle&columns=locatie,geldige%20stemmen,ongeldig,blanco,location_inprecise,${partijen.map(partij=>partij.name).join(',')}&include_nulls=0`],
+      bounds: [3.25524871110589,50.7347266517351,7.24079584680245,53.5258520631408],
+        minzoom: 8,
+        maxzoom: 18
+    })
+    let layerData = {
+      "id": "overig",
+      "type": "fill-extrusion",
+      "source": "stemdata",
+      "source-layer": "anneb.tk2021_aggr",
+      "minzoom": 8,
+      "maxzoom": 24,
+      "paint": {
+        "fill-extrusion-color": "grey",
+        "fill-extrusion-height": ["*",["get", "geldige stemmen"],0.1],
+        "fill-extrusion-base": ["*",["+"].concat(partijen.map(partij=>["get", partij.name])),0.1],
+        "fill-extrusion-opacity": 0.95
+      }
+    }
+    map.addLayer(layerData);
+    for (let i = 0; i < partijen.length; i++) {
+      let partijData = {
+        "id": partijen[i].name,
+        "type": "fill-extrusion",
+        "source": "stemdata",
+        "source-layer": "anneb.tk2021_aggr",
+        "minzoom": 8,
+        "maxzoom": 24,
+        "paint": {
+          "fill-extrusion-color": partijen[i].color,
+          "fill-extrusion-height": ["*",["+"].concat(partijen.filter((partij,index)=>index<=i).map(partij=>["get",partij.name])),0.1],
+          "fill-extrusion-base": i==0?0:["*",["+"].concat(partijen.filter((partij,index)=>index<i).map(partij=>["get",partij.name])),0.1],
+          "fill-extrusion-opacity": 0.95
+        }
+      }
+      map.addLayer(partijData);
+    };
+
+    let prevLocatie = '';
+    map.on('mousemove', function (e) {
+      var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
+      if (features.length) {
+        let feature = features[0];
+        if (feature.properties.hasOwnProperty("locatie")) {
+          if (feature.properties.locatie !== prevLocatie) {
+            prevLocatie = feature.properties.locatie;
+            updateGraph(feature)
+          }
+        }
+      }
+    });
+
+    map.on('click', function(e) {
+      let features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
+      if (features.length) {
+        if (features[0].properties.hasOwnProperty("locatie")) {
+          setCompareData(features[0]);
+        }
+      }
+    });
+});
+</script>
+
+</body>
+</html>
