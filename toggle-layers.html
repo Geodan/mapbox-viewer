@@ -4,9 +4,9 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl-dev.js'></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.2/mapbox-gl-dev.js'></script>
     <!--script src='mapbox-gl-js-0.37.0/src/index.js'></script-->
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.2/mapbox-gl.css' rel='stylesheet' />
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -76,7 +76,7 @@ map.on('load', function () {
         //url: 'mapbox://anneb.cj2oqrxsc00572wrp5r8p3pwp-3u7xc'
         "tiles": [
         //"http://saturnus.geodan.nl:9090/data/suriname_dorpen/z/x/y.pbf" 
-        "https://saturnus.geodan.nl/v2/tiles/{z}/{x}/{y}.pbf"
+        "https://tiles.edugis.nl/data/public.suriname_dorpen/mvt/{z}/{x}/{y}?geom_column=geom&columns=naam&include_nulls=0"
       ],
 	"bounds": [-57.4,2.0,-54.0,5.9]
     });
@@ -91,14 +91,14 @@ map.on('load', function () {
             'circle-radius': 8,
             'circle-color': 'rgba(55,148,179,1)'
         },
-        'source-layer': 'suriname_dorpen'
+        'source-layer': 'public.suriname_dorpen'
     });
 
     map.addSource('suriname districten', {
         type: 'vector',
         //url: 'mapbox://mapbox.mapbox-terrain-v2'
         "tiles": [       
-        "https://saturnus.geodan.nl/v2/tiles/{z}/{x}/{y}.pbf"
+            "https://tiles.edugis.nl/data/public.suriname_districten/mvt/{z}/{x}/{y}?geom_column=geom&columns=district,bevolking&include_nulls=0"
            ],
         "bounds": [-58.4,1.46,-54.0,6.0]
     });
@@ -106,7 +106,7 @@ map.on('load', function () {
         'id': 'suriname districten',
         'type': 'line',
         'source': 'suriname districten',
-        'source-layer': 'suriname_districten',
+        'source-layer': 'public.suriname_districten',
         'layout': {
             'visibility': 'visible',
             'line-join': 'round',

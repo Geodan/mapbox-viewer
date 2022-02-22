@@ -31,7 +31,7 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://saturnus.geodan.nl/data/v3.json?key=2M7vcRHumvPIiYgsvvJ9"
+      "url": "https://saturnus.geodan.nl/openmaptiles/data/v3.json?key=2M7vcRHumvPIiYgsvvJ9"
     }
   },
   "sprite": "https://openmaptiles.github.io/positron-gl-style/sprite",

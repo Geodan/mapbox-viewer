@@ -4,8 +4,8 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.2/mapbox-gl.css' rel='stylesheet' />
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:20%; width:100%; }
@@ -24,7 +24,7 @@ var map = new mapboxgl.Map({
     zoom: 16,
     center: [4.913, 52.342],
     pitch: 60,
-    maxPitch: 85
+    maxPitch: 60
 });
 
 map.on('load', function () {
@@ -158,7 +158,7 @@ map.on('load', function () {
           "type": "identity"
         },
         "fill-extrusion-base": 0,
-        "fill-extrusion-opacity": 0.8
+        "fill-extrusion-opacity": 0.95
       }
     });
 
