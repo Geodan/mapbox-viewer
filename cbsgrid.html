@@ -5,8 +5,8 @@
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <!-- mapbox -->
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.2/mapbox-gl.css' rel='stylesheet' />
 
     <!--handsontable -->
     <link href="node_modules/handsontable/dist/handsontable.full.css" rel='stylesheet' />
@@ -17,9 +17,9 @@
 
     <!-- page styles -->
     <style>
-        body { margin:0; padding:0; }
+        body { margin:0; padding:0; font-family: Arial, Helvetica, sans-serif;}
         #map { position:absolute; top:0; bottom:20%; width:100%; }
-        #metadata { position: absolute; bottom: 20%; left: 10px; background: lightyellow; border: 1 px solid darkgray;padding: 2px;}
+        #metadata { position: absolute; top: 10px; left: 10px; background: white; border: 1 px solid darkgray;padding: 2px;min-width: 200px;font-size:xx-large;}
         #table { position:absolute; top:80%; height:20%; width: 100%; outline: 1px solid black; background: white; overflow: auto;}
     </style>
 </head>
@@ -40,17 +40,17 @@ var map = new mapboxgl.Map({
 // First value is the default, used where there is no data
 var stops = [["0", "rgba(0,0,0,0)"]];
 
-var dataKeyField = 'gwb_code_10'; // unique id data elements
-var mapKeyField = 'gm_code'; // unique id map elements
-var dataValueField = 'p_1gezw';
+var uniqueDataId = 'gwb_code_10'; // unique id data elements
+var uniqueMapElementId = 'gm_code'; // unique id map elements
+var selectedDataFieldName = 'p_1gezw';
 var data = null;
 var metadata = null;
 var colNames = null;
-var keyColumn = 0;
+var dataIdColumn = 0;
 
 var grid = null;
 
-function classifyData(keyColumn, valueColumn, data)
+function classifyData(dataIdColumn, valueColumn, data)
 {
     var stops = [["0", "rgba(0,0,0,0)"]];
     var minmax = data.reduce(function(minmax, currentRow) {
@@ -71,7 +71,7 @@ function classifyData(keyColumn, valueColumn, data)
 		var green = 252 - Math.floor((252 - 90) * ratio);
 		var blue = 245 - Math.floor((245 - 50) * ratio);
         var color = "rgba(" + red + "," + green + "," + blue + ",1)";
-        stops.push([data[i][keyColumn], color]);
+        stops.push([data[i][dataIdColumn], color]);
     }
     return stops;
 }
@@ -91,6 +91,11 @@ function updateMetaData(fieldName)
     }
 }
 
+function columnSortClicked(currentSortConfig, destinationSortConfigs){
+    const colName = grid.colHeaders[currentSortConfig[0].column];
+    console.log('colName');
+}
+
 Papa.parse("data/cbsgemeenten2016.csv", {
     "download": true,
     "complete": function(results) {
@@ -107,28 +112,29 @@ Papa.parse("data/cbsgemeenten2016.csv", {
                 sortIndicator: true,
                 manualColumnResize: true,
                 fixedColumnsLeft: 1,
+                //afterColumnSort: columnSortClicked,
                 afterSelection: function(r,c, r2, c2, preventScrolling) {
+                    if (selectedDataFieldName !=colNames[c]) {
+                        // column changed, redraw map
+                        selectedDataFieldName =colNames[c];
+                        updateMetaData(selectedDataFieldName);
+                        stops = classifyData(dataIdColumn, c, data);
+                        map.setPaintProperty('gemeenten', 'fill-color', {
+                            "property": uniqueMapElementId,
+                            "type": "categorical",
+                            "stops": stops
+                        });
+                    }
                     if (r == r2 && c == c2) {
                         // single cell selected
-                        if (dataValueField !=colNames[c]) {
-                            // column changed, redraw map
-                            dataValueField =colNames[c];
-                            updateMetaData(dataValueField);
-                            stops = classifyData(keyColumn, c, data);
-                            map.setPaintProperty('gemeenten', 'fill-color', {
-                                "property": mapKeyField,
-                                "type": "categorical",
-                                "stops": stops
-                            });
-                        }
                         // visualize gemeente on map
-                        map.setFilter('gemeenteselect', ['==', mapKeyField, grid.getDataAtCell(r, colNames.indexOf(dataKeyField))]);
+                        map.setFilter('gemeenteselect', ['==', uniqueMapElementId, grid.getDataAtCell(r, colNames.indexOf(uniqueDataId))]);
                     }
                 }
             });
-            var valueColumn = colNames.indexOf(dataValueField);
-            keyColumn = colNames.indexOf(dataKeyField);
-            stops = classifyData(keyColumn, valueColumn, data);
+            var valueColumn = colNames.indexOf(selectedDataFieldName);
+            dataIdColumn = colNames.indexOf(uniqueDataId);
+            stops = classifyData(dataIdColumn, valueColumn, data);
         }
     });
 
@@ -136,7 +142,7 @@ Papa.parse("data/cbsgemeenten2016meta.csv", {
     "download": true,
     "complete": function(results) {
         metadata = results.data;
-        updateMetaData(dataValueField);
+        updateMetaData(selectedDataFieldName);
     }
 });
 
@@ -159,7 +165,7 @@ map.on('load', function () {
         "filter": [ '==', 'water', 'NEE'],
         "paint": {
             "fill-color": {
-                "property": mapKeyField,
+                "property": uniqueMapElementId,
                 "type": "categorical",
                 "stops": stops
             },
@@ -201,22 +207,22 @@ map.on('load', function () {
             "line-width": 1,
             "line-opacity": 0.8
         },
-        "filter": ["==", mapKeyField, ""]
+        "filter": ["==", uniqueMapElementId, ""]
     }, "place_other");
 });
 map.on("click", function (e) {
     var features = map.queryRenderedFeatures(e.point).map(function(feature){ return {layer: {id: feature.layer.id, type: feature.layer.type}, properties:(feature.properties)};});
     var layer = features.filter(function(feature) {return(feature.layer && feature.layer.id && feature.layer.id=='gemeenten')});
     if (layer.length) {
-        var keyValue = layer[0].properties[mapKeyField];
-        var row = grid.getDataAtCol(colNames.indexOf(dataKeyField)).indexOf(keyValue);
+        var keyValue = layer[0].properties[uniqueMapElementId];
+        var row = grid.getDataAtCol(colNames.indexOf(uniqueDataId)).indexOf(keyValue);
         if (row > -1) {
-            var valueColumn = colNames.indexOf(dataValueField);
+            var valueColumn = colNames.indexOf(selectedDataFieldName);
             grid.selectCell(row, valueColumn, row, valueColumn, true, false);
         }
     } else {
         // gemeente layer not selected
-        map.setFilter('gemeenteselect', ['==', mapKeyField, '']);
+        map.setFilter('gemeenteselect', ['==', uniqueMapElementId, '']);
     }
 });
 </script>

@@ -17,13 +17,13 @@
   },
   "homepage": "https://github.com/Geodan/mapbox-viewer#readme",
   "dependencies": {
-    "handsontable": "^0.38.0",
+    "handsontable": "^11.1.0",
     "mapbox-gl": "^1.13.2",
     "papaparse": "^5.2.0",
     "proj4": "^2.4.4",
     "voronoi": "^1.0.0"
   },
   "devDependencies": {
-    "serve": "^11.2.0"
+    "serve": "^13.0.2"
   }
 }
