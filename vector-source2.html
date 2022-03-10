@@ -84,6 +84,31 @@ var map = new mapboxgl.Map({
                     "fill-opacity": 1.0
                 }
             },{
+                id: "bgtonbegroeidterreindeel",
+                "minzoom": 13,
+                "type": "fill",
+                "source": "bgt",
+                "source-layer": "bgtonbegroeidterreindeel",
+                "paint":  {
+                    "fill-color": [
+                        "case",
+                        ["boolean", ["feature-state", "hover"], false], "red",
+                        ["match", 
+                            ["get","bgt_fysiekvoorkomen"],
+                            "erf", "rgba(230,230,214, 1)",
+                            "gesloten verharding", "rgba(228,229,230, 1)",
+                            "half verhard", "rgba(230,230,229, 1)",
+                            "onverhard", "rgba(230,230,207, 1)",
+                            "open verharding", "rgba(237,228,221, 1)",
+                            "transitie", "rgba(226,226,207, 1)",
+                            "zand", "rgba(240,236,198, 1)",
+                            "black"
+                        ]
+                    ],
+                    /* "fill-outline-color": "#ffffff",*/
+                    "fill-opacity": 1.0
+                }
+            },{
                 id: "bgtwegdeel",
                 "minzoom": 13,
                 "type": "fill",
@@ -180,28 +205,18 @@ var map = new mapboxgl.Map({
                 }
             },
             {
-                id: "bgtonbegroeidterreindeel",
+                id: "bgtscheiding",
                 "minzoom": 13,
                 "type": "fill",
                 "source": "bgt",
-                "source-layer": "bgtonbegroeidterreindeel",
-                "paint":  {
+                "source-layer": "bgtscheiding",
+                "paint": {
                     "fill-color": [
                         "case",
                         ["boolean", ["feature-state", "hover"], false], "red",
-                        ["match", 
-                            ["get","bgt_fysiekvoorkomen"],
-                            "erf", "rgba(230,230,214, 1)",
-                            "gesloten verharding", "rgba(228,229,230, 1)",
-                            "half verhard", "rgba(230,230,229, 1)",
-                            "onverhard", "rgba(230,230,207, 1)",
-                            "open verharding", "rgba(237,228,221, 1)",
-                            "transitie", "rgba(226,226,207, 1)",
-                            "zand", "rgba(240,236,198, 1)",
-                            "black"
-                        ]
+                        "rgba(209, 200, 197, 1)"
                     ],
-                    /* "fill-outline-color": "#ffffff",*/
+                    "fill-outline-color": "rgba(128, 128, 128, 1)",
                     "fill-opacity": 1.0
                 }
             },
@@ -562,7 +577,8 @@ map.on('load', function () {
                     break;
                 case "bgtwegdeel": 
                     info += `<span class="label">functie:</span> ${features[0].properties.bgt_functie}<br>
-                        <span class="label">fysiekvoorkomen:</span> ${features[0].properties.bgt_fysiekvoorkomen}`;
+                        <span class="label">fysiekvoorkomen:</span> ${features[0].properties.bgt_fysiekvoorkomen}<br>
+                        <span class="label">relatieve hoogteligging:</span> ${features[0].properties.relatievehoogteligging}<br>`;
                     break;
                 case "bgtwaterdeel": 
                     info += `<span class="label">type:</span> ${features[0].properties.bgt_type}`
@@ -584,6 +600,10 @@ map.on('load', function () {
                     break;
                 case "ligplaats":
                     info += `<span class="label">bagid:</span> ${features[0].properties.identificatie}`;
+                    break;
+                case "bgtscheiding":
+                    info += `<span class="label">type:</span> ${features[0].properties.bgt_type}<br>
+                            <span class="label">type:</span> ${features[0].properties.plus_type}`
                     break;
                 default: 
                     info += `<span class="label">unknown layer:</span> ${features[0].sourceLayer}`;
