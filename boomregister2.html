@@ -76,11 +76,13 @@
     <div><input name="achtergrond" type="radio" value="2019" id="2019"><label for="2019">2019</label></div>
     <div><input name="achtergrond" type="radio" value="2018" id="2018"><label for="2018">2018</label></div>
     <div><input name="achtergrond" type="radio" value="2017" id="2017"><label for="2017">2017</label></div>
+    <div><input name="achtergrond" type="radio" value="ahn3" id="ahn3"><label for="ahn3">AHN3</label></div>
     <div class="layername">Boomregister</div>
     <div><input name="boomregister" type="radio" value="boomkroon" checked id="boomkroon"><label for="boomkroon">boomkroon</label></div>
-    <div><input name="boomregister" type="radio" value="boomstam" id="boomstam"><label for="boomstam">boomstam</label></div>
+    <div><input name="boomregister" type="radio" value="boompunt" id="boompunt"><label for="boompunt">boompunt</label></div>
 </div>
 <script>
+let boomkroon = true;
 let map = new mapboxgl.Map({
     container: 'map',
     zoom: 16,
@@ -201,11 +203,18 @@ function addLayers() {
     map.addSource("boomregister", {
         promoteId: 'boomid',
         type: 'vector',
-        tiles:["https://saturnus.geodan.nl/mvt/pgsql2mvt/boomregister/{z}/{x}/{y}.mvt"],
+        tiles:["https://saturnus.geodan.nl/mvt/pgsql2mvt/boomregister2020/{z}/{x}/{y}.mvt"],
         bounds:[3.35869016315027,50.750546749596,7.22751067314304,53.5153564304624],
         maxzoom: 19,
         attribution: '<a href="http://boomregister.nl" target="boomregister">boomregister.nl</a>'
     });
+    map.addSource("boomregisterupdates", {
+        type: 'geojson',
+        data: {
+            type: 'FeatureCollection',
+            features: []
+        }
+    })
     map.addSource("boomstamupdates", {
         type: 'geojson',
         data: {
@@ -223,7 +232,7 @@ function addLayers() {
     map.addLayer({
         id: "boompunt",
         "minzoom": 13,
-        "maxzoom": 15,
+        "maxzoom": 22, // 15
         "type": "circle",
         "source": "boomregister",
         "source-layer": "boompunt",
@@ -250,6 +259,7 @@ function addLayers() {
                 ["<=",["get","hoogte"],48],8,
                 0
             ],
+            "circle-pitch-alignment": "map"
         }
     });
     map.addLayer({
@@ -293,6 +303,38 @@ function addLayers() {
             "fill-extrusion-opacity": 0.95
         }
     });
+    map.addLayer({
+        id: "boompuntupdates",
+        "minzoom": 15,
+        "maxzoom": 22,
+        "type": "circle", 
+        "source": "boomregisterupdates",
+        "paint": {
+            "circle-color":[
+                "case",["<",["get","hoogte"],5.6],"#ffffcc",
+                ["<",["get","hoogte"],9.53],"#d9f0a3",
+                ["<",["get","hoogte"],13.04],"#addd8e",
+                ["<",["get","hoogte"],15.83],"#78c679",
+                ["<",["get","hoogte"],18.25],"#41ab5d",
+                ["<",["get","hoogte"],21.37],"#238443",
+                ["<=",["get","hoogte"],48],"#005a32",
+                "#005a32"
+            ],
+            "circle-stroke-color":"white",
+            "circle-opacity":0.8,
+            "circle-radius":[
+                "case",["<",["get","hoogte"],5.6],2,
+                ["<",["get","hoogte"],9.53],3,
+                ["<",["get","hoogte"],13.04],4,
+                ["<",["get","hoogte"],15.83],5,
+                ["<",["get","hoogte"],18.25],6,
+                ["<",["get","hoogte"],21.37],7,
+                ["<=",["get","hoogte"],48],8,
+                0
+            ],
+            "circle-pitch-alignment": "map"
+        }
+    })
     map.addLayer({
         id: "boomkroonupdates",
         "minzoom": 15,
@@ -425,7 +467,8 @@ map.on('load', function () {
         {value: "2018", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2018_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg'},
         {value: "2019", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2019_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg'},
         {value: "2020", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2020_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg"'},
-        {value: "2021", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2021_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'}
+        {value: "2021", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2021_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'},
+        {value: "ahn3", tileSize: 512, url: 'https://t3.edugis.nl/mapproxy/ahn3/service?=WMS&REQUEST=GETMAP&SERVICE=WMS&VERSION=1.1.1&TRANSPARENT=true&LAYERS=ahn3_dsm&FORMAT=image%2Fpng&STYLES=&SRS=EPSG%3A3857&BBOX={bbox-epsg-3857}&WIDTH=512&HEIGHT=512'}
     ];
     let prevValue = `lufo2021`;
     document.querySelector('#map').addEventListener('keydown', (event)=>{
@@ -441,7 +484,8 @@ map.on('load', function () {
     document.querySelectorAll('input[name="achtergrond"]').forEach(radio=>{
         radio.onclick = (e)=>{
             if (e.target.value !== prevValue) {
-                const layer = {id: `lufo${e.target.value}`, type: "raster", source: {type:"raster", tiles: [backgroundlayers.find(layer=>layer.value===e.target.value).url], attribution: '<a href="https://pdok.nl" target="_pdok">pdok.nl</a>'}};
+                const layerInfo = backgroundlayers.find(layer=>layer.value===e.target.value);
+                const layer = {id: `lufo${e.target.value}`, type: "raster", source: {type:"raster", tiles: [layerInfo.url], tileSize: layerInfo.tileSize? layerInfo.tileSize : 256, attribution: '<a href="https://pdok.nl" target="_pdok">pdok.nl</a>'}};
                 map.addLayer(layer, prevValue)
                 if (map.getLayer(prevValue)){
                     map.removeLayer(prevValue);
@@ -453,7 +497,37 @@ map.on('load', function () {
             }
         }
     })
+    document.querySelectorAll('input[name="boomregister"]').forEach(radio=>{
+        radio.onclick = (e) => {
+            if (e.target.value === "boomkroon") {
+                toggleBoomkroon(true);
+            } else {
+                toggleBoomkroon(false);
+            }
+        }
+    });
+    map.on("zoomend", (e) => {
+        if (map.getZoom(e) < 15) {
+            map.setLayoutProperty("boompunt", "visibility", "visible");
+        } else if (boomkroon) {
+            map.setLayoutProperty("boompunt", "visibility", "none");
+        }
+    })
 });
+function toggleBoomkroon(visible) {
+    boomkroon = visible;
+    if (boomkroon) {
+        map.setLayoutProperty("boomkroon", "visibility", "visible");
+        map.setLayoutProperty("boomstam", "visibility", "visible");
+        if (map.getZoom() > 15) {
+            map.setLayoutProperty("boompunt", "visibility", "none");
+        }
+    } else {
+        map.setLayoutProperty("boomkroon", "visibility", "none");
+        map.setLayoutProperty("boomstam", "visibility", "none");
+        map.setLayoutProperty("boompunt", "visibility", "visible")
+    }
+}
 </script>
 
 </body>
