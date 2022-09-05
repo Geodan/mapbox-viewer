@@ -36,7 +36,7 @@
         #editbox { 
             position:absolute; 
             bottom:10px; 
-            left:10px; 
+            right:10px; 
             width:250px; 
             min-height:50px;
             background-color:white;
@@ -45,7 +45,8 @@
             padding: 5px;
             font-family: Arial, Helvetica, sans-serif;
         }
-        #editbox label { font-weight: bold;}
+        #editbox label { font-weight: bold; font-size: x-small}
+        #editbox table {table-layout: fixed; width: 45%}
         #layers {
             position: absolute;
             top: 10px;
@@ -182,6 +183,37 @@ function updateHoogte()
     }
 }
 
+function updateProperty(inputElement) {
+    if (clickedFeature) {
+        let requestMapUpdate = false;
+        let updateBoomkroon = updatedBoomkronen.find(feature=>feature.id==clickedFeature.id);
+        let updateBoomstam = updatedBoomstammen.find(feature=>feature.id==clickedFeature.id);
+        if (!updateBoomkroon || !updateBoomstam) {
+            // first update for this tree
+            let boomkroon = map.queryRenderedFeatures({layers:['boomkroon'],filter:["==",["get","boomid"],clickedFeature.id]});
+            let boomstam = map.queryRenderedFeatures({layers:['boomstam'],filter:["==",["get","boomid"],clickedFeature.id]});
+            if (boomkroon.length && boomstam.length) {
+                updateBoomkroon = {type:"Feature", "id": clickedFeature.id, properties: boomkroon[0].properties, geometry: boomkroon[0].geometry};
+                updateBoomstam = {type:"Feature", "id": clickedFeature.id, properties: boomkroon[0].properties, geometry: boomstam[0].geometry};
+                updatedBoomkronen.push(updateBoomkroon);
+                updatedBoomstammen.push(updateBoomstam);
+                map.setFeatureState(clickedFeature, {clicked: false});
+                deleteVectorFeature(clickedFeature);
+                delete clickedFeature.sourceLayer;
+                clickedFeature.source = 'boomkroonupdates';
+                requestMapUpdate = true;
+            }
+        }
+        if (updateBoomkroon && updateBoomstam) {
+            updateBoomkroon.properties[inputElement.name] = updateBoomstam.properties[inputElement.name] = inputElement.value;
+            map.setFeatureState(clickedFeature, {clicked: true});
+            window.localStorage.setItem('updatedBoomkronen', JSON.stringify(updatedBoomkronen));
+            window.localStorage.setItem('updatedBoomstammen', JSON.stringify(updatedBoomstammen));
+        }
+        updateMap(true);
+    }
+}
+
 function resetMap()
 {
     deletedFeatures = [];
@@ -203,7 +235,7 @@ function addLayers() {
     map.addSource("boomregister", {
         promoteId: 'boomid',
         type: 'vector',
-        tiles:["https://saturnus.geodan.nl/mvt/pgsql2mvt/boomregister2020/{z}/{x}/{y}.mvt"],
+        tiles:["https://saturnus.geodan.nl/mvt/pgsql2mvt/boomregister2022/{z}/{x}/{y}.mvt"],
         bounds:[3.35869016315027,50.750546749596,7.22751067314304,53.5153564304624],
         maxzoom: 19,
         attribution: '<a href="http://boomregister.nl" target="boomregister">boomregister.nl</a>'
@@ -399,16 +431,15 @@ map.on('load', function () {
                 case "boompunt":
                     info += `<span class="label">boom id:</span> ${features[0].properties.boomid}<br>\n
                         <span class="label">hoogte:</span> ${features[0].properties.hoogte}<br>\n
-                        <span class="label">klasse:</span> ${features[0].properties.klasse}<br>\n
-                        <span class="label">solitair:</span> ${features[0].properties.solitair}<br>\n
-                        <span class="label">blad:</span> ${features[0].properties.blad}<br>\n
-                        <span class="label">oppervlak:</span> ${features[0].properties.area}<br>\n
-                        <span class="label">bron:</span> ${features[0].properties.bron}<br>\n
-                        <span class="label">datum:</span> ${features[0].properties.datum}<br>\n
-                        <span class="label">betrouwbaar:</span> ${features[0].properties.betrouwb}<br>\n
-                        <span class="label">gemeentenaam:</span> ${features[0].properties.gemnaam}<br>\n
-                        <span class="label">gemeentecode:</span> ${features[0].properties.gemcode}<br>\n
-                        <span class="label">postcode 4:</span> ${features[0].properties.pc4code}<br>\n
+                        <span class="label">manform:</span> ${features[0].properties.manform}<br>\n
+                        <span class="label">cultivar:</span> ${features[0].properties.cultivar}<br>\n
+                        <span class="label">soort:</span> ${features[0].properties.species}<br>\n
+                        <span class="label">geslacht:</span> ${features[0].properties.genus}<br>\n
+                        <span class="label">familie:</span> ${features[0].properties.family}<br>\n
+                        <span class="label">base:</span> ${features[0].properties.base}<br>\n
+                        <span class="label">oppervlak:</span> ${features[0].properties.cr_area}<br>\n
+                        <span class="label">diameter:</span> ${features[0].properties.cr_diam}<br>\n
+                        <span class="label">ug_cover:</span> ${features[0].properties.ug_cover}<br>\n
                         `;
                     break;
                 default: 
@@ -444,8 +475,15 @@ map.on('load', function () {
                     info += `<span class="label">boom id:</span> ${features[0].properties.boomid}<br>\n
                         <table>
                         <tr><td><label for="hoogte">Hoogte:</label></td><td><input type="text" id="hoogte" name="hoogte" value="${features[0].properties.hoogte}" oninput="updateHoogte()"></td></tr>\n
-                        <tr><td><label for="klasse">Klasse:</label></td><td><input type="text" id="klasse" name="klasse" value="${features[0].properties.klasse}"></td></tr>\n
-                        <tr><td><label for="klasse">Solitair:</label></td><td><input type="text" id="solitair" name="solitair" value="${features[0].properties.solitair}"></td></tr>\n
+                        <tr><td><label for="manform">Manform:</label></td><td><input type="text" id="manform" name="manform" value="${features[0].properties.manform}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="cultivar">Cultivar:</label></td><td><input type="text" id="cultivar" name="cultivar" value="${features[0].properties.cultivar}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="species">Soort:</label></td><td><input type="text" id="species" name="species" value="${features[0].properties.species}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="genus">Geslacht:</label></td><td><input type="text" id="genus" name="genus" value="${features[0].properties.genus}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="family">Familie:</label></td><td><input type="text" id="family" name="family" value="${features[0].properties.family}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="base">Base:</label></td><td><input type="text" id="base" name="base" value="${features[0].properties.base}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="cr_area">Oppervlak:</label></td><td><input type="text" id="cr_area" name="cr_area" value="${features[0].properties.cr_area}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="cr_diam">Diameter:</label></td><td><input type="text" id="cr_diam" name="cr_diam" value="${features[0].properties.cr_diam}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="ug_cover">UG_cover:</label></td><td><input type="text" id="ug_cover" name="ug_cover" value="${features[0].properties.ug_cover}" oninput="updateProperty(this)"></td></tr>\n
                         </table>`;
                     break;
                 default: 
