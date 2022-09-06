@@ -523,7 +523,7 @@ map.on('load', function () {
         radio.onclick = (e)=>{
             if (e.target.value !== prevValue) {
                 const layerInfo = backgroundlayers.find(layer=>layer.value===e.target.value);
-                const layer = {id: `lufo${e.target.value}`, type: "raster", source: {type:"raster", tiles: [layerInfo.url], tileSize: layerInfo.tileSize? layerInfo.tileSize : 256, attribution: '<a href="https://pdok.nl" target="_pdok">pdok.nl</a>'}};
+                const layer = {id: `${e.target.value}`, type: "raster", source: {type:"raster", tiles: [layerInfo.url], tileSize: layerInfo.tileSize? layerInfo.tileSize : 256, attribution: '<a href="https://pdok.nl" target="_pdok">pdok.nl</a>'}};
                 map.addLayer(layer, prevValue)
                 if (map.getLayer(prevValue)){
                     map.removeLayer(prevValue);
