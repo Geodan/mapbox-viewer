@@ -153,36 +153,6 @@ function deleteVectorFeature(feature) {
     }
 }
 
-function updateHoogte()
-{
-    if (clickedFeature) {
-        newhoogte = parseFloat(document.querySelector('#hoogte').value);
-        let updateBoomkroon = updatedBoomkronen.find(feature=>feature.id==clickedFeature.id);
-        let updateBoomstam = updatedBoomstammen.find(feature=>feature.id==clickedFeature.id);
-        if (!updateBoomkroon || !updateBoomstam) {
-            let boomkroon = map.queryRenderedFeatures({layers:['boomkroon'],filter:["==",["get","boomid"],clickedFeature.id]});
-            let boomstam = map.queryRenderedFeatures({layers:['boomstam'],filter:["==",["get","boomid"],clickedFeature.id]});
-            if (boomkroon.length && boomstam.length) {
-                updateBoomkroon = {type:"Feature", "id": clickedFeature.id, properties: boomkroon[0].properties, geometry: boomkroon[0].geometry};
-                updateBoomstam = {type:"Feature", "id": clickedFeature.id, properties: boomkroon[0].properties, geometry: boomstam[0].geometry};
-                updatedBoomkronen.push(updateBoomkroon);
-                updatedBoomstammen.push(updateBoomstam);
-                map.setFeatureState(clickedFeature, {clicked: false});
-                deleteVectorFeature(clickedFeature);
-                delete clickedFeature.sourceLayer;
-                clickedFeature.source = 'boomkroonupdates';
-            }
-        }
-        if (updateBoomkroon && updateBoomstam) {
-            updateBoomkroon.properties.hoogte = updateBoomstam.properties.hoogte = newhoogte;
-            updateMap(true);
-            map.setFeatureState(clickedFeature, {clicked: true});
-            window.localStorage.setItem('updatedBoomkronen', JSON.stringify(updatedBoomkronen));
-            window.localStorage.setItem('updatedBoomstammen', JSON.stringify(updatedBoomstammen));
-        }
-    }
-}
-
 function updateProperty(inputElement) {
     if (clickedFeature) {
         let requestMapUpdate = false;
@@ -205,7 +175,11 @@ function updateProperty(inputElement) {
             }
         }
         if (updateBoomkroon && updateBoomstam) {
-            updateBoomkroon.properties[inputElement.name] = updateBoomstam.properties[inputElement.name] = inputElement.value;
+            if (typeof updateBoomkroon.properties[inputElement.name] === "number") {
+                updateBoomkroon.properties[inputElement.name] = updateBoomstam.properties[inputElement.name] = parseFloat(inputElement.value.replace(',', '.'));
+            } else {
+                updateBoomkroon.properties[inputElement.name] = updateBoomstam.properties[inputElement.name] = inputElement.value;
+            }
             map.setFeatureState(clickedFeature, {clicked: true});
             window.localStorage.setItem('updatedBoomkronen', JSON.stringify(updatedBoomkronen));
             window.localStorage.setItem('updatedBoomstammen', JSON.stringify(updatedBoomstammen));
@@ -474,16 +448,16 @@ map.on('load', function () {
                 case "boomstam":
                     info += `<span class="label">boom id:</span> ${features[0].properties.boomid}<br>\n
                         <table>
-                        <tr><td><label for="hoogte">Hoogte:</label></td><td><input type="text" id="hoogte" name="hoogte" value="${features[0].properties.hoogte}" oninput="updateHoogte()"></td></tr>\n
+                        <tr><td><label for="hoogte">Hoogte:</label></td><td><input type="number" id="hoogte" name="hoogte" value="${features[0].properties.hoogte}" oninput="updateProperty(this)"></td></tr>\n
                         <tr><td><label for="manform">Manform:</label></td><td><input type="text" id="manform" name="manform" value="${features[0].properties.manform}" oninput="updateProperty(this)"></td></tr>\n
                         <tr><td><label for="cultivar">Cultivar:</label></td><td><input type="text" id="cultivar" name="cultivar" value="${features[0].properties.cultivar}" oninput="updateProperty(this)"></td></tr>\n
                         <tr><td><label for="species">Soort:</label></td><td><input type="text" id="species" name="species" value="${features[0].properties.species}" oninput="updateProperty(this)"></td></tr>\n
                         <tr><td><label for="genus">Geslacht:</label></td><td><input type="text" id="genus" name="genus" value="${features[0].properties.genus}" oninput="updateProperty(this)"></td></tr>\n
                         <tr><td><label for="family">Familie:</label></td><td><input type="text" id="family" name="family" value="${features[0].properties.family}" oninput="updateProperty(this)"></td></tr>\n
                         <tr><td><label for="base">Base:</label></td><td><input type="text" id="base" name="base" value="${features[0].properties.base}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="cr_area">Oppervlak:</label></td><td><input type="text" id="cr_area" name="cr_area" value="${features[0].properties.cr_area}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="cr_diam">Diameter:</label></td><td><input type="text" id="cr_diam" name="cr_diam" value="${features[0].properties.cr_diam}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="ug_cover">UG_cover:</label></td><td><input type="text" id="ug_cover" name="ug_cover" value="${features[0].properties.ug_cover}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="cr_area">Oppervlak:</label></td><td><input type="number" disabled id="cr_area" name="cr_area" value="${features[0].properties.cr_area}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="cr_diam">Diameter:</label></td><td><input type="number" disabled id="cr_diam" name="cr_diam" value="${features[0].properties.cr_diam}" oninput="updateProperty(this)"></td></tr>\n
+                        <tr><td><label for="ug_cover">UG_cover:</label></td><td><input type="number" disabled id="ug_cover" name="ug_cover" value="${features[0].properties.ug_cover}" oninput="updateProperty(this)"></td></tr>\n
                         </table>`;
                     break;
                 default: 
