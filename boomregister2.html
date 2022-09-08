@@ -55,6 +55,45 @@
             min-height: 50px;
             background: white;
         }
+        #dialogoverlay {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(204,204,204,0.6);
+        }
+        #dialogwindow {
+            box-shadow: 4px 4px 9px 0px rgba(168,168,168,1);
+            min-width: 250px;
+            min-height: 250px;
+            background-color: white;
+            margin: auto;
+        }
+        #dialogheader {
+          display: block;
+          height: 2em;
+          border-bottom: 1px solid whitesmoke;
+          background-color: #2e7dba;
+          color: white;
+        }
+        #dialogclosebutton {
+          float: right;
+          padding: 2px 10px;
+          margin: 2px;
+          cursor: pointer;
+          font-weight: bold;
+        }
+        #dialogclosebutton:hover {
+          background-color: lightgray;
+          color: black;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +120,14 @@
     <div class="layername">Boomregister</div>
     <div><input name="boomregister" type="radio" value="boomkroon" checked id="boomkroon"><label for="boomkroon">boomkroon</label></div>
     <div><input name="boomregister" type="radio" value="boompunt" id="boompunt"><label for="boompunt">boompunt</label></div>
+</div>
+<div id="dialog" class="hidden">
+    <div id="dialogoverlay">
+        <div id="dialogwindow">
+            <div id="dialogheader"><div id="dialogclosebutton" onclick="dialogClose(this)">x</div></div>
+            <div id="dialogcontent">Hallo!</div>
+        </div>
+    </div>
 </div>
 <script>
 let boomkroon = true;
@@ -116,8 +163,8 @@ let map = new mapboxgl.Map({
 let currentFeature, clickedFeature;
 //window.localStorage.clear();
 let deletedFeatures = window.localStorage.getItem('deletedFeatures');
-let updatedBoomkronen = window.localStorage.getItem('updatedBoomkronen');
-let updatedBoomstammen = window.localStorage.getItem('updatedBoomstammen');
+let updatedBoomkronen = window.localStorage.getItem('updatedBoomkronen'); // props + crown geometries
+let updatedBoomstammen = window.localStorage.getItem('updatedBoomstammen'); // props + stem geometries
 
 deletedFeatures = deletedFeatures ? JSON.parse(deletedFeatures) : [];
 updatedBoomkronen = updatedBoomkronen ? JSON.parse(updatedBoomkronen) : [];
@@ -201,8 +248,16 @@ function resetMap()
     updateMap(true);
 }
 
+function dialogClose() {
+    document.querySelector('#dialog').classList.add('hidden');
+}
+
+function dialogSaveShow() {
+    document.querySelector('#dialog').classList.remove('hidden');
+}
+
 function saveMap() {
-    alert('not yet implemented');
+    dialogSaveShow()
 }
 
 function addLayers() {
