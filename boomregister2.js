@@ -43,9 +43,10 @@ let updateCount = 0;
 function updateMap(force) {
     if (deletedFeatures.length !== deleteCount) {
         deleteCount = deletedFeatures.length;
-        let deleteFilter = ["!", ["in", ["id"], ["literal", deletedFeatures]]];
+        let deleteFilter = ["!", ["in", ["id"], ["literal", deletedFeatures.map(feature=>feature.id)]]];
         map.setFilter('boomkroon', deleteFilter);
         map.setFilter('boomstam', deleteFilter);
+        map.setFilter('boompunt', deleteFilter);
     }
     if (updatedBoomstammen.length !== updateCount || force) {
         updateCount = updatedBoomstammen.length;
@@ -57,7 +58,7 @@ function updateMap(force) {
 function deleteVectorFeature(feature) {
     console.log(feature);
     if (feature.source == "boomregister") {
-        deletedFeatures.push(feature.id);
+        deletedFeatures.push({id:feature.id,entrydate:Date.now()});
         map.setFeatureState(feature, {clicked: false});
         window.localStorage.setItem('deletedFeatures', JSON.stringify(deletedFeatures));
     } else if (feature.source == "boomkroonupdates") {
@@ -95,6 +96,7 @@ function updateProperty(inputElement) {
             } else {
                 updateBoomkroon.properties[inputElement.name] = updateBoomstam.properties[inputElement.name] = inputElement.value;
             }
+            updateBoomkroon.properties.entrydate = updateBoomstam.properties.entrydate = Date.now();
             map.setFeatureState(clickedFeature, {clicked: true});
             window.localStorage.setItem('updatedBoomkronen', JSON.stringify(updatedBoomkronen));
             window.localStorage.setItem('updatedBoomstammen', JSON.stringify(updatedBoomstammen));

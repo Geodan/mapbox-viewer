@@ -10,7 +10,9 @@
 </head>
 <body>
 
-<div id='map'></div>
+<div id='map'>
+    
+</div>
 <div id='buttonbox'>
     <div>edits
     <input type="button" value="reset" id="resetbutton" onclick="resetMap()">
@@ -33,6 +35,7 @@
     <div><input name="boomregister" type="radio" value="boomkroon" checked id="boomkroon"><label for="boomkroon">boomkroon</label></div>
     <div><input name="boomregister" type="radio" value="boompunt" id="boompunt"><label for="boompunt">boompunt</label></div>
 </div>
+<div id="geocoder"><input type="text" placeholder="zoek een locatie" spellcheck="false"><div id="geocoderlist"></div></div>
 <div id="dialog" class="hidden">
     <div id="dialogoverlay">
         <div id="dialogwindow">
@@ -42,5 +45,6 @@
     </div>
 </div>
 <script src="boomregister2.js"></script>
+<script src="boomregistergeocoder.js"></script>
 </body>
 </html>
