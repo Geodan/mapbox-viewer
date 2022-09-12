@@ -5,6 +5,7 @@
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.2.1/client.min.js"></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
     <link rel="stylesheet" href="boomregister2.css">
 </head>
@@ -40,7 +41,15 @@
     <div id="dialogoverlay">
         <div id="dialogwindow">
             <div id="dialogheader"><div id="dialogclosebutton" onclick="dialogClose(this)">x</div></div>
-            <div id="dialogcontent">Hallo!</div>
+            <div id="dialogcontent">
+                <div>Wijzigingen versturen naar het boomregister</div>
+                <div>Aantal nieuwe bomen: <span id="newtrees"></span></div>
+                <div>Aantal gewijzigde bomen: <span id="updatedtrees"></span></div>
+                <div>Aantal verwijderde bomen: <span id="deletedtrees"></span></div>
+                <div><input name="email" id="email" type="email" placeholder="gebruiker@domein.nl" spellcheck="false"><label for="usermail">e-mailadres (optioneel)</label></div>
+                <div><input type="checkbox" name="akkoord" id="akkoord" onchange="dialogPrivacyCheckbox()"><label for="akkoord">Akkoord</label> <a href="boomregisterprivacy.html" target="_privacy">privacystatement</a></div>
+                <div class="button disabled" id="sendbutton" onclick="uploadUpdates()">Versturen</div>
+            </div>
         </div>
     </div>
 </div>

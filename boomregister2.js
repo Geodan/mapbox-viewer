@@ -123,7 +123,71 @@ function dialogClose() {
 }
 
 function dialogSaveShow() {
+    const spanNewTrees = document.querySelector('#newtrees');
+    const spanUpdatedTrees = document.querySelector('#updatedtrees');
+    const spanDeletedTrees = document.querySelector('#deletedtrees');
+
+    spanNewTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id < 0).length}`
+    spanUpdatedTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id >= 0).length}`
+    spanDeletedTrees.innerHTML = `${deletedFeatures.length}`
+
     document.querySelector('#dialog').classList.remove('hidden');
+}
+
+function dialogPrivacyCheckbox() {
+    const privacyCheckbox = document.querySelector('#akkoord');
+    const sendButton = document.querySelector('#sendbutton');
+    if (privacyCheckbox.checked) {
+        sendButton.classList.remove('disabled');
+    } else {
+        sendButton.classList.add('disabled');
+    }
+}
+
+function getFingerPrint() {
+    // Create a new ClientJS object
+    const client = new ClientJS();
+
+    // Get the client's fingerprint id
+    const fingerprint = client.getFingerprint();
+    return fingerprint;
+}
+
+async function uploadUpdates() {
+    const url = 'http://localhost:3030/updatetrees';
+    const fingerprint = getFingerPrint();
+    const usermail = document.querySelector('#email').value;
+    const treeUpdates = {
+        updates: updatedBoomkronen.map(boom=>{
+            return {
+                usermail: usermail,
+                fingerprint: fingerprint,
+                entrydate: boom.properties.entrydate,
+                tree_id: boom.properties.boomid.toString(),
+                height: boom.properties.hoogte,
+                manform: boom.properties.manform,
+                cultivar: boom.properties.cultivar,
+                species: boom.properties.species,
+                genus: boom.properties.genus,
+                family: boom.properties.family,
+                base: boom.properties.base
+            }
+        }),
+        deletes: []
+    }
+    const response = await fetch(url, {
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": JSON.stringify(treeUpdates)
+    });
+    if (response.ok) {
+        let result = await response.json();
+        console.log(result);
+    } else {
+        console.log(`failed to send data`);
+    }
 }
 
 function saveMap() {

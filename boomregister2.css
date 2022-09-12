@@ -11,6 +11,31 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
     padding: 5px;
     font-family: Arial, Helvetica, sans-serif;
 }
+.button {
+    display: inline-block;
+    color: white;
+    background-color: #2e7dba;
+    border-radius: 4px;
+    text-align: center;
+    border: 1px solid lightgray;
+    height: 22px;
+    margin-top: 2px;
+    height: 22px;
+    padding-left: 5px;
+    padding-right: 5px;
+    min-width: 60px;
+}
+.button:hover {
+    cursor: pointer;
+    background-color: #286CA0;
+}
+.button.disabled {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+    pointer-events: none;
+    cursor: default;
+}
 #geocoder {
     position:absolute;
     top: 50px;
@@ -72,11 +97,14 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
     background-color: rgba(204,204,204,0.6);
 }
 #dialogwindow {
-    box-shadow: 4px 4px 9px 0px rgba(168,168,168,1);
+    box-shadow: 4px 4px 9px 0px rgba(100,100,100,1);
     min-width: 250px;
     min-height: 250px;
     background-color: white;
     margin: auto;
+}
+#dialogcontent {
+    padding: 5px;
 }
 #dialogheader {
     display: block;
