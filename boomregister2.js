@@ -26,13 +26,14 @@ let map = new mapboxgl.Map({
         }]
     },
 });
-
+map.addControl(new mapboxgl.NavigationControl({showCompass:true, showZoom: true, visualizePitch: true}), "bottom-left");
 
 let currentFeature, clickedFeature;
 //window.localStorage.clear();
 let deletedFeatures = window.localStorage.getItem('deletedFeatures');
 let updatedBoomkronen = window.localStorage.getItem('updatedBoomkronen'); // props + crown geometries
 let updatedBoomstammen = window.localStorage.getItem('updatedBoomstammen'); // props + stem geometries
+let usermail = window.localStorage.getItem('useremail');
 
 deletedFeatures = deletedFeatures ? JSON.parse(deletedFeatures) : [];
 updatedBoomkronen = updatedBoomkronen ? JSON.parse(updatedBoomkronen) : [];
@@ -127,9 +128,14 @@ function dialogSaveShow() {
     const spanUpdatedTrees = document.querySelector('#updatedtrees');
     const spanDeletedTrees = document.querySelector('#deletedtrees');
 
-    spanNewTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id < 0).length}`
-    spanUpdatedTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id >= 0).length}`
-    spanDeletedTrees.innerHTML = `${deletedFeatures.length}`
+    spanNewTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id < 0).length}`;
+    spanUpdatedTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id >= 0).length}`;
+    spanDeletedTrees.innerHTML = `${deletedFeatures.length - updatedBoomkronen.length}`;
+
+    if (usermail) {
+        const emailInput = document.querySelector('#email');
+        emailInput.value = usermail;
+    }
 
     document.querySelector('#dialog').classList.remove('hidden');
 }
@@ -157,6 +163,7 @@ async function uploadUpdates() {
     const url = 'http://localhost:3030/updatetrees';
     const fingerprint = getFingerPrint();
     const usermail = document.querySelector('#email').value;
+    const undeletedTrees = updatedBoomkronen.map(boom=>boom.properties.boomid);
     const treeUpdates = {
         updates: updatedBoomkronen.map(boom=>{
             return {
@@ -170,10 +177,19 @@ async function uploadUpdates() {
                 species: boom.properties.species,
                 genus: boom.properties.genus,
                 family: boom.properties.family,
-                base: boom.properties.base
+                base: boom.properties.base,
+                cr_area: boom.properties.cr_area,
+                cr_diam: boom.properties.cr_diam
             }
         }),
-        deletes: []
+        deletes: deletedFeatures.filter(boom=>!undeletedTrees.includes(boom.id)).map(boom=>{
+            return {
+                usermail: usermail,
+                fingerprint: fingerprint,
+                entrydate: boom.entrydate,
+                tree_id: boom.id.toString()
+            }
+        })
     }
     const response = await fetch(url, {
         "method": "POST",
@@ -188,6 +204,12 @@ async function uploadUpdates() {
     } else {
         console.log(`failed to send data`);
     }
+}
+
+async function uploadButtonClick() {
+    const usermail = document.querySelector('#email').value;
+    window.localStorage.setItem('useremail', usermail);
+    await uploadUpdates();
 }
 
 function saveMap() {
