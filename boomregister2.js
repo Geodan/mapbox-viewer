@@ -237,6 +237,20 @@ async function uploadButtonClick() {
     if (result.deletes.length || result.updates.length) {
         dialogClose();
         resetMap();
+        const boomkroon = map.getLayer('boomkroon').serialize();
+        const boomstam = map.getLayer('boomstam').serialize();
+        const boompunt = map.getLayer('boompunt').serialize();
+        delete boomkroon.filter;
+        delete boomstam.filter;
+        delete boompunt.filter;
+        map.removeLayer('boomkroon');
+        map.removeLayer('boomstam');
+        map.removeLayer('boompunt');
+        //setTimeout(()=> {
+            map.addLayer(boompunt, 'boompuntupdates');
+            map.addLayer(boomstam, 'boompuntupdates');
+            map.addLayer(boomkroon, 'boompuntupdates')
+        //}, 1000);
     } else {
         dialogErrorMessage('#dialogerror', true);
         setTimeout(()=>{
