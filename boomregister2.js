@@ -1,6 +1,7 @@
 const config = {
-    newTreeStartId:100000000000,
-    updateTreesUrl: 'https://saturnus.geodan.nl/boomregisterservice/updatetrees'
+    newTreeStartId:200000000000,
+    //boomregisterService: 'https://saturnus.geodan.nl/boomregisterservice'
+    boomregisterService: 'http://localhost:3030'
 }
 let newTreeId = window.localStorage.getItem("newTreeId") ? window.localStorage.getItem("newTreeId") : config.newTreeStartId;
 
@@ -85,10 +86,11 @@ function circle(lngLat, radius) {
         }).geometry.coordinates;
 }
 
-function addTree(lngLat) {
+function createTree(lngLat) {
     newId = ++newTreeId;
     window.localStorage.setItem("newTreeId", newId);
     const properties = {
+        entrydate: Date.now(),
         boomid: newId.toString(),
         hoogte: 11.5,
         manform: null,
@@ -220,15 +222,16 @@ function getFingerPrint() {
 async function uploadUpdates() {
     let result = {
         deletes: [],
-        updates: []
+        updates: [],
+        creates: []
     }
-    const url = config.updateTreesUrl;
+    const url = config.boomregisterService + '/updatetrees';
     const fingerprint = getFingerPrint();
     const usermail = document.querySelector('#email').value;
     const undeletedTrees = updatedBoomkronen.map(boom=>boom.properties.boomid);
     const treeUpdates = {
         updates: updatedBoomkronen.map(boom=>{
-            return {
+            const result = {
                 usermail: usermail,
                 fingerprint: fingerprint,
                 entrydate: boom.properties.entrydate,
@@ -241,8 +244,19 @@ async function uploadUpdates() {
                 family: boom.properties.family,
                 base: boom.properties.base,
                 cr_area: boom.properties.cr_area,
-                cr_diam: boom.properties.cr_diam
+                cr_diam: boom.properties.cr_diam,
+                ug_cover: boom.properties.ug_cover
+            };
+            if (boom.properties.boomid > config.newTreeStartId) {
+                result.crowngeojson = JSON.stringify(boom.geometry);
+                const stam = updatedBoomstammen.find(stam=>stam.properties.boomid === boom.properties.boomid);
+                if (stam){
+                    result.stemgeojson = JSON.stringify(stam.geometry);
+                } else {
+                    result.stemgeojson = null;
+                }
             }
+            return result;
         }),
         deletes: deletedFeatures.filter(boom=>!undeletedTrees.includes(boom.id)).map(boom=>{
             return {
@@ -252,7 +266,9 @@ async function uploadUpdates() {
                 tree_id: boom.id.toString()
             }
         })
-    }
+    };
+    treeUpdates.creates = treeUpdates.updates.filter(({tree_id})=>tree_id==='');
+    treeUpdates.updates = treeUpdates.updates.filter(({tree_id})=>tree_id !== '');
     const response = await fetch(url, {
         "method": "POST",
         "headers": {
@@ -283,7 +299,7 @@ async function uploadButtonClick() {
     const usermail = document.querySelector('#email').value;
     window.localStorage.setItem('useremail', usermail);
     const result = await uploadUpdates();
-    if (result.deletes.length || result.updates.length) {
+    if (result.deletes.length || result.updates.length || result.creates.length) {
         dialogClose();
         resetMap();
         const boomkroon = map.getLayer('boomkroon').serialize();
@@ -585,7 +601,7 @@ map.on('load', function () {
             selectFeature(features[0]);
         } else {
             unselectFeature();
-            addTree(event.lngLat);
+            createTree(event.lngLat);
         }
     });
     const backgroundlayers = [
@@ -608,7 +624,7 @@ map.on('load', function () {
             }
         }
         if (event.key === "Insert") {
-            addTree()
+            createTree()
         }
     });
     document.querySelectorAll('input[name="achtergrond"]').forEach(radio=>{
