@@ -160,7 +160,8 @@ function getFingerPrint() {
 }
 
 async function uploadUpdates() {
-    const url = 'http://localhost:3030/updatetrees';
+    //const url = 'http://localhost:3030/updatetrees';
+    const url = 'https://saturnus.geodan.nl/boomregisterservice/updatetrees'
     const fingerprint = getFingerPrint();
     const usermail = document.querySelector('#email').value;
     const undeletedTrees = updatedBoomkronen.map(boom=>boom.properties.boomid);
