@@ -246,11 +246,11 @@ async function uploadButtonClick() {
         map.removeLayer('boomkroon');
         map.removeLayer('boomstam');
         map.removeLayer('boompunt');
-        //setTimeout(()=> {
+        setTimeout(()=> {
             map.addLayer(boompunt, 'boompuntupdates');
             map.addLayer(boomstam, 'boompuntupdates');
             map.addLayer(boomkroon, 'boompuntupdates')
-        //}, 1000);
+        }, 500);
     } else {
         dialogErrorMessage('#dialogerror', true);
         setTimeout(()=>{
