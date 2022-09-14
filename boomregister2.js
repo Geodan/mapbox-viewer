@@ -1,3 +1,9 @@
+const config = {
+    newTreeStartId:100000000000,
+    updateTreesUrl: 'https://saturnus.geodan.nl/boomregisterservice/updatetrees'
+}
+let newTreeId = window.localStorage.getItem("newTreeId") ? window.localStorage.getItem("newTreeId") : config.newTreeStartId;
+
 let boomkroon = true;
 let map = new mapboxgl.Map({
     container: 'map',
@@ -69,6 +75,48 @@ function deleteVectorFeature(feature) {
         window.localStorage.setItem('updatedBoomstammen', JSON.stringify(updatedBoomstammen));
     }
 }
+function circle(lngLat, radius) {
+    return turf.circle(
+        [lngLat.lng, lngLat.lat], 
+        radius / 1000,
+        {
+            steps: 10,
+            units: 'kilometers'
+        }).geometry.coordinates;
+}
+
+function addTree(lngLat) {
+    newId = ++newTreeId;
+    window.localStorage.setItem("newTreeId", newId);
+    const properties = {
+        boomid: newId.toString(),
+        hoogte: 11.5,
+        manform: null,
+        cultivar: null,
+        species: null,
+        genus: null,
+        family: null,
+        base: null,
+        cr_area: 56,
+        cr_diam: 7.6,
+        ug_cover: 32
+    }
+    //const boompunt = {"type": "Feature", properties: properties, geometry: {"type": "Point", "coordinates": [lngLat.lng, lngLat.lat]}};
+    const boomstam = {"type": "Feature", "id": newId, properties: properties, geometry: {"type": "Polygon", "coordinates": circle(lngLat, 0.3)}};
+    const boomkroon = {"type": "Feature", "id": newId, properties: properties, geometry: {"type": "Polygon", "coordinates": circle(lngLat, 3.8)}};
+    updatedBoomkronen.push(boomkroon);
+    updatedBoomstammen.push(boomstam);
+    window.localStorage.setItem('updatedBoomkronen', JSON.stringify(updatedBoomkronen));
+    window.localStorage.setItem('updatedBoomstammen', JSON.stringify(updatedBoomstammen));
+    updateMap(true);
+    //const allFeatures = map.queryRenderedFeatures({layers: ['boomkroonupdates']});
+    setTimeout(()=>{
+        const newFeatures = map.queryRenderedFeatures({layers: ['boomkroonupdates'], filter: ["==",["get", "boomid"],newId.toString()]});
+        if (newFeatures.length) {
+            selectFeature(newFeatures[0]);
+        }
+    },100)
+}
 
 function updateProperty(inputElement) {
     if (clickedFeature) {
@@ -114,7 +162,8 @@ function resetMap()
     window.localStorage.setItem('deletedFeatures', JSON.stringify(deletedFeatures));
     window.localStorage.setItem('updatedBoomkronen', JSON.stringify(updatedBoomkronen));
     window.localStorage.setItem('updatedBoomstammen', JSON.stringify(updatedBoomstammen));
-    
+    window.localStorage.removeItem('newTreeId');
+    newTreeId = config.newTreeStartId;
     deletecount = -1;
     updateMap(true);
 }
@@ -128,9 +177,10 @@ function dialogSaveShow() {
     const spanUpdatedTrees = document.querySelector('#updatedtrees');
     const spanDeletedTrees = document.querySelector('#deletedtrees');
 
-    spanNewTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id < 0).length}`;
-    spanUpdatedTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id >= 0).length}`;
-    spanDeletedTrees.innerHTML = `${deletedFeatures.length - updatedBoomkronen.length}`;
+    const updatedTreeCount = updatedBoomkronen.filter(boomkroon=>boomkroon.id < config.newTreeStartId).length;
+    spanNewTrees.innerHTML = `${updatedBoomkronen.filter(boomkroon=>boomkroon.id > config.newTreeStartId).length}`;
+    spanUpdatedTrees.innerHTML = `${updatedTreeCount}`;
+    spanDeletedTrees.innerHTML = `${deletedFeatures.length - updatedTreeCount}`;
 
     if (usermail) {
         const emailInput = document.querySelector('#email');
@@ -172,8 +222,7 @@ async function uploadUpdates() {
         deletes: [],
         updates: []
     }
-    //const url = 'http://localhost:3030/updatetrees';
-    const url = 'https://saturnus.geodan.nl/boomregisterservice/updatetrees'
+    const url = config.updateTreesUrl;
     const fingerprint = getFingerPrint();
     const usermail = document.querySelector('#email').value;
     const undeletedTrees = updatedBoomkronen.map(boom=>boom.properties.boomid);
@@ -183,7 +232,7 @@ async function uploadUpdates() {
                 usermail: usermail,
                 fingerprint: fingerprint,
                 entrydate: boom.properties.entrydate,
-                tree_id: boom.properties.boomid.toString(),
+                tree_id: boom.properties.boomid < config.newTreeStartId ? boom.properties.boomid.toString() : '',
                 height: boom.properties.hoogte,
                 manform: boom.properties.manform,
                 cultivar: boom.properties.cultivar,
@@ -441,6 +490,48 @@ function addLayers() {
     });
 }
 
+function selectFeature(feature) {
+    if (clickedFeature && clickedFeature.id === feature.id && clickedFeature.source === feature.source && clickedFeature.sourceLayer === feature.sourceLayer) {
+        // same feature clicked
+        return;
+    }
+    if (clickedFeature) {
+        map.setFeatureState(clickedFeature, {clicked: false});
+    }
+    let newFeature= {id: feature.id, source: feature.source, sourceLayer: feature.sourceLayer}
+    map.setFeatureState(newFeature, {clicked: true});
+    let info = ``;
+    switch(feature.layer.id) {
+        case "boomkroon":
+        case "boomkroonupdates":
+        case "boomstam":
+            info += `<span class="label">boom id:</span> ${feature.properties.boomid}<br>\n
+                <table>
+                <tr><td><label for="hoogte">Hoogte:</label></td><td><input type="number" id="hoogte" name="hoogte" value="${feature.properties.hoogte}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="manform">Manform:</label></td><td><input type="text" id="manform" name="manform" value="${feature.properties.manform}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="cultivar">Cultivar:</label></td><td><input type="text" id="cultivar" name="cultivar" value="${feature.properties.cultivar}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="species">Soort:</label></td><td><input type="text" id="species" name="species" value="${feature.properties.species}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="genus">Geslacht:</label></td><td><input type="text" id="genus" name="genus" value="${feature.properties.genus}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="family">Familie:</label></td><td><input type="text" id="family" name="family" value="${feature.properties.family}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="base">Base:</label></td><td><input type="text" id="base" name="base" value="${feature.properties.base}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="cr_area">Oppervlak:</label></td><td><input type="number" disabled id="cr_area" name="cr_area" value="${feature.properties.cr_area}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="cr_diam">Diameter:</label></td><td><input type="number" disabled id="cr_diam" name="cr_diam" value="${feature.properties.cr_diam}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label for="ug_cover">UG_cover:</label></td><td><input type="number" disabled id="ug_cover" name="ug_cover" value="${feature.properties.ug_cover}" oninput="updateProperty(this)"></td></tr>\n
+                </table>`;
+            break;
+        default: 
+            info += `<span class="label">cannot edit layer:</span> ${feature.layer.id}`;
+    }
+    document.querySelector('#editbox').innerHTML = info;
+    clickedFeature = newFeature;
+}
+function unselectFeature() {
+    if (clickedFeature) {
+        map.setFeatureState(clickedFeature, {clicked: false});
+        clickedFeature = null;
+        document.querySelector('#editbox').innerHTML = '';
+    }
+}
 map.on('load', function () {
     //map.showTileBoundaries = true;
     addLayers();
@@ -491,45 +582,10 @@ map.on('load', function () {
     map.on("click", event=>{        
         let features = map.queryRenderedFeatures(event.point);
         if (features.length) {
-            if (clickedFeature && clickedFeature.id === features[0].id && clickedFeature.source === features[0].source && clickedFeature.sourceLayer === features[0].sourceLayer) {
-                // same feature clicked
-                return;
-            }
-            if (clickedFeature) {
-                map.setFeatureState(clickedFeature, {clicked: false});
-            }
-            let newFeature= {id: features[0].id, source: features[0].source, sourceLayer: features[0].sourceLayer}
-            map.setFeatureState(newFeature, {clicked: true});
-            let info = ``;
-            switch(features[0].layer.id) {
-                case "boomkroon":
-                case "boomkroonupdates":
-                case "boomstam":
-                    info += `<span class="label">boom id:</span> ${features[0].properties.boomid}<br>\n
-                        <table>
-                        <tr><td><label for="hoogte">Hoogte:</label></td><td><input type="number" id="hoogte" name="hoogte" value="${features[0].properties.hoogte}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="manform">Manform:</label></td><td><input type="text" id="manform" name="manform" value="${features[0].properties.manform}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="cultivar">Cultivar:</label></td><td><input type="text" id="cultivar" name="cultivar" value="${features[0].properties.cultivar}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="species">Soort:</label></td><td><input type="text" id="species" name="species" value="${features[0].properties.species}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="genus">Geslacht:</label></td><td><input type="text" id="genus" name="genus" value="${features[0].properties.genus}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="family">Familie:</label></td><td><input type="text" id="family" name="family" value="${features[0].properties.family}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="base">Base:</label></td><td><input type="text" id="base" name="base" value="${features[0].properties.base}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="cr_area">Oppervlak:</label></td><td><input type="number" disabled id="cr_area" name="cr_area" value="${features[0].properties.cr_area}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="cr_diam">Diameter:</label></td><td><input type="number" disabled id="cr_diam" name="cr_diam" value="${features[0].properties.cr_diam}" oninput="updateProperty(this)"></td></tr>\n
-                        <tr><td><label for="ug_cover">UG_cover:</label></td><td><input type="number" disabled id="ug_cover" name="ug_cover" value="${features[0].properties.ug_cover}" oninput="updateProperty(this)"></td></tr>\n
-                        </table>`;
-                    break;
-                default: 
-                    info += `<span class="label">cannot edit layer:</span> ${features[0].layer.id}`;
-            }
-            document.querySelector('#editbox').innerHTML = info;
-            clickedFeature = newFeature;
+            selectFeature(features[0]);
         } else {
-            if (clickedFeature) {
-                map.setFeatureState(clickedFeature, {clicked: false});
-                clickedFeature = null;
-                document.querySelector('#editbox').innerHTML = '';
-            }
+            unselectFeature();
+            addTree(event.lngLat);
         }
     });
     const backgroundlayers = [
@@ -550,6 +606,9 @@ map.on('load', function () {
                 clickedFeature = null;
                 document.querySelector('#editbox').innerHTML = '';
             }
+        }
+        if (event.key === "Insert") {
+            addTree()
         }
     });
     document.querySelectorAll('input[name="achtergrond"]').forEach(radio=>{
