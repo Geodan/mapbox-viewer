@@ -138,6 +138,14 @@ function dialogSaveShow() {
     }
 
     document.querySelector('#dialog').classList.remove('hidden');
+
+    if (deletedFeatures.length === 0 && updatedBoomkronen.length === 0) {
+        dialogErrorMessage('#dialognochanges', true);
+        setTimeout(()=>{
+            dialogClose();
+            dialogErrorMessage('#dialognochanges', false);
+        }, 3000)
+    }
 }
 
 function dialogPrivacyCheckbox() {
@@ -160,6 +168,10 @@ function getFingerPrint() {
 }
 
 async function uploadUpdates() {
+    let result = {
+        deletes: [],
+        updates: []
+    }
     //const url = 'http://localhost:3030/updatetrees';
     const url = 'https://saturnus.geodan.nl/boomregisterservice/updatetrees'
     const fingerprint = getFingerPrint();
@@ -200,17 +212,38 @@ async function uploadUpdates() {
         "body": JSON.stringify(treeUpdates)
     });
     if (response.ok) {
-        let result = await response.json();
+        result = await response.json();
         console.log(result);
     } else {
         console.log(`failed to send data`);
+    }
+    return result;
+}
+
+function dialogErrorMessage(id, visible)
+{
+    const dialogErrorElement = document.querySelector(id);
+    if (visible) {
+        dialogErrorElement.classList.remove('hidden');
+    } else {
+        dialogErrorElement.classList.add('hidden');
     }
 }
 
 async function uploadButtonClick() {
     const usermail = document.querySelector('#email').value;
     window.localStorage.setItem('useremail', usermail);
-    await uploadUpdates();
+    const result = await uploadUpdates();
+    if (result.deletes.length || result.updates.length) {
+        dialogClose();
+        resetMap();
+    } else {
+        dialogErrorMessage('#dialogerror', true);
+        setTimeout(()=>{
+            dialogClose();
+            dialogErrorMessage('#dialogerror', false);
+        }, 10000);
+    }
 }
 
 function saveMap() {

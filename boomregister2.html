@@ -49,6 +49,8 @@
                 <div><input name="email" id="email" type="email" placeholder="gebruiker@domein.nl" spellcheck="false"><label for="usermail">e-mailadres (optioneel)</label></div>
                 <div><input type="checkbox" name="akkoord" id="akkoord" onchange="dialogPrivacyCheckbox()"><label for="akkoord">Akkoord</label> <a href="boomregisterprivacy.html" target="_privacy">privacystatement</a></div>
                 <div class="button disabled" id="sendbutton" onclick="uploadButtonClick()">Versturen</div>
+                <div id="dialogerror" class="hidden">Het versturen is helaas niet gelukt<br>De wijzigingen zijn lokaal bewaard<br>Probeer het later opnieuw<br></div>
+                <div id="dialognochanges" class="hidden">Er zijn geen wijzigingen om te versturen</div>
             </div>
         </div>
     </div>
