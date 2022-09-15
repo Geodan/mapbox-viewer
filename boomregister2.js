@@ -530,29 +530,29 @@ function selectFeature(feature) {
         case "boomstam":
             info += `<span class="label">boom id:</span> ${feature.properties.boomid}<br>\n
                 <table>
-                <tr><td><label for="hoogte">Hoogte:</label></td><td><input type="number" id="hoogte" name="hoogte" value="${feature.properties.hoogte}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="manform">Manform:</label></td><td><input type="text" id="manform" name="manform" value="${feature.properties.manform}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="cultivar">Cultivar:</label></td><td><input type="text" id="cultivar" name="cultivar" value="${feature.properties.cultivar}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="species">Soort:</label></td><td><input type="text" id="species" name="species" value="${feature.properties.species}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="genus">Geslacht:</label></td><td><input type="text" id="genus" name="genus" value="${feature.properties.genus}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="family">Familie:</label></td><td><input type="text" id="family" name="family" value="${feature.properties.family}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="base">Base:</label></td><td><input type="text" id="base" name="base" value="${feature.properties.base}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="cr_area">Oppervlak:</label></td><td><input type="number" disabled id="cr_area" name="cr_area" value="${feature.properties.cr_area}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="cr_diam">Diameter:</label></td><td><input type="number" disabled id="cr_diam" name="cr_diam" value="${feature.properties.cr_diam}" oninput="updateProperty(this)"></td></tr>\n
-                <tr><td><label for="ug_cover">UG_cover:</label></td><td><input type="number" disabled id="ug_cover" name="ug_cover" value="${feature.properties.ug_cover}" oninput="updateProperty(this)"></td></tr>\n
+                <tr><td><label class="label" for="hoogte">Hoogte:</label></td><td><input type="number" id="hoogte" name="hoogte" value="${feature.properties.hoogte}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="manform">Manform:</label></td><td><input type="text" id="manform" name="manform" value="${feature.properties.manform}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="cultivar">Cultivar:</label></td><td><input type="text" id="cultivar" name="cultivar" value="${feature.properties.cultivar}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="species">Soort:</label></td><td><input type="text" id="species" name="species" value="${feature.properties.species}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="genus">Geslacht:</label></td><td><input type="text" id="genus" name="genus" value="${feature.properties.genus}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="family">Familie:</label></td><td><input type="text" id="family" name="family" value="${feature.properties.family}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="base">Base:</label></td><td><input type="text" id="base" name="base" value="${feature.properties.base}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="cr_area">Oppervlak:</label></td><td><input type="number" disabled id="cr_area" name="cr_area" value="${feature.properties.cr_area}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="cr_diam">Diameter:</label></td><td><input type="number" disabled id="cr_diam" name="cr_diam" value="${feature.properties.cr_diam}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
+                <tr><td><label class="label" for="ug_cover">UG_cover:</label></td><td><input type="number" disabled id="ug_cover" name="ug_cover" value="${feature.properties.ug_cover}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
                 </table>`;
             break;
         default: 
-            info += `<span class="label">cannot edit layer:</span> ${feature.layer.id}`;
+            info += `<span class="label">Kan deze kaartlaag niet bewerken:</span> ${feature.layer.id}`;
     }
-    document.querySelector('#editbox').innerHTML = info;
+    document.querySelector('#infobox').innerHTML = info;
     clickedFeature = newFeature;
 }
 function unselectFeature() {
     if (clickedFeature) {
         map.setFeatureState(clickedFeature, {clicked: false});
         clickedFeature = null;
-        document.querySelector('#editbox').innerHTML = '';
+        document.querySelector('#infobox').innerHTML = infoHtml;
     }
 }
 map.on('load', function () {
@@ -560,7 +560,14 @@ map.on('load', function () {
     addLayers();
     setLayerVisibilityForZoom();
     updateMap();
-    map.on("mousemove", event=>{        
+    map.on("mousemove", event=>{
+        if (clickedFeature) {
+            if (currentFeature) {
+                map.setFeatureState(currentFeature, {hover: false});
+                currentFeature = null;
+            }
+            return;
+        }
         let features = map.queryRenderedFeatures(event.point);
         if (features.length) {
             if (currentFeature && currentFeature.id === features[0].id && currentFeature.source === features[0].source && currentFeature.sourceLayer === features[0].sourceLayer) {
@@ -572,7 +579,8 @@ map.on('load', function () {
             }
             let newFeature = {source: features[0].source, sourceLayer: features[0].sourceLayer, id: features[0].id};
             map.setFeatureState(newFeature, {hover: true});
-            let info = `<span class="label">layer:</span> ${features[0].layer.id}<br>`;
+            //let info = `<span class="label">layer:</span> ${features[0].layer.id}<br>`;
+            let info = '';
             switch(features[0].layer.id) {
                 case "boomkroon":
                 case "boomkroonupdates":
@@ -630,7 +638,7 @@ map.on('load', function () {
                 deleteVectorFeature(clickedFeature);
                 updateMap();
                 clickedFeature = null;
-                document.querySelector('#editbox').innerHTML = '';
+                document.querySelector('#infobox').innerHTML = infoHtml;
             }
         }
     });
