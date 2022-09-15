@@ -1,13 +1,15 @@
 body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; }
 #map { position:absolute; top:0; bottom:0; width:100%; }
 #buttonbox {
-    position:absolute; 
-    top:10px; 
-    left:10px; 
+    position:absolute;
+    display:flex;
+    justify-content: space-between;
+    bottom:10px; 
+    left:50px; 
     width:250px; 
     background-color:white;
     border:1px solid lightgray;
-    border-radius: 2px;
+    border-radius: 4px;
     padding: 5px;
     font-family: Arial, Helvetica, sans-serif;
 }
@@ -38,31 +40,38 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
 }
 #geocoder {
     position:absolute;
-    top: 50px;
+    top: 10px;
     left: 10px;
     min-height: 30px;
     min-width: 200px;
     background: white;
     border: 1px solid gray;
     padding: 2px;
-    border-radius: 2px;
+    border-radius: 4px;
+}
+#geocoder input {
+    width: 100%;
 }
 #geocoderlist ul li {
     cursor: pointer;
 }
 #infobox { 
     position:absolute; 
-    top:90px; 
+    top:55px; 
     left:10px; 
     width:250px; 
     min-height:50px;
     background-color:white;
     border:1px solid lightgray;
-    border-radius: 2px;
+    border-radius: 4px;
     padding: 5px;
     font-family: Arial, Helvetica, sans-serif;
 }
 #infobox .label { font-weight: bold;}
+#infohtml {
+    font-size: small;
+    line-height: 25px;
+}
 #editbox { 
     position:absolute; 
     bottom:10px; 
@@ -81,9 +90,49 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 250px;
+    width: 150px;
     min-height: 50px;
     background: white;
+    padding: 5px;
+    border-radius: 4px;
+}
+.layeritem {
+    display: flex;
+}
+.layeritem:hover {
+    background-color:#cccccc;
+}
+.layeritem label {
+    flex-grow: 1;
+}
+.title {
+    text-align: center;
+    font-weight: bold;
+}
+#tools {
+    position: absolute;
+    left: 10px;
+    bottom: 110px;
+    width: 29px;
+    background-color: white;
+    fill: none;
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.toolbutton {
+    padding-left: 2px;
+    padding-top: 2px;
+    border-bottom: 1px solid gray;
+    stroke: black;
+}
+.toolbutton:hover {
+    background-color: whitesmoke;
+    stroke: black;
+}
+.toolbutton.active {
+    background-color: black;
+    stroke: white;
 }
 #dialogoverlay {
     position: absolute;
@@ -162,11 +211,6 @@ input[type="search"] {
     border-radius: 50em;
     background: url(https://pro.fontawesome.com/releases/v5.10.0/svgs/solid/times-circle.svg) no-repeat 50% 50%;
     background-size: contain;
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  input[type="search"]:focus::-webkit-search-cancel-button {
     opacity: .3;
     pointer-events: all;
   }

@@ -4,6 +4,7 @@ const config = {
     boomregisterService: 'http://localhost:3030'
 }
 let newTreeId = window.localStorage.getItem("newTreeId") ? window.localStorage.getItem("newTreeId") : config.newTreeStartId;
+let infoHtml = document.querySelector('#infobox').innerHTML;
 
 let boomkroon = true;
 let map = new mapboxgl.Map({
@@ -11,7 +12,7 @@ let map = new mapboxgl.Map({
     zoom: 16,
     maxZoom: 18.99,
     center: [4.913, 52.342],
-    pitch: 60,
+    pitch: 0,
     style: {
         "version": 8,
         "sources": {
@@ -32,10 +33,15 @@ let map = new mapboxgl.Map({
             "maxzoom": 22
         }]
     },
+    locale: {
+        'NavigationControl.ZoomOut': 'Zoom uit',
+        'NavigationControl.ResetBearing': 'Kompasriching en kijkhoek'
+    }
 });
 map.addControl(new mapboxgl.NavigationControl({showCompass:true, showZoom: true, visualizePitch: true}), "bottom-left");
 
 let currentFeature, clickedFeature;
+let treeMode = 'treeselect';
 //window.localStorage.clear();
 let deletedFeatures = window.localStorage.getItem('deletedFeatures');
 let updatedBoomkronen = window.localStorage.getItem('updatedBoomkronen'); // props + crown geometries
@@ -378,6 +384,7 @@ function addLayers() {
                 "#005a32"
             ],
             "circle-stroke-color":"white",
+            "circle-stroke-width": 1,
             "circle-opacity":0.8,
             "circle-radius":[
                 "case",["<",["get","hoogte"],5.6],2,
@@ -551,6 +558,7 @@ function unselectFeature() {
 map.on('load', function () {
     //map.showTileBoundaries = true;
     addLayers();
+    setLayerVisibilityForZoom();
     updateMap();
     map.on("mousemove", event=>{        
         let features = map.queryRenderedFeatures(event.point);
@@ -591,7 +599,7 @@ map.on('load', function () {
             if (currentFeature) {
                 map.setFeatureState(currentFeature, {hover: false});
                 currentFeature = null;
-                document.querySelector('#infobox').innerHTML = '';
+                document.querySelector('#infobox').innerHTML = infoHtml;
             }
         }
     });
@@ -601,7 +609,9 @@ map.on('load', function () {
             selectFeature(features[0]);
         } else {
             unselectFeature();
-            createTree(event.lngLat);
+            if (treeMode === 'treeadd') {
+                createTree(event.lngLat);
+            }
         }
     });
     const backgroundlayers = [
@@ -622,9 +632,6 @@ map.on('load', function () {
                 clickedFeature = null;
                 document.querySelector('#editbox').innerHTML = '';
             }
-        }
-        if (event.key === "Insert") {
-            createTree()
         }
     });
     document.querySelectorAll('input[name="achtergrond"]').forEach(radio=>{
@@ -653,13 +660,18 @@ map.on('load', function () {
         }
     });
     map.on("zoomend", (e) => {
-        if (map.getZoom(e) < 15) {
-            map.setLayoutProperty("boompunt", "visibility", "visible");
-        } else if (boomkroon) {
-            map.setLayoutProperty("boompunt", "visibility", "none");
-        }
+        setLayerVisibilityForZoom()
     })
 });
+function setLayerVisibilityForZoom() {
+    if (map.getZoom() < 15) {
+        map.setLayoutProperty("boompunt", "visibility", "visible");
+    } else if (boomkroon) {
+        map.setLayoutProperty("boompunt", "visibility", "none");
+    } else {
+        map.setLayoutProperty("boompunt", "visibility", "visible");
+    }
+}
 function toggleBoomkroon(visible) {
     boomkroon = visible;
     if (boomkroon) {
@@ -673,4 +685,19 @@ function toggleBoomkroon(visible) {
         map.setLayoutProperty("boomstam", "visibility", "none");
         map.setLayoutProperty("boompunt", "visibility", "visible")
     }
+}
+function setMode(mode) {
+    toolbuttons = document.querySelectorAll('.toolbutton');
+    for (const button of toolbuttons) {
+        button.classList.remove('active');
+    }
+    switch(mode) {
+        case 'treeselect':
+            document.querySelector('#treeselect').classList.add('active');
+            break;
+        case 'treeadd':
+            document.querySelector('#treeadd').classList.add('active');
+            break;
+    }
+    treeMode = mode;
 }

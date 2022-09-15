@@ -16,28 +16,67 @@
     
 </div>
 <div id='buttonbox'>
-    <div>edits
+    <div>Wijzigingen</div>
+    <div>
     <input type="button" value="reset" id="resetbutton" onclick="resetMap()">
-    <input type="button" value="upload" id="resetbutton" onclick="saveMap()">
+    <input type="button" value="verzenden" id="resetbutton" onclick="saveMap()">
     </div>
 </div>
-<div id='infobox'></div>
+<div id='infobox'>
+    <div id="infohtml">
+        <div><u>Beweeg</u> over een boom voor informatie</div>
+        <div><u>Klik</u> op een boom om te bewerken</div>
+        <div>
+        <svg width="24" height="24" version="1.1" viewBox="0 0 6.35 6.35" xmlns="http://www.w3.org/2000/svg">
+            <g stroke-linejoin="round" stroke-miterlimit="10" stroke="#000" fill="none">
+            <path d="m3.0089 4.2436c-0.1614 0.13652-0.37015 0.21908-0.59796 0.21908-0.46223 0-0.84561-0.33893-0.91493-0.78184l-0.010319-0.077523c-0.31141-0.12912-0.52996-0.43603-0.52996-0.79428 0-0.35295 0.21246-0.65617 0.51647-0.78846l0.0127-0.071438c0-0.36539 0.29607-0.66146 0.66146-0.66146l0.066146-0.066146c0-0.47493 0.3847-0.8599 0.8599-0.8599 0.47519 0 0.8599 0.38497 0.8599 0.8599l0.066146 0.066146c0.36539 0 0.66146 0.29607 0.66146 0.66146l0.07911 0.10398c0.26829 0.14552 0.45006 0.42942 0.45006 0.75591 0 0.35613-0.21616 0.66172-0.52493 0.79243l-0.015346 0.07964c-0.069321 0.44265-0.45297 0.78158-0.91493 0.78158-0.22595 0-0.43259-0.080963-0.5932-0.21484z" stroke-width=".26458"/>
+            <line x1="3.0724" x2="3.0724" y1="2.0814" y2="6.0502" stroke-linecap="round" stroke-width=".26458"/>
+            <path d="m3.0724 3.5366c0.58446 0 1.0583-0.47387 1.0583-1.0583" stroke-linecap="round" stroke-width=".26458"/>
+            <path d="m3.0724 3.0075c-0.43841 0-0.79375-0.35534-0.79375-0.79375" stroke-linecap="round" stroke-width=".26458"/>
+            <line x1="5.0505" x2="5.0505" y1="4.7588" y2="5.7206" stroke-linecap="round" stroke-width=".23601"/>
+            <line x1="4.5777" x2="5.5396" y1="5.24" y2="5.24" stroke-linecap="round" stroke-width=".23601"/>
+            </g>
+        </svg> om een boom toe te voegen
+        </div>
+    </div>
+</div>
 <div id='editbox'></div>
 
 <div id='layers'>
-    <div class="ẗitle">Kaartlagen</div>
-    <div class="layername">Luchtfoto</div>
-    <div><input name="achtergrond" type="radio" value="2021" checked id="2021"><label for="2021">2021</label></div>
-    <div><input name="achtergrond" type="radio" value="2020" id="2020"><label for="2020">2020</label></div>
-    <div><input name="achtergrond" type="radio" value="2019" id="2019"><label for="2019">2019</label></div>
-    <div><input name="achtergrond" type="radio" value="2018" id="2018"><label for="2018">2018</label></div>
-    <div><input name="achtergrond" type="radio" value="2017" id="2017"><label for="2017">2017</label></div>
-    <div><input name="achtergrond" type="radio" value="ahn3" id="ahn3"><label for="ahn3">AHN3</label></div>
+    <div class="title">Kaartlagen</div>
+    <div class="layername">Luchtfoto's</div>
+    <div class="layeritem"><input name="achtergrond" type="radio" value="2021" checked id="2021"><label for="2021">2021</label></div>
+    <div class="layeritem"><input name="achtergrond" type="radio" value="2020" id="2020"><label for="2020">2020</label></div>
+    <div class="layeritem"><input name="achtergrond" type="radio" value="2019" id="2019"><label for="2019">2019</label></div>
+    <div class="layeritem"><input name="achtergrond" type="radio" value="2018" id="2018"><label for="2018">2018</label></div>
+    <div class="layeritem"><input name="achtergrond" type="radio" value="2017" id="2017"><label for="2017">2017</label></div>
+    <div class="layeritem"><input name="achtergrond" type="radio" value="ahn3" id="ahn3"><label for="ahn3">AHN3</label></div>
     <div class="layername">Boomregister</div>
-    <div><input name="boomregister" type="radio" value="boomkroon" checked id="boomkroon"><label for="boomkroon">boomkroon</label></div>
-    <div><input name="boomregister" type="radio" value="boompunt" id="boompunt"><label for="boompunt">boompunt</label></div>
+    <div class="layeritem"><input name="boomregister" type="radio" value="boomkroon" checked id="boomkroon"><label for="boomkroon">boomkroon</label></div>
+    <div class="layeritem"><input name="boomregister" type="radio" value="boompunt" id="boompunt"><label for="boompunt">boompunt</label></div>
 </div>
-<div id="geocoder"><input type="search" placeholder="zoek een locatie" spellcheck="false"><div id="geocoderlist"></div></div>
+<div id="geocoder"><input type="search" placeholder="zoek een adres of plaats" spellcheck="false"><div id="geocoderlist"></div></div>
+<div id="tools">
+    <div id="treeselect" class="toolbutton active" onclick="setMode('treeselect')" title="bomen selecteren">
+        <svg width="24" height="24" viewBox="0 0 6.3499999 6.3500002" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <g><path stroke-linejoin="round" stroke-miterlimit="10" d="M 3.61962,3.28767 4.54566,2.36163 0.841499,1.03871 2.16441,4.74288 3.09045,3.81684 4.81024,5.53662 5.33941,5.00746 Z"
+                style="stroke-width:0.25294167;stroke-miterlimit:10;" />
+            </g>
+        </svg>
+    </div>
+    <div id="treeadd" class="toolbutton" onclick="setMode('treeadd')" title="bomen toevoegen">
+        <svg width="24" height="24" version="1.1" viewBox="0 0 6.35 6.35" xmlns="http://www.w3.org/2000/svg">
+            <g stroke-linejoin="round" stroke-miterlimit="10">
+            <path d="m3.0089 4.2436c-0.1614 0.13652-0.37015 0.21908-0.59796 0.21908-0.46223 0-0.84561-0.33893-0.91493-0.78184l-0.010319-0.077523c-0.31141-0.12912-0.52996-0.43603-0.52996-0.79428 0-0.35295 0.21246-0.65617 0.51647-0.78846l0.0127-0.071438c0-0.36539 0.29607-0.66146 0.66146-0.66146l0.066146-0.066146c0-0.47493 0.3847-0.8599 0.8599-0.8599 0.47519 0 0.8599 0.38497 0.8599 0.8599l0.066146 0.066146c0.36539 0 0.66146 0.29607 0.66146 0.66146l0.07911 0.10398c0.26829 0.14552 0.45006 0.42942 0.45006 0.75591 0 0.35613-0.21616 0.66172-0.52493 0.79243l-0.015346 0.07964c-0.069321 0.44265-0.45297 0.78158-0.91493 0.78158-0.22595 0-0.43259-0.080963-0.5932-0.21484z" stroke-width=".26458"/>
+            <line x1="3.0724" x2="3.0724" y1="2.0814" y2="6.0502" stroke-linecap="round" stroke-width=".26458"/>
+            <path d="m3.0724 3.5366c0.58446 0 1.0583-0.47387 1.0583-1.0583" stroke-linecap="round" stroke-width=".26458"/>
+            <path d="m3.0724 3.0075c-0.43841 0-0.79375-0.35534-0.79375-0.79375" stroke-linecap="round" stroke-width=".26458"/>
+            <line x1="5.0505" x2="5.0505" y1="4.7588" y2="5.7206" stroke-linecap="round" stroke-width=".23601"/>
+            <line x1="4.5777" x2="5.5396" y1="5.24" y2="5.24" stroke-linecap="round" stroke-width=".23601"/>
+            </g>
+        </svg>
+    </div>
+</div>
 <div id="dialog" class="hidden">
     <div id="dialogoverlay">
         <div id="dialogwindow">
