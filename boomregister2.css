@@ -74,7 +74,7 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
     padding: 5px;
     font-family: Arial, Helvetica, sans-serif;
 }
-#infobox .label { font-weight: bold;}
+#infobox .label { font-weight: bold; font-size: x-small;}
 #infobox div {font-size: small};
 #infohtml {
     font-size: small;

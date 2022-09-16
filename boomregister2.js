@@ -542,7 +542,8 @@ function selectFeature(feature) {
                 <tr><td><label class="label" for="cr_area">Oppervlak:</label></td><td><input type="number" disabled id="cr_area" name="cr_area" value="${feature.properties.cr_area}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
                 <tr><td><label class="label" for="cr_diam">Diameter:</label></td><td><input type="number" disabled id="cr_diam" name="cr_diam" value="${feature.properties.cr_diam}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
                 <tr><td><label class="label" for="ug_cover">UG_cover:</label></td><td><input type="number" disabled id="ug_cover" name="ug_cover" value="${feature.properties.ug_cover}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                </table>`;
+                </table>
+                <button onclick="deleteTree()">verwijderen</button>`;
             break;
         default: 
             info += `<span class="label">Kan deze kaartlaag niet bewerken:</span> ${feature.layer.id}`;
@@ -636,12 +637,7 @@ map.on('load', function () {
     let prevValue = `lufo2021`;
     document.querySelector('#map').addEventListener('keydown', (event)=>{
         if (event.key === "Backspace" || event.key === "Delete") {
-            if (clickedFeature) {
-                deleteVectorFeature(clickedFeature);
-                updateMap();
-                clickedFeature = null;
-                document.querySelector('#infobox').innerHTML = infoHtml;
-            }
+            deleteTree();
         }
     });
     document.querySelectorAll('input[name="achtergrond"]').forEach(radio=>{
@@ -673,6 +669,14 @@ map.on('load', function () {
         setLayerVisibilityForZoom()
     })
 });
+function deleteTree() {
+    if (clickedFeature) {
+        deleteVectorFeature(clickedFeature);
+        updateMap();
+        clickedFeature = null;
+        document.querySelector('#infobox').innerHTML = infoHtml;
+    }
+}
 function setLayerVisibilityForZoom() {
     if (map.getZoom() < 15) {
         map.setLayoutProperty("boompunt", "visibility", "visible");
