@@ -344,7 +344,7 @@ function addLayers() {
         tiles:["https://saturnus.geodan.nl/mvt/pgsql2mvt/boomregister2022/{z}/{x}/{y}.mvt"],
         bounds:[3.35869016315027,50.750546749596,7.22751067314304,53.5153564304624],
         maxzoom: 19,
-        attribution: '<a href="http://boomregister.nl" target="boomregister">boomregister.nl</a>'
+        attribution: '<a href="http://boomregister.nl" target="boomregister" translate="no">boomregister.nl</a>'
     });
     map.addSource("boomregisterupdates", {
         type: 'geojson',
