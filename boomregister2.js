@@ -530,19 +530,19 @@ function selectFeature(feature) {
         case "boomkroon":
         case "boomkroonupdates":
         case "boomstam":
-            info += `<span class="label">boom id:</span> ${feature.properties.boomid}<br>\n
-                <table>
-                <tr><td><label class="label" for="hoogte">Hoogte:</label></td><td><input type="number" id="hoogte" name="hoogte" value="${feature.properties.hoogte}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="manform">Manform:</label></td><td><input type="text" id="manform" name="manform" value="${feature.properties.manform}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="cultivar">Cultivar:</label></td><td><input type="text" id="cultivar" name="cultivar" value="${feature.properties.cultivar}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="species">Soort:</label></td><td><input type="text" id="species" name="species" value="${feature.properties.species}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="genus">Geslacht:</label></td><td><input type="text" id="genus" name="genus" value="${feature.properties.genus}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="family">Familie:</label></td><td><input type="text" id="family" name="family" value="${feature.properties.family}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="base">Base:</label></td><td><input type="text" id="base" name="base" value="${feature.properties.base}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="cr_area">Oppervlak:</label></td><td><input type="number" disabled id="cr_area" name="cr_area" value="${feature.properties.cr_area}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="cr_diam">Diameter:</label></td><td><input type="number" disabled id="cr_diam" name="cr_diam" value="${feature.properties.cr_diam}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                <tr><td><label class="label" for="ug_cover">UG_cover:</label></td><td><input type="number" disabled id="ug_cover" name="ug_cover" value="${feature.properties.ug_cover}" oninput="updateProperty(this)" spellcheck="false"></td></tr>\n
-                </table>
+            info += `<span class="label">boom id:</span> ${feature.properties.boomid}<br>
+                <div class="table">
+                <label class="label" for="hoogte">Hoogte:</label><div class="input"><input type="number" id="hoogte" name="hoogte" value="${feature.properties.hoogte}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="manform">Manform:</label><div class="input"><input type="text" id="manform" name="manform" value="${feature.properties.manform}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="cultivar">Cultivar:</label><div class="input"><input type="text" id="cultivar" name="cultivar" value="${feature.properties.cultivar}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="species">Soort:</label><div class="input"><input type="text" id="species" name="species" value="${feature.properties.species}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="genus">Geslacht:</label><div class="input"><input type="text" id="genus" name="genus" value="${feature.properties.genus}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="family">Familie:</label><div class="input"><input type="text" id="family" name="family" value="${feature.properties.family}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="base">Base:</label><div class="input"><input type="text" id="base" name="base" value="${feature.properties.base}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="cr_area">Oppervlak:</label><div class="input"><input type="number" disabled id="cr_area" name="cr_area" value="${feature.properties.cr_area}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="cr_diam">Diameter:</label><div class="input"><input type="number" disabled id="cr_diam" name="cr_diam" value="${feature.properties.cr_diam}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="ug_cover">UG_cover:</label><div class="input"><input type="number" disabled id="ug_cover" name="ug_cover" value="${feature.properties.ug_cover}" oninput="updateProperty(this)" spellcheck="false"></div>
+                </div>
                 <button onclick="deleteTree()">verwijderen</button>`;
             break;
         default: 
