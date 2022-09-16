@@ -1,10 +1,11 @@
 const config = {
     newTreeStartId:200000000000,
-    //boomregisterService: 'https://saturnus.geodan.nl/boomregisterservice'
-    boomregisterService: 'http://localhost:3030'
+    boomregisterService: 'https://saturnus.geodan.nl/boomregisterservice'
+    //boomregisterService: 'http://localhost:3030'
 }
 let newTreeId = window.localStorage.getItem("newTreeId") ? window.localStorage.getItem("newTreeId") : config.newTreeStartId;
 let infoHtml = document.querySelector('#infobox').innerHTML;
+let closeTimeout
 
 let boomkroon = true;
 let map = new mapboxgl.Map({
@@ -178,6 +179,9 @@ function resetMap()
 
 function dialogClose() {
     document.querySelector('#dialog').classList.add('hidden');
+    dialogErrorMessage('#dialognochanges', false);
+    dialogErrorMessage('#dialogerror', false);
+    clearTimeout(closeTimeout);
 }
 
 function dialogSaveShow() {
@@ -199,9 +203,8 @@ function dialogSaveShow() {
 
     if (deletedFeatures.length === 0 && updatedBoomkronen.length === 0) {
         dialogErrorMessage('#dialognochanges', true);
-        setTimeout(()=>{
+        closeTimeout = setTimeout(()=>{
             dialogClose();
-            dialogErrorMessage('#dialognochanges', false);
         }, 3000)
     }
 }
@@ -324,9 +327,8 @@ async function uploadButtonClick() {
         }, 500);
     } else {
         dialogErrorMessage('#dialogerror', true);
-        setTimeout(()=>{
+        closeTimeout = setTimeout(()=>{
             dialogClose();
-            dialogErrorMessage('#dialogerror', false);
         }, 10000);
     }
 }
@@ -585,17 +587,17 @@ map.on('load', function () {
                 case "boomkroon":
                 case "boomkroonupdates":
                 case "boompunt":
-                    info += `<span class="label">boom id:</span> ${features[0].properties.boomid}<br>\n
-                        <span class="label">hoogte:</span> ${features[0].properties.hoogte}<br>\n
-                        <span class="label">manform:</span> ${features[0].properties.manform}<br>\n
-                        <span class="label">cultivar:</span> ${features[0].properties.cultivar}<br>\n
-                        <span class="label">soort:</span> ${features[0].properties.species}<br>\n
-                        <span class="label">geslacht:</span> ${features[0].properties.genus}<br>\n
-                        <span class="label">familie:</span> ${features[0].properties.family}<br>\n
-                        <span class="label">base:</span> ${features[0].properties.base}<br>\n
-                        <span class="label">oppervlak:</span> ${features[0].properties.cr_area}<br>\n
-                        <span class="label">diameter:</span> ${features[0].properties.cr_diam}<br>\n
-                        <span class="label">ug_cover:</span> ${features[0].properties.ug_cover}<br>\n
+                    info += `<div><span class="label">boom id:</span> ${features[0].properties.boomid}</div>
+                        <div><span class="label">hoogte:</span> ${features[0].properties.hoogte}</div>
+                        <div><span class="label">manform:</span> ${features[0].properties.manform}</div>
+                        <div><span class="label">cultivar:</span> ${features[0].properties.cultivar}</div>
+                        <div><span class="label">soort:</span> ${features[0].properties.species}</div>
+                        <div><span class="label">geslacht:</span> ${features[0].properties.genus}</div>
+                        <div><span class="label">familie:</span> ${features[0].properties.family}</div>
+                        <div><span class="label">base:</span> ${features[0].properties.base}</div>
+                        <div><span class="label">oppervlak:</span> ${features[0].properties.cr_area}</div>
+                        <div><span class="label">diameter:</span> ${features[0].properties.cr_diam}</div>
+                        <div><span class="label">ug_cover:</span> ${features[0].properties.ug_cover}</div>
                         `;
                     break;
                 default: 

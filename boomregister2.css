@@ -6,12 +6,13 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
     justify-content: space-between;
     bottom:10px; 
     left:50px; 
-    width:250px; 
+    width:210px; 
     background-color:white;
     border:1px solid lightgray;
     border-radius: 4px;
     padding: 5px;
     font-family: Arial, Helvetica, sans-serif;
+    font-size: small;
 }
 .button {
     display: inline-block;
@@ -43,14 +44,17 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
     top: 10px;
     left: 10px;
     min-height: 30px;
-    min-width: 200px;
+    min-width: 250px;
     background: white;
     border: 1px solid gray;
-    padding: 2px;
+    padding: 5px;
     border-radius: 4px;
 }
 #geocoder input {
     width: 100%;
+}
+#geocoderlist {
+    font-size: smaller;
 }
 #geocoderlist ul li {
     cursor: pointer;
@@ -70,7 +74,8 @@ body { margin:0; padding:0; font-family: 'Lucida Sans', 'Lucida Sans Regular', '
     padding: 5px;
     font-family: Arial, Helvetica, sans-serif;
 }
-#infobox .label { font-weight: bold;font-size: x-small}
+#infobox .label { font-weight: bold;}
+#infobox div {font-size: small};
 #infohtml {
     font-size: small;
     line-height: 25px;
