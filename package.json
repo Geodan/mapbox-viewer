@@ -24,6 +24,6 @@
     "voronoi": "^1.0.0"
   },
   "devDependencies": {
-    "serve": "^13.0.2"
+    "serve": "^14.2.0"
   }
 }
