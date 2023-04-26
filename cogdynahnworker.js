@@ -108,11 +108,10 @@ const unproject = (p, pixelMatrixInverse, worldSize) => {
 }
 
 const openCOG = async (url) => {
-    const result = {images: []}
+    const result = {}
     // get the COG
     const tiff = result.tiff = await GeoTIFF.fromUrl(url);
     const mainImage = await tiff.getImage(0);
-    result.images.push(mainImage);
     const geokeys = result.geokeys = mainImage.getGeoKeys();
     if (geokeys) {
         // get tiff data projection and
@@ -129,11 +128,11 @@ const openCOG = async (url) => {
         result.bbox = [sw[0], sw[1], ne[0], ne[1]];
     }
     // get metadata for overlay images
-    const imageCount = await tiff.getImageCount();
+    /* const imageCount = await tiff.getImageCount();
     for (let i = 1; i < imageCount; i++) {
         const image = await tiff.getImage(i);
         result.images.push(image);
-    }
+    }*/
     console.log(result);
     return result;
 }
