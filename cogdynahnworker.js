@@ -142,11 +142,20 @@ const openCOG = async (url) => {
     return result;
 }
 
-let pendingRequests = 0;
-let cancelPendingRequestsFlag = false;
+let imageDataRequestCounter = 0;
+
+const wait = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const getImageData = async (renderType, canvasbbox, w, h, pixelMatrixInverse, worldSize) => {
-    pendingRequests++;
+    imageDataRequestCounter++;
+    const currentImageDataRequestCounter = imageDataRequestCounter;
+    await wait(100);
+    if (currentImageDataRequestCounter !== imageDataRequestCounter) {
+        postMessage({cmd: 'getImageData', result: 'cancelled'});
+        return;
+    }
     if (cogImage) {
         const cogBbox = cogImage.bbox;
         if (cogBbox[0] <= canvasbbox[2] && cogBbox[2] > canvasbbox[0] && cogBbox[1] <= canvasbbox[3] && cogBbox[3] > canvasbbox[1]) {
@@ -161,6 +170,10 @@ const getImageData = async (renderType, canvasbbox, w, h, pixelMatrixInverse, wo
             console.log('loading raster data');
             const data = await cogImage.tiff.readRasters(options);
             console.log('done loading raster data');
+            if (currentImageDataRequestCounter !== imageDataRequestCounter) {
+                postMessage({cmd: 'getImageData', result: 'cancelled'});
+                return;
+            }
             let minFloatValue = 100000000;
             let maxFloatValue = -100000000;
             for (let i = 0; i < data[0].length; i++) {
@@ -181,8 +194,8 @@ const getImageData = async (renderType, canvasbbox, w, h, pixelMatrixInverse, wo
             // for every longitude and latitude in the canvasbbox get the correspoding tiff value
             // the longitude and latitude of the cogImage pixels are not the same as the canvasbbox
             // so we need to get the tiff value for the corresponding pixel in the cogImage
-            for (let x = 0; x < w && !cancelPendingRequestsFlag; x++) {
-                for (let y = 0; y < h && !cancelPendingRequestsFlag; y++) {
+            for (let x = 0; x < w; x++) {
+                for (let y = 0; y < h; y++) {
                     const canvasLonLat = unproject({x:x, y:y}, pixelMatrixInverse, worldSize);
                     const tiffXY = cogImage.projection.inverse([canvasLonLat.lng, canvasLonLat.lat]);
                     const imageX = Math.round((tiffXY[0] - tiffImageSouthWest[0]) / imgResX);
@@ -232,38 +245,19 @@ const getImageData = async (renderType, canvasbbox, w, h, pixelMatrixInverse, wo
                     }
                 }
             }
-            if (!cancelPendingRequestsFlag) {
+            await wait(1)
+            if (currentImageDataRequestCounter === imageDataRequestCounter) {
                 postMessage({cmd: 'getImageData', result: 'ok', imageData: imageData, canvasbbox: canvasbbox});
             } else {
                 postMessage({cmd: 'getImageData', result: 'cancelled'});
             } 
         } else {
-            if (!cancelPendingRequestsFlag) {
-                postMessage({cmd: 'getImageData', result: 'no overlap'});
-            } else {
-                postMessage({cmd: 'getImageData', result: 'cancelled'});
-            }
+            postMessage({cmd: 'getImageData', result: 'no overlap'});
         }
     } else {
         postMessage({cmd: 'getImageData', result: 'no cogImage'});
     }
-    pendingRequests--;
 }
-
-const wait = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-const cancelPendingRequests = async () => {
-    if (pendingRequests > 0) {
-        cancelPendingRequestsFlag = true;
-    }
-    while (pendingRequests > 0) {
-        await wait(100);
-    }
-    cancelPendingRequestsFlag = false;
-}
-
 
 onmessage = async (e) => {
     switch(e.data.cmd) {
@@ -273,7 +267,7 @@ onmessage = async (e) => {
             console.log(`worker opened COG ${e.data.url}`);
             break;
         case 'getImageData':
-            await cancelPendingRequests();
+            console.log(`worker getImageData ${e.data.renderType} (${imageDataRequestCounter})`);
             getImageData(e.data.renderType, e.data.canvasbbox, e.data.width, e.data.height, e.data.pixelMatrixInverse, e.data.worldSize);
             break;
     }
