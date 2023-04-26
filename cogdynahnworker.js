@@ -142,7 +142,11 @@ const openCOG = async (url) => {
     return result;
 }
 
-const convertImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize) => {
+let pendingRequests = 0;
+let cancelPendingRequestsFlag = false;
+
+const getImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize) => {
+    pendingRequests++;
     if (cogImage) {
         const cogBbox = cogImage.bbox;
         if (cogBbox[0] <= canvasbbox[2] && cogBbox[2] > canvasbbox[0] && cogBbox[1] <= canvasbbox[3] && cogBbox[3] > canvasbbox[1]) {
@@ -154,15 +158,9 @@ const convertImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize)
                 width: w,
                 height: h,
             }
-            if (abortUpdateRequest) {
-                console.log('aborting update request (1)');
-                return;
-            }
+            console.log('loading raster data');
             const data = await cogImage.tiff.readRasters(options);
-            if (abortUpdateRequest) {
-                console.log('aborting update request (2)');
-                return;
-            }
+            console.log('done loading raster data');
             let minFloatValue = 100000000;
             let maxFloatValue = -100000000;
             for (let i = 0; i < data[0].length; i++) {
@@ -183,12 +181,8 @@ const convertImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize)
             // for every longitude and latitude in the canvasbbox get the correspoding tiff value
             // the longitude and latitude of the cogImage pixels are not the same as the canvasbbox
             // so we need to get the tiff value for the corresponding pixel in the cogImage
-            for (let x = 0; x < w; x++) {
-                if (abortUpdateRequest) {
-                    console.log('aborting update request (3)');
-                    return;
-                }
-                for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w && !cancelPendingRequestsFlag; x++) {
+                for (let y = 0; y < h && !cancelPendingRequestsFlag; y++) {
                     const canvasLonLat = unproject({x:x, y:y}, pixelMatrixInverse, worldSize);
                     const tiffXY = cogImage.projection.inverse([canvasLonLat.lng, canvasLonLat.lat]);
                     const imageX = Math.round((tiffXY[0] - tiffImageSouthWest[0]) / imgResX);
@@ -255,14 +249,38 @@ const convertImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize)
                 }
             }
             */
-            postMessage({cmd: 'convertImageData', result: 'ok', imageData: imageData});
+            if (!cancelPendingRequestsFlag) {
+                postMessage({cmd: 'getImageData', result: 'ok', imageData: imageData, canvasbbox: canvasbbox});
+            } else {
+                postMessage({cmd: 'getImageData', result: 'cancelled'});
+            } 
         } else {
-            postMessage({cmd: 'convertImageData', result: 'no overlap'});
+            if (!cancelPendingRequestsFlag) {
+                postMessage({cmd: 'getImageData', result: 'no overlap'});
+            } else {
+                postMessage({cmd: 'getImageData', result: 'cancelled'});
+            }
         }
     } else {
-        postMessage({cmd: 'convertImageData', result: 'no cogImage'});
+        postMessage({cmd: 'getImageData', result: 'no cogImage'});
     }
+    pendingRequests--;
 }
+
+const wait = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const cancelPendingRequests = async () => {
+    if (pendingRequests > 0) {
+        cancelPendingRequestsFlag = true;
+    }
+    while (pendingRequests > 0) {
+        await wait(100);
+    }
+    cancelPendingRequestsFlag = false;
+}
+
 
 onmessage = async (e) => {
     switch(e.data.cmd) {
@@ -271,10 +289,9 @@ onmessage = async (e) => {
             postMessage({cmd: 'openCOG', result: 'ok'})
             console.log(`worker opened COG ${e.data.url}`);
             break;
-        case 'convertImageData':
-            let result = await convertImageData(e.data.canvasbbox, e.data.width, e.data.height, e.data.pixelMatrixInverse, e.data.worldSize);
+        case 'getImageData':
+            await cancelPendingRequests();
+            getImageData(e.data.canvasbbox, e.data.width, e.data.height, e.data.pixelMatrixInverse, e.data.worldSize);
             break;
     }
-    //const worldSize = e.data.worldSize;
-    //const projection = proj4(e.data.proj4string, "WGS84"); // Project our GeoTIFF to WGS84
 }
