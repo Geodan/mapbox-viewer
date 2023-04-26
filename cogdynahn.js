@@ -108,6 +108,7 @@ map.on('load', async ()=> {
         }
     });
     myWorker.postMessage({cmd: 'openCOG', url: "https://ahp-research.storage.googleapis.com/rasters/ahn4_05m_dtm_cog.tiff"});
+    //myWorker.postMessage({cmd: 'openCOG', url: "https://storage.googleapis.com/ahp-research/rasters/ahn3_5m.tiff"});
 });
 
 map.on('moveend', () => {

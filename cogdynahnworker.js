@@ -120,17 +120,13 @@ const openCOG = async (url) => {
         let projObj = result.projObj = geokeysToProj4.toProj4(geokeys); // Convert geokeys to proj4 string
         console.log(projObj);
         const projection = result.projection = proj4(projObj.proj4, "WGS84"); // Project our GeoTIFF to WGS84
-        if (projObj.shouldConvertCoordinates){
-            const [originX, originY] = mainImage.getOrigin(); // Get origin of the image
-            const [xSize, ySize] = mainImage.getResolution(); // Get resolution of the image
-            const sw = projection.forward([originX, originY]); // Convert origin to WGS84
-            const ne = projection.forward([originX + xSize * mainImage.getWidth(), originY + ySize * mainImage.getHeight()]); // Convert opposite corner to WGS84
-            result.bbox = [sw[0], sw[1], ne[0], ne[1]];
-        } else {
-            const sw = projection.forward([0,0]);
-            const ne = projection.forward([mainImage.getWidth(), mainImage.getHeight()]);
-            result.bbox = [sw[0], sw[1], ne[0], ne[1]];
-        }
+        const [xSize, ySize] = mainImage.getResolution(); // Get resolution of the image
+        const [originX, originY] = mainImage.getOrigin(); // Get origin of the image
+        const p1 = projection.forward([originX, originY]);
+        const p2 = projection.forward([originX + xSize * mainImage.getWidth(), originY + ySize * mainImage.getHeight()]);
+        const sw = [Math.min(p1[0], p2[0]), Math.min(p1[1], p2[1])];
+        const ne = [Math.max(p1[0], p2[0]), Math.max(p1[1], p2[1])];
+        result.bbox = [sw[0], sw[1], ne[0], ne[1]];
     }
     // get metadata for overlay images
     const imageCount = await tiff.getImageCount();
