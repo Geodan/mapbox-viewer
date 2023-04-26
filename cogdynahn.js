@@ -59,7 +59,8 @@ const updateCanvasLayer = async () => {
     const w = canvas.width = canvas.clientWidth;
     const h = canvas.height = canvas.clientHeight;
     const canvasbbox = [sw.lng, sw.lat, ne.lng, ne.lat];
-    myWorker.postMessage({ cmd: 'getImageData', canvasbbox, width: w, height: h, pixelMatrixInverse: map.transform.pixelMatrixInverse, worldSize: map.transform.worldSize});
+    const renderType = document.querySelector('#typeselect select').value;
+    myWorker.postMessage({ cmd: 'getImageData', renderType, canvasbbox, width: w, height: h, pixelMatrixInverse: map.transform.pixelMatrixInverse, worldSize: map.transform.worldSize});
 }
 
 map = new maplibregl.Map({
@@ -112,3 +113,7 @@ map.on('load', async ()=> {
 map.on('moveend', () => {
     updateCanvasLayer();
 })
+
+document.querySelector('#typeselect select').addEventListener('change', () => {
+    updateCanvasLayer();
+});

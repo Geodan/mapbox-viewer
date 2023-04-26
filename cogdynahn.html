@@ -4,24 +4,26 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <!-- script src='https://cdn.jsdelivr.net/npm/maplibre-gl@2.4.0/dist/maplibre-gl.min.js'></script-->
-    <script src="node_modules/maplibre-gl/dist/maplibre-gl-dev.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/maplibre-gl@2.4.0/dist/maplibre-gl.min.js'></script>
+    <!--script src="node_modules/maplibre-gl/dist/maplibre-gl-dev.js"></script-->
     <link href='https://cdn.jsdelivr.net/npm/maplibre-gl@2.4.0/dist/maplibre-gl.min.css' rel='stylesheet' />
-    <script src="node_modules/geotiff/dist-browser/geotiff.js"></script>
-    <script src='node_modules/proj4/dist/proj4-src.js'></script>
-    <script src="./node_modules/geotiff-geokeys-to-proj4/main-dist.js"></script>
     <script type='module' src="cogdynahn.js"></script>
     <style>
         html,body { margin:0; padding:0; box-sizing: border-box;}
         #map, #canvas { position:absolute; top:0; bottom:0; width:100%; height:100%; }
+        #typeselect { display: inline-block; position:absolute; top:10px; right:10px; padding: 10px; background-color: white;}
     </style>
 </head>
 <body>
-
-
     <canvas id="canvas">canvas not supported</canvas>
     <div id='map'></div>
-
+    <div id="typeselect">
+        <select>
+            <option value="static">AHN4 standard</option>
+            <option value="dynamic" selected>AHN4 dynamic</option>
+            <option value="grayscale">AHN4 grayscale</option>
+        </select>
+    </div>
 </body>
 </html>
 

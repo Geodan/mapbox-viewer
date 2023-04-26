@@ -145,7 +145,7 @@ const openCOG = async (url) => {
 let pendingRequests = 0;
 let cancelPendingRequestsFlag = false;
 
-const getImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize) => {
+const getImageData = async (renderType, canvasbbox, w, h, pixelMatrixInverse, worldSize) => {
     pendingRequests++;
     if (cogImage) {
         const cogBbox = cogImage.bbox;
@@ -192,32 +192,37 @@ const getImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize) => 
                         let floatValue = data[0][i];
                         const color = [0,0,0,0];
                         if (floatValue > -10 && floatValue < 323 && floatValue !== 0) {
-                            // dynamic color
-                            let c = Math.round((floatValue - minFloatValue) * scale);
-                            color[0] = colorTable[c][2];
-                            color[1] = colorTable[c][3];
-                            color[2] = colorTable[c][4];
-                            color[3] = 255;
-                            /*
-                            // color table
-                            for (let c = 0; c < colorTable.length; c++) {
-                                if (floatValue < colorTable[c][0]) {
+                            switch (renderType) {
+                                case 'dynamic':
+                                    // dynamic color
+                                    let c = Math.round((floatValue - minFloatValue) * scale);
                                     color[0] = colorTable[c][2];
                                     color[1] = colorTable[c][3];
                                     color[2] = colorTable[c][4];
                                     color[3] = 255;
                                     break;
-                                }
+                                case 'static':
+                                    // color table
+                                    for (let c = 0; c < colorTable.length; c++) {
+                                        if (floatValue < colorTable[c][0]) {
+                                            color[0] = colorTable[c][2];
+                                            color[1] = colorTable[c][3];
+                                            color[2] = colorTable[c][4];
+                                            color[3] = 255;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                case 'grayscale':
+                                default:
+                                    // gray scale
+                                    const colorValue = Math.round((floatValue + 10) * 255 / 333);
+                                    color[0] = colorValue;
+                                    color[1] = colorValue;
+                                    color[2] = colorValue;
+                                    color[3] = 255;
+                                    break;
                             }
-                            /*
-                            /*
-                            // gray scale
-                            const colorValue = Math.round((floatValue + 10) * 255 / 333);
-                            color[0] = colorValue;
-                            color[1] = colorValue;
-                            color[2] = colorValue;
-                            color[3] = 255;
-                            */
                         }
                         const j = (y * w + x);
                         imageData.data[j * 4] = color[0];
@@ -227,28 +232,6 @@ const getImageData = async (canvasbbox, w, h, pixelMatrixInverse, worldSize) => 
                     }
                 }
             }
-            /*
-            const band = 0;
-            for (let x = 0; x < data.width; x++) {
-                for (let y = 0; y < data.height; y++) {
-                    const i = (y * data.width + x);
-                    const floatValue = data[band][i];
-                    const color = [0,0,0,0];
-                    if (floatValue > -10 && floatValue < 350 && floatValue !== 0) {
-                        const colorValue = Math.round((floatValue + 10) * 255 / 333);
-                        color[0] = colorValue;
-                        color[1] = colorValue;
-                        color[2] = colorValue;
-                        color[3] = 255;
-                    }
-                    const j = (y * w + x);
-                    imageData.data[j * 4] = color[0];
-                    imageData.data[j * 4 + 1] = color[1];
-                    imageData.data[j * 4 + 2] = color[2];
-                    imageData.data[j * 4 + 3] = color[3];
-                }
-            }
-            */
             if (!cancelPendingRequestsFlag) {
                 postMessage({cmd: 'getImageData', result: 'ok', imageData: imageData, canvasbbox: canvasbbox});
             } else {
@@ -291,7 +274,7 @@ onmessage = async (e) => {
             break;
         case 'getImageData':
             await cancelPendingRequests();
-            getImageData(e.data.canvasbbox, e.data.width, e.data.height, e.data.pixelMatrixInverse, e.data.worldSize);
+            getImageData(e.data.renderType, e.data.canvasbbox, e.data.width, e.data.height, e.data.pixelMatrixInverse, e.data.worldSize);
             break;
     }
 }
