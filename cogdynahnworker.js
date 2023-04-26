@@ -108,7 +108,7 @@ const unproject = (p, pixelMatrixInverse, worldSize) => {
 }
 
 const openCOG = async (url) => {
-    const result = {}
+    const result = {};
     // get the COG
     const tiff = result.tiff = await GeoTIFF.fromUrl(url);
     const mainImage = await tiff.getImage(0);
@@ -258,7 +258,7 @@ onmessage = async (e) => {
     switch(e.data.cmd) {
         case 'openCOG':
             cogImage = await openCOG(e.data.url);
-            postMessage({cmd: 'openCOG', result: 'ok'})
+            postMessage({cmd: 'openCOG', result: 'ok', url: e.data.url})
             console.log(`worker opened COG ${e.data.url}`);
             break;
         case 'getImageData':

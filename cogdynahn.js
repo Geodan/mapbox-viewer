@@ -1,4 +1,8 @@
 let map;
+let currentCog = "";
+let AHN4Cog = "https://ahp-research.storage.googleapis.com/rasters/ahn4_05m_dtm_cog.tiff";
+let AHN3Cog = "https://storage.googleapis.com/ahp-research/rasters/ahn3_5m.tiff";
+
 const myWorker = new Worker("cogdynahnworker.js");
 myWorker.onmessage = (e) => {
     if (e.data.cmd && e.data.result) {
@@ -6,6 +10,7 @@ myWorker.onmessage = (e) => {
         switch (e.data.cmd) {
             case 'openCOG':
                 if (e.data.result === 'ok') {
+                    currentCog = e.data.url;
                     updateCanvasLayer();
                 }
                 break;
@@ -52,6 +57,17 @@ const renderCanvas = (imageData, canvasbbox) => {
 }
 
 const updateCanvasLayer = async () => {
+    const renderOptions = document.querySelector('#typeselect select').value.split('-');
+    const renderLayer = renderOptions[0];
+    const renderType = renderOptions[1];
+    if (renderLayer === 'ahn4' && currentCog !== AHN4Cog) {
+        myWorker.postMessage({cmd: 'openCOG', url: AHN4Cog});
+        return;
+    }
+    if (renderLayer === 'ahn3' && currentCog !== AHN3Cog) {
+        myWorker.postMessage({cmd: 'openCOG', url: AHN3Cog});
+        return;
+    }
     const bounds = map.getBounds();
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
@@ -59,7 +75,6 @@ const updateCanvasLayer = async () => {
     const w = canvas.width = canvas.clientWidth;
     const h = canvas.height = canvas.clientHeight;
     const canvasbbox = [sw.lng, sw.lat, ne.lng, ne.lat];
-    const renderType = document.querySelector('#typeselect select').value;
     myWorker.postMessage({ cmd: 'getImageData', renderType, canvasbbox, width: w, height: h, pixelMatrixInverse: map.transform.pixelMatrixInverse, worldSize: map.transform.worldSize});
 }
 
@@ -107,8 +122,7 @@ map.on('load', async ()=> {
             'fill-outline-color': '#000'
         }
     });
-    myWorker.postMessage({cmd: 'openCOG', url: "https://ahp-research.storage.googleapis.com/rasters/ahn4_05m_dtm_cog.tiff"});
-    //myWorker.postMessage({cmd: 'openCOG', url: "https://storage.googleapis.com/ahp-research/rasters/ahn3_5m.tiff"});
+    updateCanvasLayer();
 });
 
 map.on('moveend', () => {
