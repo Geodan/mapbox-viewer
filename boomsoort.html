@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boomsoorten</title>
+    <script src="boomsoort.js"></script>
+    <style>
+.table-container {
+    width: 100%; /* adjust as needed */
+    max-width: 1500px;
+    max-height: 300px; /* adjust as needed */
+    overflow-y: auto; 
+    display: inline-block;
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2);
+}
+
+table {
+    width: 100%; 
+    border-collapse: collapse;
+    cursor: pointer;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    background-color: #fff; /* adjust as needed */
+    z-index: 1;
+}
+
+th {
+    padding: 0; /* remove padding from the th */
+}
+
+th span {
+    display: block;
+    position: relative;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+    padding: 3px; /* move the padding to the span */
+    width: 100%; /* span will occupy the full width of the th */
+    height: 100%; /* span will occupy the full height of the th */
+    box-sizing: border-box; /* border and padding are included in the total width and height */
+}
+
+th:first-child span {
+    border-left: 2px solid black;
+}
+
+td {
+    padding: 3px; /* adjust as needed */
+    text-align: left;
+    border-left: 1px dotted gray; /* adjust as needed */
+    border-right: 1px dotted gray; /* adjust as needed */
+}
+
+tbody tr td {
+    border-top: 1px dotted gray; /* adjust as needed */
+}
+
+tbody tr:last-child td {
+    border-bottom: 1px dotted gray; /* adjust as needed */
+}
+#selected {
+    font-size: xx-large;
+}
+
+    </style>
+</head>
+<body>
+    <label for="filter">Zoek</label>
+    <input type="text" id="filter" name="filter" placeholder="Zoek op naam" oninput="filtertrees(this)"><br>
+    <input type="checkbox" id="tree" name="tree" value="tree" checked onchange="treechange(this)">
+    <label for="tree">Boom</label><br>
+    <input type="checkbox" id="nontree" name="nontree" value="nontree" checked onchange="treechange(this)">
+    <label for="nontree">Niet-boom (Struiken e.d.)</label><br>
+    <input type="checkbox" id="decidious" name="decidious" value="decidious" checked onchange="decidiouschange(this)">
+    <label for="decidious">Bladverliezend</label><br>
+    <input type="checkbox" id="evergreen" name="evergreen" value="evergreen" checked onchange="decidiouschange(this)">
+    <label for="naaldboom">Niet-bladverliezend (naaldbomen e.d.)</label><br>
+    <div id="species"></div>
+    <div id="selected"></div>
+    <script>init()</script>
+</body>
+</html>
