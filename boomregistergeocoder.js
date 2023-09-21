@@ -1,6 +1,6 @@
 async function zoomTo(docId) {
     if (map) {
-        const url = `https://geodata.nationaalgeoregister.nl/locatieserver/v3/lookup?wt=json&id=${encodeURI(docId)}`;
+        const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup?wt=json&id=${encodeURI(docId)}`;
         const response = await fetch(url);
         if (response.ok) {
             const result = await response.json();
@@ -15,7 +15,7 @@ let lastTimeout;
 function updateGeocoderList(event) {
     clearTimeout(lastTimeout);
     lastTimeout = setTimeout(async()=>{
-        const url = "https://geodata.nationaalgeoregister.nl/locatieserver/v3/suggest?wt=json&q=";
+        const url = "https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest?wt=json&q=";
         let list = document.querySelector('#geocoderlist');
         let search = (event.target).value;
         if (search.length > 2) {
