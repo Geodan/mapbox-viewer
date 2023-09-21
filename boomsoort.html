@@ -82,5 +82,47 @@ tbody tr:last-child td {
     <div id="species"></div>
     <div id="selected"></div>
     <script>init()</script>
+
+    <h2>Take a Tree Picture</h2>
+
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="snap">Snap Photo</button>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    
+    <script>
+    // Elements
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const snap = document.getElementById('snap');
+    const context = canvas.getContext('2d');
+    
+    // Get access to the camera
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          video.srcObject = stream;
+          video.play();
+        });
+    }
+    
+    // Capture a photo
+    snap.addEventListener('click', function() {
+  context.drawImage(video, 0, 0, 640, 480);
+  canvas.toBlob(blob => {
+    const formData = new FormData();
+    formData.append('image', blob, 'image.jpg');
+    formData.append('location_coordinates', '52,4');
+    fetch('https://identify.biodiversityanalysis.nl/v1/observation/identify', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert('Tree identity: ' + JSON.stringify(data));
+    });
+  }, 'image/jpeg');
+});
+    </script>
+
 </body>
 </html>
