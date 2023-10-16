@@ -20,14 +20,14 @@ let map = new mapboxgl.Map({
             "raster-tiles": {
                 "type": "raster",
                 "tiles": [
-			        "https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2021_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg"
+			        "https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2023_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg"
 			    ],
                 "tileSize": 256,
                 "attribution": '<a href="https://pdok.nl" target="_pdok">pdok.nl</a>'
             }
         },
         "layers": [{
-            "id": "lufo2021",
+            "id": "lufo2023",
             "type": "raster",
             "source": "raster-tiles",
             "minzoom": 0,
@@ -107,12 +107,12 @@ function createTree(lngLat) {
         family: null,
         base: null,
         cr_area: 56,
-        cr_diam: 7.6,
+        cr_diam: 2.8,
         ug_cover: 32
     }
     //const boompunt = {"type": "Feature", properties: properties, geometry: {"type": "Point", "coordinates": [lngLat.lng, lngLat.lat]}};
     const boomstam = {"type": "Feature", "id": newId, properties: properties, geometry: {"type": "Polygon", "coordinates": circle(lngLat, 0.3)}};
-    const boomkroon = {"type": "Feature", "id": newId, properties: properties, geometry: {"type": "Polygon", "coordinates": circle(lngLat, 3.8)}};
+    const boomkroon = {"type": "Feature", "id": newId, properties: properties, geometry: {"type": "Polygon", "coordinates": circle(lngLat, properties.cr_diam/2.0)}};
     updatedBoomkronen.push(boomkroon);
     updatedBoomstammen.push(boomstam);
     window.localStorage.setItem('updatedBoomkronen', JSON.stringify(updatedBoomkronen));
@@ -632,9 +632,12 @@ map.on('load', function () {
         {value: "2019", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2019_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg'},
         {value: "2020", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2020_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg"'},
         {value: "2021", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2021_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'},
-        {value: "ahn3", tileSize: 512, url: 'https://t3.edugis.nl/mapproxy/ahn3/service?=WMS&REQUEST=GETMAP&SERVICE=WMS&VERSION=1.1.1&TRANSPARENT=true&LAYERS=ahn3_dsm&FORMAT=image%2Fpng&STYLES=&SRS=EPSG%3A3857&BBOX={bbox-epsg-3857}&WIDTH=512&HEIGHT=512'}
+        {value: "2022", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2022_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'},
+        {value: "2023", url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/2023_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg'},
+        {value: "ahn3", tileSize: 512, url: 'https://t3.edugis.nl/mapproxy/ahn3/service?=WMS&REQUEST=GETMAP&SERVICE=WMS&VERSION=1.1.1&TRANSPARENT=true&LAYERS=ahn3_dsm&FORMAT=image%2Fpng&STYLES=&SRS=EPSG%3A3857&BBOX={bbox-epsg-3857}&WIDTH=512&HEIGHT=512'},
+        {value: "ahn4", tileSize: 512, url: 'https://service.pdok.nl/rws/ahn/wms/v1_0?layers=dsm_05m&format=image/png&service=WMS&version=1.1.1&request=GetMap&styles=&srs=EPSG:3857&bbox={bbox-epsg-3857}&width=512&height=512'}
     ];
-    let prevValue = `lufo2021`;
+    let prevValue = `lufo2023`;
     document.querySelector('#map').addEventListener('keydown', (event)=>{
         if (event.key === "Backspace" || event.key === "Delete") {
             deleteTree();
