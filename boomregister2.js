@@ -100,15 +100,12 @@ function createTree(lngLat) {
         entrydate: Date.now(),
         boomid: newId.toString(),
         hoogte: 11.5,
-        manform: null,
-        cultivar: null,
-        species: null,
-        genus: null,
-        family: null,
-        base: null,
-        cr_area: 56,
-        cr_diam: 2.8,
-        ug_cover: 32
+        cultivar: undefined,
+        species: undefined,
+        genus: undefined,
+        family: undefined,
+        cr_area: 7.84,
+        cr_diam: 2.8
     }
     //const boompunt = {"type": "Feature", properties: properties, geometry: {"type": "Point", "coordinates": [lngLat.lng, lngLat.lat]}};
     const boomstam = {"type": "Feature", "id": newId, properties: properties, geometry: {"type": "Polygon", "coordinates": circle(lngLat, 0.3)}};
@@ -228,6 +225,10 @@ function getFingerPrint() {
     return fingerprint;
 }
 
+function nullifyNoData(property) {
+    return property === undefined || property === null || (typeof property === 'string' && property.trim() === '') ? null : property;
+}
+
 async function uploadUpdates() {
     let result = {
         deletes: [],
@@ -246,15 +247,15 @@ async function uploadUpdates() {
                 entrydate: boom.properties.entrydate,
                 tree_id: boom.properties.boomid < config.newTreeStartId ? boom.properties.boomid.toString() : '',
                 height: boom.properties.hoogte,
-                manform: boom.properties.manform,
-                cultivar: boom.properties.cultivar,
-                species: boom.properties.species,
-                genus: boom.properties.genus,
-                family: boom.properties.family,
-                base: boom.properties.base,
+                manform: nullifyNoData(boom.properties.manform),
+                cultivar: nullifyNoData(boom.properties.cultivar),
+                species: nullifyNoData(boom.properties.species),
+                genus: nullifyNoData(boom.properties.genus),
+                family: nullifyNoData(boom.properties.family),
+                base: nullifyNoData(boom.properties.base),
                 cr_area: boom.properties.cr_area,
                 cr_diam: boom.properties.cr_diam,
-                ug_cover: boom.properties.ug_cover
+                ug_cover: nullifyNoData(boom.properties.ug_cover)
             };
             if (boom.properties.boomid > config.newTreeStartId) {
                 result.crowngeojson = JSON.stringify(boom.geometry);
@@ -278,18 +279,26 @@ async function uploadUpdates() {
     };
     treeUpdates.creates = treeUpdates.updates.filter(({tree_id})=>tree_id==='');
     treeUpdates.updates = treeUpdates.updates.filter(({tree_id})=>tree_id !== '');
-    const response = await fetch(url, {
-        "method": "POST",
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": JSON.stringify(treeUpdates)
-    });
-    if (response.ok) {
-        result = await response.json();
-        console.log(result);
-    } else {
-        console.log(`failed to send data`);
+    try {
+        const response = await fetch(url, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": JSON.stringify(treeUpdates)
+        });
+        if (response.ok) {
+            result = await response.json();
+            console.log(result);
+        } else {
+            console.log(`failed to send data`);
+        }
+    } catch (error) {
+        if (error.message){
+            console.log(`${url}: ${error.message}`);
+        } else {
+            console.log(`${url}: ${error}`);
+        }
     }
     return result;
 }
@@ -533,15 +542,12 @@ function selectFeature(feature) {
             info += `<span class="label">boom id:</span> ${feature.properties.boomid}<br>
                 <div class="table">
                 <label class="label" for="hoogte">Hoogte:</label><div class="input"><input type="number" id="hoogte" name="hoogte" value="${feature.properties.hoogte}" oninput="updateProperty(this)" spellcheck="false"></div>
-                <label class="label" for="manform">Manform:</label><div class="input"><input type="text" id="manform" name="manform" value="${feature.properties.manform}" oninput="updateProperty(this)" spellcheck="false"></div>
-                <label class="label" for="cultivar">Cultivar:</label><div class="input"><input type="text" id="cultivar" name="cultivar" value="${feature.properties.cultivar}" oninput="updateProperty(this)" spellcheck="false"></div>
-                <label class="label" for="species">Soort:</label><div class="input"><input type="text" id="species" name="species" value="${feature.properties.species}" oninput="updateProperty(this)" spellcheck="false"></div>
-                <label class="label" for="genus">Geslacht:</label><div class="input"><input type="text" id="genus" name="genus" value="${feature.properties.genus}" oninput="updateProperty(this)" spellcheck="false"></div>
-                <label class="label" for="family">Familie:</label><div class="input"><input type="text" id="family" name="family" value="${feature.properties.family}" oninput="updateProperty(this)" spellcheck="false"></div>
-                <label class="label" for="base">Base:</label><div class="input"><input type="text" id="base" name="base" value="${feature.properties.base}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="cultivar">Cultivar:</label><div class="input"><input type="text" id="cultivar" name="cultivar" value="${feature.properties.cultivar??''}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="species">Soort:</label><div class="input"><input type="text" id="species" name="species" value="${feature.properties.species??''}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="genus">Geslacht:</label><div class="input"><input type="text" id="genus" name="genus" value="${feature.properties.genus??''}" oninput="updateProperty(this)" spellcheck="false"></div>
+                <label class="label" for="family">Familie:</label><div class="input"><input type="text" id="family" name="family" value="${feature.properties.family??''}" oninput="updateProperty(this)" spellcheck="false"></div>
                 <label class="label" for="cr_area">Oppervlak:</label><div class="input"><input type="number" disabled id="cr_area" name="cr_area" value="${feature.properties.cr_area}" oninput="updateProperty(this)" spellcheck="false"></div>
                 <label class="label" for="cr_diam">Diameter:</label><div class="input"><input type="number" disabled id="cr_diam" name="cr_diam" value="${feature.properties.cr_diam}" oninput="updateProperty(this)" spellcheck="false"></div>
-                <label class="label" for="ug_cover">UG_cover:</label><div class="input"><input type="number" disabled id="ug_cover" name="ug_cover" value="${feature.properties.ug_cover}" oninput="updateProperty(this)" spellcheck="false"></div>
                 </div>
                 <button onclick="deleteTree()">verwijderen</button>`;
             break;
@@ -589,16 +595,13 @@ map.on('load', function () {
                 case "boomkroonupdates":
                 case "boompunt":
                     info += `<div><span class="label">boom id:</span> ${features[0].properties.boomid}</div>
-                        <div><span class="label">hoogte:</span> ${features[0].properties.hoogte}</div>
-                        <div><span class="label">manform:</span> ${features[0].properties.manform}</div>
-                        <div><span class="label">cultivar:</span> ${features[0].properties.cultivar}</div>
-                        <div><span class="label">soort:</span> ${features[0].properties.species}</div>
-                        <div><span class="label">geslacht:</span> ${features[0].properties.genus}</div>
-                        <div><span class="label">familie:</span> ${features[0].properties.family}</div>
-                        <div><span class="label">base:</span> ${features[0].properties.base}</div>
-                        <div><span class="label">oppervlak:</span> ${features[0].properties.cr_area}</div>
-                        <div><span class="label">diameter:</span> ${features[0].properties.cr_diam}</div>
-                        <div><span class="label">ug_cover:</span> ${features[0].properties.ug_cover}</div>
+                        <div><span class="label">hoogte:</span> ${(features[0].properties.hoogte !== undefined && features[0].properties.hoogte !== null)?features[0].properties.hoogte.toFixed(2):0} m</div>
+                        <div><span class="label">cultivar:</span> ${features[0].properties.cultivar??''}</div>
+                        <div><span class="label">soort:</span> ${features[0].properties.species??''}</div>
+                        <div><span class="label">geslacht:</span> ${features[0].properties.genus??''}</div>
+                        <div><span class="label">familie:</span> ${features[0].properties.family??''}</div>
+                        <div><span class="label">oppervlak:</span> ${(features[0].properties.cr_area!==undefined && features[0].properties.cr_area!==null)?features[0].properties.cr_area.toFixed(0):0} m²</div>
+                        <div><span class="label">diameter:</span> ${(features[0].properties.cr_diam !== undefined && features[0].properties.cr_diam !== null)?features[0].properties.cr_diam.toFixed(2):''} m</div>
                         `;
                     break;
                 default: 
